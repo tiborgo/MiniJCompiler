@@ -1,3 +1,4 @@
+package minijava;
 import java.io.IOException;
 
 import minijava.MiniJavaLexer;
@@ -19,7 +20,7 @@ public class MiniJavaCompiler {
 
 		try {
 			ANTLRFileStream reader = new ANTLRFileStream(
-					"MiniJava-Beispiele/Small/ArrSum.java");
+					"minijava-examples/small/ArrSum.java");
 			MiniJavaLexer lexer = new MiniJavaLexer((CharStream) reader);
 			TokenStream tokens = new CommonTokenStream(lexer);
 			MiniJavaParser parser = new MiniJavaParser(tokens);
@@ -28,6 +29,7 @@ public class MiniJavaCompiler {
 			MiniJavaPrettyPrintVisitor visitor = new MiniJavaPrettyPrintVisitor();
 			System.out.print(visitor.visit(tree));
 		} catch (IOException e) {
+			e.printStackTrace();
 			System.out.println("Not Accepted");
 		} catch (IllegalArgumentException e) {
 			System.out.println(e.getMessage());

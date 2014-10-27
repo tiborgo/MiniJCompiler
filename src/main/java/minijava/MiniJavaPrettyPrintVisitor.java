@@ -1,3 +1,4 @@
+package minijava;
 // Generated from MiniJava.g4 by ANTLR 4.4
 import minijava.MiniJavaBaseVisitor;
 import minijava.MiniJavaParser;
