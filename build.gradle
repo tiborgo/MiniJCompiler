@@ -4,9 +4,21 @@ apply plugin: "java"
 sourceCompatibility = 1.8
 targetCompatibility = 1.7
 
-dependencies {
+ext.antlr = [
+	grammarpackage: "minijava",
+	antlrSource: 'src/main/antlr',
+	destinationDir: "src/generated-sources/java"
+]
 
-	compile(group: "org.antlr", name: "antlr4-runtime", version: "4.4.+")
+configurations {
+	antlr4 {
+		description = "ANTLR4"
+	}
+}
+
+dependencies {
+	compile(group: "org.antlr", name: "antlr4-runtime", version: "4.3")
+	antlr4(group: "org.antlr", name: "antlr4", version: "4.3")
 	testCompile(group: "junit", name: "junit", version: "4.+")
 }
 
@@ -27,4 +39,30 @@ def getVersionString() {
 		standardOutput = out
 	}
 	return out.toString().trim()
+}
+
+task antlrOutputDir << {
+	mkdir(antlr.destinationDir)
+}
+
+task generateGrammarSource(dependsOn: antlrOutputDir, type: JavaExec) {
+	description = 'Generates Java sources from ANTLR4 grammars.'
+
+	inputs.dir file(antlr.antlrSource)
+	outputs.dir file(antlr.destinationDir)
+
+	def grammars = fileTree(antlr.antlrSource).include('**/*.g4')
+
+	main = 'org.antlr.v4.Tool'
+	classpath = configurations.antlr4
+	def pkg = antlr.grammarpackage.replaceAll("\\.", "/")
+	args = ["-o", "${antlr.destinationDir}/${pkg}"/*, "-atn"*/, "-visitor", "-package", antlr.grammarpackage, grammars.files].flatten()
+}
+
+compileJava {
+	dependsOn generateGrammarSource
+}
+
+clean {
+	delete antlr.destinationDir
 }
