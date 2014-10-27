@@ -20,7 +20,7 @@ public class MiniJavaCompiler {
 
 		try {
 			ANTLRFileStream reader = new ANTLRFileStream(
-					"minijava-examples/small/ArrSum.java");
+					"src/test/resources/minijava-examples/small/ArrSum.java");
 			MiniJavaLexer lexer = new MiniJavaLexer((CharStream) reader);
 			TokenStream tokens = new CommonTokenStream(lexer);
 			MiniJavaParser parser = new MiniJavaParser(tokens);
