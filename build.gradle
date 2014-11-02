@@ -1,8 +1,14 @@
 version = getVersionString()
 
 apply plugin: "java"
+apply plugin: "application"
+apply plugin: "eclipse"
+
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
+
+mainClassName = "minijava.MiniJavaCompiler"
+sourceSets.main.java.srcDir "src/generated-sources/java"
 
 ext.antlr = [
 	grammarpackage: "minijava",
