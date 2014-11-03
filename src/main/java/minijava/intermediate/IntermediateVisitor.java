@@ -3,7 +3,25 @@ package minijava.intermediate;
 import java.util.List;
 
 import minijava.intermediate.tree.TreeExp;
+import minijava.intermediate.tree.TreeStm;
+import minijava.syntax.ast.DeclClass;
+import minijava.syntax.ast.DeclMain;
+import minijava.syntax.ast.DeclMeth;
+import minijava.syntax.ast.DeclVar;
+import minijava.syntax.ast.ExpArrayGet;
+import minijava.syntax.ast.ExpArrayLength;
+import minijava.syntax.ast.ExpBinOp;
+import minijava.syntax.ast.ExpFalse;
+import minijava.syntax.ast.ExpId;
+import minijava.syntax.ast.ExpIntConst;
+import minijava.syntax.ast.ExpInvoke;
+import minijava.syntax.ast.ExpNeg;
+import minijava.syntax.ast.ExpNew;
+import minijava.syntax.ast.ExpNewIntArray;
+import minijava.syntax.ast.ExpThis;
+import minijava.syntax.ast.ExpTrue;
 import minijava.syntax.ast.ExpVisitor;
+import minijava.syntax.ast.Prg;
 import minijava.syntax.ast.StmArrayAssign;
 import minijava.syntax.ast.StmAssign;
 import minijava.syntax.ast.StmIf;
@@ -13,32 +31,38 @@ import minijava.syntax.ast.StmPrintlnInt;
 import minijava.syntax.ast.StmVisitor;
 import minijava.syntax.ast.StmWhile;
 
-public class IntermediatePrint {
+public class IntermediateVisitor {
 
-  private static final String indentStep = "  ";
-
-  public static String prettyPrint(Prg p) {
+  public static Object prettyPrint(Prg p) {
+	  return null;
   }
 
-  private static String prettyPrintClass(DeclClass c, String indent) {
+  private static Object prettyPrintClass(DeclClass c, String indent) {
+	  return null;
   }
 
-  private static String prettyPrintClassList(List<DeclClass> cl, String indent) {
+  private static Object prettyPrintClassList(List<DeclClass> cl, String indent) {
+	  return null;
   }
 
-  private static String prettyPrintMeth(DeclMeth m, String indent) {
+  private static Object prettyPrintMeth(DeclMeth m, String indent) {
+	  return null;
   }
 
-  private static String prettyPrintMethList(List<DeclMeth> dm, String indent) {
+  private static Object prettyPrintMethList(List<DeclMeth> dm, String indent) {
+	  return null;
   }
 
-  private static String prettyPrintVar(DeclVar d, String indent) {
+  private static Object prettyPrintVar(DeclVar d, String indent) {
+	  return null;
   }
 
-  private static String prettyPrintVarList(List<DeclVar> dl, String indent) {
+  private static Object prettyPrintVarList(List<DeclVar> dl, String indent) {
+	  return null;
   }
 
-  private static String prettyPrintMain(DeclMain d, String indent) {
+  private static Object prettyPrintMain(DeclMain d, String indent) {
+	  return null;
   }
 
   /*static class IntermediateVisitorTy implements TyVisitor<String> {
@@ -66,53 +90,79 @@ public class IntermediatePrint {
 
   static class IntermediateVisitorExp implements ExpVisitor<TreeExp, RuntimeException> {
 
-    @Override
-    public TreeExp visit(ExpTrue x) {
-    }
+	@Override
+	public TreeExp visit(ExpTrue e) throws RuntimeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    @Override
-    public TreeExp visit(ExpFalse x) {
-    }
+	@Override
+	public TreeExp visit(ExpFalse e) throws RuntimeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    @Override
-    public TreeExp visit(ExpThis x) {
-    }
+	@Override
+	public TreeExp visit(ExpThis e) throws RuntimeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    @Override
-    public TreeExp visit(ExpNewIntArray x) {
-    }
+	@Override
+	public TreeExp visit(ExpNewIntArray e) throws RuntimeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    @Override
-    public TreeExp visit(ExpNew x) {
-    }
+	@Override
+	public TreeExp visit(ExpNew e) throws RuntimeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    @Override
-    public TreeExp visit(ExpBinOp e) {
-    }
+	@Override
+	public TreeExp visit(ExpNeg e) throws RuntimeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    @Override
-    public TreeExp visit(ExpArrayGet e) {
-    }
+	@Override
+	public TreeExp visit(ExpBinOp e) throws RuntimeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    @Override
-    public TreeExp visit(ExpArrayLength e) {
-    }
+	@Override
+	public TreeExp visit(ExpArrayGet e) throws RuntimeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    @Override
-    public TreeExp visit(ExpInvoke e) {
-    }
+	@Override
+	public TreeExp visit(ExpArrayLength e) throws RuntimeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    @Override
-    public TreeExp visit(ExpIntConst x) {
-    }
+	@Override
+	public TreeExp visit(ExpInvoke e) throws RuntimeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    @Override
-    public TreeExp visit(ExpId x) {
-    }
+	@Override
+	public TreeExp visit(ExpIntConst e) throws RuntimeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
-    @Override
-    public TreeExp visit(ExpNeg x) {
-    }
+	@Override
+	public TreeExp visit(ExpId e) throws RuntimeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+    
   }
 
   static class IntermediateVisitorStm implements StmVisitor<TreeStm, RuntimeException> {
