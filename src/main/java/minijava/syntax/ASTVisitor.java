@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.LinkedList;
 
-import org.antlr.v4.runtime.misc.NotNull;
-
 import minijava.MiniJavaBaseVisitor;
 import minijava.MiniJavaParser;
 import minijava.MiniJavaParser.ArrayAccessExpressionContext;
@@ -16,17 +14,22 @@ import minijava.MiniJavaParser.FalseExpressionContext;
 import minijava.MiniJavaParser.IdentifierExpressionContext;
 import minijava.MiniJavaParser.IntegerLiteralExpressionContext;
 import minijava.MiniJavaParser.InvokeExpressionContext;
+import minijava.MiniJavaParser.MethodDeclarationContext;
 import minijava.MiniJavaParser.NewExpressionContext;
 import minijava.MiniJavaParser.NewIntArrayExpressionContext;
 import minijava.MiniJavaParser.NotExpressionContext;
 import minijava.MiniJavaParser.StatementContext;
 import minijava.MiniJavaParser.ThisExpressionContext;
 import minijava.MiniJavaParser.TrueExpressionContext;
+import minijava.syntax.ast.DeclMain;
+import minijava.syntax.ast.DeclMeth;
+import minijava.syntax.ast.DeclVar;
 import minijava.syntax.ast.Exp;
 import minijava.syntax.ast.ExpArrayGet;
 import minijava.syntax.ast.ExpArrayLength;
 import minijava.syntax.ast.ExpBinOp;
 import minijava.syntax.ast.ExpBinOp.Op;
+import minijava.syntax.ast.DeclClass;
 import minijava.syntax.ast.ExpFalse;
 import minijava.syntax.ast.ExpId;
 import minijava.syntax.ast.ExpIntConst;
@@ -36,11 +39,11 @@ import minijava.syntax.ast.ExpNew;
 import minijava.syntax.ast.ExpThis;
 import minijava.syntax.ast.ExpTrue;
 import minijava.MiniJavaParser.VarDeclarationContext;
-import minijava.syntax.ast.DeclMeth;
-import minijava.syntax.ast.DeclVar;
 import minijava.syntax.ast.Parameter;
 import minijava.syntax.ast.Stm;
 import minijava.syntax.ast.Ty;
+
+import org.antlr.v4.runtime.misc.NotNull;
 
 public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 
@@ -80,7 +83,13 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 
 	@Override public Object visitBooleanType(@NotNull MiniJavaParser.BooleanTypeContext ctx) { return visitChildren(ctx); }
 
-	@Override public Object visitMainClass(@NotNull MiniJavaParser.MainClassContext ctx) { return visitChildren(ctx); }
+	@Override
+	public Object visitMainClass(@NotNull MiniJavaParser.MainClassContext ctx) {
+		String className = ctx.identifier(0).getText();
+		String mainMethodArgumentVariableName = ctx.identifier(1).getText();
+		Stm statement = (Stm) visit(ctx.statement());
+		return new DeclMain(className, mainMethodArgumentVariableName, statement);
+	}
 
 	@Override public Object visitArrayAssignStatement(@NotNull MiniJavaParser.ArrayAssignStatementContext ctx) { return visitChildren(ctx); }
 
@@ -105,7 +114,24 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 
 	@Override public Object visitOtherType(@NotNull MiniJavaParser.OtherTypeContext ctx) { return visitChildren(ctx); }
 
-	@Override public Object visitClassDeclaration(@NotNull MiniJavaParser.ClassDeclarationContext ctx) { return visitChildren(ctx); }
+	@Override
+	public Object visitClassDeclaration(@NotNull MiniJavaParser.ClassDeclarationContext ctx) {
+		String className = ctx.className.getText();
+		String superClassName = ctx.superClassName.getText();
+		List<VarDeclarationContext> fieldsRaw = ctx.varDeclaration();
+		List<DeclVar> fields = new ArrayList<>(fieldsRaw.size());
+		for (VarDeclarationContext fieldRaw : fieldsRaw) {
+			DeclVar field = (DeclVar) visit(fieldRaw);
+			fields.add(field);
+		}
+		List<MethodDeclarationContext> methodsRaw = ctx.methodDeclaration();
+		List<DeclMeth> methods = new ArrayList<>(methodsRaw.size());
+		for (MethodDeclarationContext methodRaw : methodsRaw) {
+			DeclMeth method = (DeclMeth) visit(methodRaw);
+			methods.add(method);
+		}
+		return new DeclClass(className, superClassName, fields, methods);
+	}
 
 	@Override public Object visitWhileStatement(@NotNull MiniJavaParser.WhileStatementContext ctx) { return visitChildren(ctx); }
 
