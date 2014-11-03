@@ -42,6 +42,10 @@ import minijava.MiniJavaParser.VarDeclarationContext;
 import minijava.syntax.ast.Parameter;
 import minijava.syntax.ast.Stm;
 import minijava.syntax.ast.Ty;
+import minijava.syntax.ast.TyArr;
+import minijava.syntax.ast.TyBool;
+import minijava.syntax.ast.TyClass;
+import minijava.syntax.ast.TyInt;
 
 import org.antlr.v4.runtime.misc.NotNull;
 
@@ -93,9 +97,31 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 
 	@Override public Object visitArrayAssignStatement(@NotNull MiniJavaParser.ArrayAssignStatementContext ctx) { return visitChildren(ctx); }
 
-	@Override public Object visitIntType(@NotNull MiniJavaParser.IntTypeContext ctx) { return visitChildren(ctx); }
-
-	@Override public Object visitIntArrayType(@NotNull MiniJavaParser.IntArrayTypeContext ctx) { return visitChildren(ctx); }
+	@Override public Object visitArrayAssignStatement(@NotNull MiniJavaParser.ArrayAssignStatementContext ctx) { return visitChildren(ctx); } 
+	
+	/* ####### TYPES ####### */
+	
+	@Override
+	public Object visitIntType(@NotNull MiniJavaParser.IntTypeContext ctx) {
+		return new TyInt();
+	} 
+	
+	@Override
+	public Object visitIntArrayType(@NotNull MiniJavaParser.IntArrayTypeContext ctx) {
+		return new TyArr(new TyInt());
+	}
+	
+	@Override
+	public Object visitBooleanType(@NotNull MiniJavaParser.BooleanTypeContext ctx) {
+		return new TyBool();
+	}
+	
+	@Override
+	public Object visitOtherType(@NotNull MiniJavaParser.OtherTypeContext ctx) {
+	
+		String name = (String) visit(ctx.identifier());
+		return new TyClass(name);
+	}
 
 	@Override public Object visitBracketStatement(@NotNull MiniJavaParser.BracketStatementContext ctx) { return visitChildren(ctx); }
 
