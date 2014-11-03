@@ -50,7 +50,7 @@ IDENTIFIER: [a-zA-Z][a-zA-Z0-9_]*;
 prog: mainClass ( classDeclaration )* EOF;
 mainClass: CLASS identifier LCBRACKET PUBLIC STATIC VOID MAIN LBRACKET STRING LSBRACKET RSBRACKET identifier RBRACKET LCBRACKET statement RCBRACKET RCBRACKET;
 
-classDeclaration: CLASS className=identifier (EXTENDS identifier)? LCBRACKET ( varDeclaration )* ( methodDeclaration )* RCBRACKET;
+classDeclaration: CLASS className=identifier (EXTENDS superClassName=identifier)? LCBRACKET ( varDeclaration )* ( methodDeclaration )* RCBRACKET;
 
 varDeclaration: type identifier SEMICOLON;
 
