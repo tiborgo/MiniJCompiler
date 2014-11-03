@@ -3,6 +3,9 @@ import java.io.IOException;
 
 import minijava.MiniJavaLexer;
 import minijava.MiniJavaParser;
+import minijava.syntax.ASTVisitor;
+import minijava.syntax.ast.PrettyPrint;
+import minijava.syntax.ast.Prg;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CharStream;
@@ -20,18 +23,21 @@ public class MiniJavaCompiler {
 
 		try {
 			ANTLRFileStream reader = new ANTLRFileStream(
-					"src/test/resources/minijava-examples/small/ArrSum.java");
+					"src/test/resources/minijava-examples/working/ArrSum.java");
 			MiniJavaLexer lexer = new MiniJavaLexer((CharStream) reader);
 			TokenStream tokens = new CommonTokenStream(lexer);
 			MiniJavaParser parser = new MiniJavaParser(tokens);
 			ParseTree tree = parser.prog();
+			ASTVisitor astVisitor = new ASTVisitor();
+			Prg program = (Prg) astVisitor.visit(tree);
 
-			MiniJavaPrettyPrintVisitor visitor = new MiniJavaPrettyPrintVisitor();
-			System.out.print(visitor.visit(tree));
+			String output = PrettyPrint.prettyPrint(program);
+			System.out.print(output);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.out.println("Not Accepted");
 		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
 			System.out.println(e.getMessage());
 		}
 	}
