@@ -54,7 +54,7 @@ classDeclaration: CLASS className=identifier (EXTENDS identifier)? LCBRACKET ( v
 
 varDeclaration: type identifier SEMICOLON;
 
-methodDeclaration: PUBLIC returnType=type methodName=identifier LBRACKET ( type identifier ( COMMA type identifier )* )? RBRACKET LCBRACKET (varDeclaration )* ( statement )* RETURN expression SEMICOLON RCBRACKET;
+methodDeclaration: PUBLIC returnType=type methodName=identifier LBRACKET ( firstParameterType=type firstParameterName=identifier ( COMMA type identifier )* )? RBRACKET LCBRACKET (varDeclaration )* ( statement )* RETURN returnExpression=expression SEMICOLON RCBRACKET;
 
 type: INT LSBRACKET RSBRACKET # intArrayType
 	|  BOOLEAN            # booleanType
