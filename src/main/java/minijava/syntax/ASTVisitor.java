@@ -87,7 +87,7 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 		if (ctx.firstParameterType != null) {
 			parameters.add(new Parameter((String) visit(ctx.firstParameterName), (Ty) visit(ctx.firstParameterType)));
 		}
-		for (int i = 0; i < ctx.type().size(); i++) {
+		for (int i = 2; i < ctx.type().size(); i++) {
 			parameters.add(new Parameter((String) visit(ctx.identifier().get(i)), (Ty) visit(ctx.type().get(i))));
 		}
 
