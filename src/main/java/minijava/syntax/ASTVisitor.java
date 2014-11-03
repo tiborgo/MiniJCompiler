@@ -9,6 +9,7 @@ import minijava.MiniJavaParser;
 import minijava.MiniJavaParser.ArrayAccessExpressionContext;
 import minijava.MiniJavaParser.ArrayLengthExpressionContext;
 import minijava.MiniJavaParser.BinOpExpressionContext;
+import minijava.MiniJavaParser.ClassDeclarationContext;
 import minijava.MiniJavaParser.ExpressionContext;
 import minijava.MiniJavaParser.FalseExpressionContext;
 import minijava.MiniJavaParser.IdentifierExpressionContext;
@@ -40,6 +41,7 @@ import minijava.syntax.ast.ExpThis;
 import minijava.syntax.ast.ExpTrue;
 import minijava.MiniJavaParser.VarDeclarationContext;
 import minijava.syntax.ast.Parameter;
+import minijava.syntax.ast.Prg;
 import minijava.syntax.ast.Stm;
 import minijava.syntax.ast.StmArrayAssign;
 import minijava.syntax.ast.StmAssign;
@@ -58,6 +60,18 @@ import org.antlr.v4.runtime.misc.NotNull;
 
 public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 
+	@Override
+	public Object visitProg(@NotNull MiniJavaParser.ProgContext ctx) {
+		
+		DeclMain mainClass = (DeclMain) visit(ctx.mainClass());
+		LinkedList<DeclClass> classes = new LinkedList<>();
+		for (ClassDeclarationContext classDeclCtx : ctx.classDeclaration()) {
+			classes.add((DeclClass) visit(classDeclCtx));
+		}
+		
+		return new Prg(mainClass, classes);
+	}
+	
 	@Override
 	public Object visitIdentifier(@NotNull MiniJavaParser.IdentifierContext ctx) {
 		return ctx.IDENTIFIER().getText();
