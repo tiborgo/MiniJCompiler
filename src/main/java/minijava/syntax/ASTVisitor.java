@@ -317,4 +317,9 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 		Exp arraySize = (Exp) visit(ctx.expression());
 		return arraySize;
 	}
+	
+	@Override
+	public Object visitBracketExpression(@NotNull MiniJavaParser.BracketExpressionContext ctx) {
+		return visit(ctx.expression());
+	}
 }
