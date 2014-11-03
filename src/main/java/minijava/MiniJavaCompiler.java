@@ -3,9 +3,9 @@ import java.io.IOException;
 
 import minijava.MiniJavaLexer;
 import minijava.MiniJavaParser;
-import minijava.syntax.ASTVisitor;
-import minijava.syntax.ast.PrettyPrint;
-import minijava.syntax.ast.Prg;
+import minijava.antlr.visitors.ASTVisitor;
+import minijava.ast.rules.Prg;
+import minijava.ast.visitors.PrettyPrintVisitor;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CharStream;
@@ -31,7 +31,7 @@ public class MiniJavaCompiler {
 			ASTVisitor astVisitor = new ASTVisitor();
 			Prg program = (Prg) astVisitor.visit(tree);
 
-			String output = PrettyPrint.prettyPrint(program);
+			String output = PrettyPrintVisitor.prettyPrint(program);
 			System.out.print(output);
 		} catch (IOException e) {
 			e.printStackTrace();
