@@ -69,7 +69,14 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 
 	@Override public Object visitProg(@NotNull MiniJavaParser.ProgContext ctx) { return visitChildren(ctx); }
 
-	@Override public Object visitVarDeclaration(@NotNull MiniJavaParser.VarDeclarationContext ctx) { return visitChildren(ctx); }
+	@Override
+	public Object visitVarDeclaration(@NotNull MiniJavaParser.VarDeclarationContext ctx) {
+		
+		Ty ty = (Ty) visit(ctx.type());
+		String name = (String) visit(ctx.identifier());
+		
+		return new DeclVar(ty, name);
+	}
 
 	@Override public Object visitOtherType(@NotNull MiniJavaParser.OtherTypeContext ctx) { return visitChildren(ctx); }
 
