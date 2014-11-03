@@ -92,8 +92,6 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 		return new DeclMeth(ty, methodName, parameters, localVars, body, returnExp);
 	}
 
-	@Override public Object visitBooleanType(@NotNull MiniJavaParser.BooleanTypeContext ctx) { return visitChildren(ctx); }
-
 	@Override
 	public Object visitMainClass(@NotNull MiniJavaParser.MainClassContext ctx) {
 		String className = ctx.identifier(0).getText();
@@ -102,10 +100,6 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 		return new DeclMain(className, mainMethodArgumentVariableName, statement);
 	}
 
-	@Override public Object visitArrayAssignStatement(@NotNull MiniJavaParser.ArrayAssignStatementContext ctx) { return visitChildren(ctx); }
-
-	@Override public Object visitArrayAssignStatement(@NotNull MiniJavaParser.ArrayAssignStatementContext ctx) { return visitChildren(ctx); } 
-	
 	/* ####### TYPES ####### */
 	
 	@Override
@@ -206,8 +200,6 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 		return new DeclVar(ty, name);
 	}
 
-	@Override public Object visitOtherType(@NotNull MiniJavaParser.OtherTypeContext ctx) { return visitChildren(ctx); }
-
 	@Override
 	public Object visitClassDeclaration(@NotNull MiniJavaParser.ClassDeclarationContext ctx) {
 		String className = ctx.className.getText();
@@ -226,14 +218,6 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 		}
 		return new DeclClass(className, superClassName, fields, methods);
 	}
-
-	@Override public Object visitWhileStatement(@NotNull MiniJavaParser.WhileStatementContext ctx) { return visitChildren(ctx); }
-
-	@Override public Object visitSystemOutPrintlnStatement(@NotNull MiniJavaParser.SystemOutPrintlnStatementContext ctx) { return visitChildren(ctx); }
-
-	@Override public Object visitAssignStatement(@NotNull MiniJavaParser.AssignStatementContext ctx) { return visitChildren(ctx); }
-
-	@Override public Object visitSystemOutPrintStatement(@NotNull MiniJavaParser.SystemOutPrintStatementContext ctx) { return visitChildren(ctx); }
 
 	@Override
 	public Object visitThisExpression(ThisExpressionContext ctx) {
