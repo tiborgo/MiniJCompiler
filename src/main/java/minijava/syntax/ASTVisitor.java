@@ -62,16 +62,16 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 
 	@Override
 	public Object visitProg(@NotNull MiniJavaParser.ProgContext ctx) {
-		
+
 		DeclMain mainClass = (DeclMain) visit(ctx.mainClass());
 		LinkedList<DeclClass> classes = new LinkedList<>();
 		for (ClassDeclarationContext classDeclCtx : ctx.classDeclaration()) {
 			classes.add((DeclClass) visit(classDeclCtx));
 		}
-		
+
 		return new Prg(mainClass, classes);
 	}
-	
+
 	@Override
 	public Object visitIdentifier(@NotNull MiniJavaParser.IdentifierContext ctx) {
 		return ctx.IDENTIFIER().getText();
@@ -241,12 +241,21 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 	@Override
 	public Object visitBinOpExpression(BinOpExpressionContext ctx) {
 		ExpBinOp.Op binOp;
-		binOp = ctx.MINUS() != null ? Op.MINUS : null;
-		binOp = ctx.PLUS() != null ? Op.PLUS : null;
-		binOp = ctx.SLASH() != null ? Op.DIV : null;
-		binOp = ctx.STAR() != null ? Op.TIMES : null;
-		binOp = ctx.SMALLER() != null ? Op.LT : null;
-		binOp = ctx.DOUBLE_AMPERSAND() != null ? Op.AND : null;
+		if (ctx.MINUS() != null) {
+			binOp = Op.MINUS;
+		} else if (ctx.PLUS() != null) {
+			binOp = Op.PLUS;
+		} else if (ctx.SLASH() != null) {
+			binOp =  Op.DIV;
+		} else if (ctx.STAR() != null) {
+			binOp = Op.TIMES;
+		} else if (ctx.SMALLER() != null) {
+			binOp = Op.LT;
+		} else if (ctx.DOUBLE_AMPERSAND() != null) {
+			binOp = Op.AND;
+		} else {
+			throw new IllegalArgumentException("Unknown operator in: \n"+ctx.getText());
+		}
 		Exp expression0 = (Exp) visit(ctx.expression(0));
 		Exp expression1 = (Exp) visit(ctx.expression(1));
 		return new ExpBinOp(expression0, binOp, expression1);
