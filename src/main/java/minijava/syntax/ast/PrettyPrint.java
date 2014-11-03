@@ -14,7 +14,7 @@ public class PrettyPrint {
   private static String prettyPrintClass(DeclClass c, String indent) {
     return indent + "class " + c.className  +
             (c.superName == null ? " " : " extends " + c.superName + " ") + "{\n\n" +
-            prettyPrintVarList(c.fields, indent + indentStep) + 
+            prettyPrintVarList(c.fields, indent + indentStep) +
             prettyPrintMethList(c.methods, indent + indentStep) +
             indent + "}\n";
   }
@@ -37,11 +37,17 @@ public class PrettyPrint {
       sep = ", ";
     }
 
+    StringBuilder body = new StringBuilder();
+    for (Stm stm : m.body) {
+    	String stmRepresentation = stm.accept(new PrettyPrintVisitorStm(indent + indentStep));
+    	body.append(stmRepresentation);
+    }
+
     return indent + "public " +
             m.ty.accept(new PrettyPrintVisitorTy()) + " " + m.methodName +
             " (" + params + ") {\n" +
             prettyPrintVarList(m.localVars, indent + indentStep) +
-            m.body.accept(new PrettyPrintVisitorStm(indent + indentStep)) +
+            body.toString() +
             indent + indentStep +
             "return " + m.returnExp.accept(new PrettyPrintVisitorExp()) + ";\n" +
             indent + "}\n";
