@@ -4,4 +4,4 @@ bin/
 .project
 .classpath
 .settings/
-src/
+src/generated-sources
