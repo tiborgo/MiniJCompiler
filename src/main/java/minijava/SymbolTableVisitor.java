@@ -1,15 +1,17 @@
 package minijava;
 
-import minijava.MiniJavaParser.ClassBodyContext;
-import minijava.MiniJavaParser.ClassDeclarationExtendsContext;
-import minijava.MiniJavaParser.ClassDeclarationSimpleContext;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.antlr.v4.runtime.ParserRuleContext;
+
+import minijava.MiniJavaParser.ClassDeclarationContext;
 import minijava.MiniJavaParser.MethodDeclarationContext;
 import minijava.MiniJavaParser.OtherTypeContext;
 import minijava.MiniJavaParser.VarDeclarationContext;
 
-public class SymbolTableVisitor extends MiniJavaBaseVisitor<SymbolTable> {
+public class SymbolTableVisitor extends MiniJavaBaseVisitor<Entry> {
 	private final Program program;
-	private Class currentClass;
 
 	public SymbolTableVisitor() {
 		program = new Program();
@@ -20,45 +22,52 @@ public class SymbolTableVisitor extends MiniJavaBaseVisitor<SymbolTable> {
 		Class booleanClass = new Class("boolean");
 		program.add(booleanClass);
 	}
-
-	@Override
-	public SymbolTable visitVarDeclaration(VarDeclarationContext ctx) {
-
-		return super.visitVarDeclaration(ctx);
+	
+	protected List<Entry> visit(List<? extends ParserRuleContext> ctxs) {
+		
+		LinkedList<Entry> result = new LinkedList<>();
+		
+		for (ParserRuleContext ctx : ctxs) {
+			result.add(visit(ctx));
+		}
+		return result;
 	}
 
 	@Override
-	public SymbolTable visitClassDeclarationExtends(ClassDeclarationExtendsContext ctx) {
-		throw new UnsupportedOperationException("Not implemented.");
-	}
+	public Entry visitVarDeclaration(VarDeclarationContext ctx) {
 
+		return new Variable(ctx.type().getText(), ctx.identifier().getText());
+	}
+	
 	@Override
-	public SymbolTable visitClassDeclarationSimple(ClassDeclarationSimpleContext ctx) {
-		String className = ctx.identifier().IDENTIFIER().getText();
+	public Entry visitMethodDeclaration(MethodDeclarationContext ctx) {
+		Method method = new Method(ctx.methodName.getText(), ctx.returnType.getText());
+		
+		method.addLocalVariable((Variable[]) visit(ctx.varDeclaration()).toArray());
+		method.addParameters((Method[]) visit(ctx.).toArray());
+	}
+	
+	@Override
+	public Entry visitClassDeclaration(ClassDeclarationContext ctx) {
+		String className = ctx.className.IDENTIFIER().getText();
+		
 		if (program.contains(className)) {
 			System.out.println("Class "+className+" has already been declared.");
+			return null;
 		} else {
 			Class clazz = new Class(className);
-			currentClass = clazz;
-			program.add(clazz);
-		}
-		return visit(ctx.classBody());
-	}
-
-	@Override
-	public SymbolTable visitClassBody(ClassBodyContext ctx) {
-		for (VarDeclarationContext varDeclaration : ctx.varDeclaration()) {
-			if (varDeclaration.type() instanceof OtherTypeContext) {
-				OtherTypeContext typeContext = (OtherTypeContext) varDeclaration.type();
-				String typeName = typeContext.identifier().IDENTIFIER().getText();
-				String variableName = varDeclaration.identifier().IDENTIFIER().getText();
-				currentClass.fields.put(variableName, typeName);
+			
+			for (VarDeclarationContext varDeclarationCtx : ctx.varDeclaration()) {
+				clazz.add((Variable) visit(varDeclarationCtx));
 			}
+			
+			for (MethodDeclarationContext methodDeclarationCtx : ctx.methodDeclaration()) {
+				clazz.add((Method) visit(methodDeclarationCtx));
+			}
+			
+			program.add(clazz);
+			return clazz;
 		}
-
-		for (MethodDeclarationContext methodDeclaration : ctx.methodDeclaration()) {
-			visit(methodDeclaration);
-		}
-		return super.visitClassBody(ctx);
+		
 	}
 }
