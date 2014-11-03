@@ -56,7 +56,7 @@ classDeclaration: classDeclarationSimple
 classDeclarationSimple: CLASS identifier classBody;
 classDeclarationExtends: CLASS identifier EXTENDS identifier classBody;
 
-classBody: LCBRACKET ( varDeclaration )* ( methodDeclaration )* RCBRACKET; 
+classBody: LCBRACKET ( varDeclaration )* ( methodDeclaration )* RCBRACKET;
 
 varDeclaration: type identifier SEMICOLON;
 methodDeclaration: PUBLIC type identifier LBRACKET ( type identifier ( COMMA type identifier )* )? RBRACKET LCBRACKET ( varDeclaration )* ( statement )* RETURN expression SEMICOLON RCBRACKET;
@@ -76,22 +76,22 @@ statement: LCBRACKET ( statement )* RCBRACKET							# bracketStatement
 	|  identifier LSBRACKET expression RSBRACKET EQUAL_SIGN expression SEMICOLON		# arrayAssignStatement
 	;
 
-expression: expression ( STAR | SLASH ) expression
-	|  expression ( PLUS | MINUS ) expression
-	|  expression ( SMALLER ) expression
-	|  expression ( DOUBLE_AMPERSAND ) expression
-	|  expression LSBRACKET expression RSBRACKET
-	|  expression DOT LENGTH
-	|  expression DOT identifier LBRACKET ( expression ( COMMA expression )* )? RBRACKET
-	|  INTEGER_LITERAL
-	|  identifier
-	|  NEW INT LSBRACKET expression RSBRACKET
-	|  NEW identifier LBRACKET RBRACKET
-	|  EXCLAMATION_MARK expression
-	|  LBRACKET expression RBRACKET
-	|  FALSE
-	|  TRUE
-	|  THIS
+expression: expression ( STAR | SLASH ) expression						# binOpExpression
+	|  expression ( PLUS | MINUS ) expression							# binOpExpression
+	|  expression ( SMALLER ) expression								# binOpExpression
+	|  expression ( DOUBLE_AMPERSAND ) expression						# binOpExpression
+	|  expression LSBRACKET expression RSBRACKET						# arrayAccessExpression
+	|  expression DOT LENGTH											# arrayLengthExpression
+	|  expression DOT identifier LBRACKET ( expression ( COMMA expression )* )? RBRACKET # invokeExpression
+	|  INTEGER_LITERAL													# integerLiteralExpression
+	|  identifier														# identifierExpression
+	|  NEW INT LSBRACKET expression RSBRACKET							# newIntArrayExpression
+	|  NEW identifier LBRACKET RBRACKET									# newExpression
+	|  EXCLAMATION_MARK expression										# notExpression
+	|  LBRACKET expression RBRACKET										# bracketExpression
+	|  FALSE															# falseExpression
+	|  TRUE																# trueExpression
+	|  THIS																# thisExpression
 	;
 
 identifier: IDENTIFIER;

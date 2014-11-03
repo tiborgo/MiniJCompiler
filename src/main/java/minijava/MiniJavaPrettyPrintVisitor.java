@@ -18,11 +18,6 @@ public class MiniJavaPrettyPrintVisitor extends MiniJavaBaseVisitor<String> {
 	}
 
 	@Override
-	public String visitExpression(@NotNull MiniJavaParser.ExpressionContext ctx) {
-		return visitChildren(ctx);
-	}
-
-	@Override
 	public String visitProg(@NotNull MiniJavaParser.ProgContext ctx) {
 
 		// prog: mainClass ( classDeclaration )* EOF;
