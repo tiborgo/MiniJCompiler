@@ -8,14 +8,14 @@ public class DeclMeth {
   final public String methodName;
   final public List<Parameter> parameters;
   final public List<DeclVar> localVars;
-  final public Stm body;
+  final public List<Stm> body;
   final public Exp returnExp;
 
   public DeclMeth(Ty ty,
           String methodName,
           List<Parameter> parameters,
           List<DeclVar> localVars,
-          Stm body,
+          List<Stm> body,
           Exp returnExp) {
     this.ty = ty;
     this.methodName = methodName;
