@@ -50,16 +50,11 @@ IDENTIFIER: [a-zA-Z][a-zA-Z0-9_]*;
 prog: mainClass ( classDeclaration )* EOF;
 mainClass: CLASS identifier LCBRACKET PUBLIC STATIC VOID MAIN LBRACKET STRING LSBRACKET RSBRACKET identifier RBRACKET LCBRACKET statement RCBRACKET RCBRACKET;
 
-classDeclaration: classDeclarationSimple
-	| classDeclarationExtends;
-
-classDeclarationSimple: CLASS identifier classBody;
-classDeclarationExtends: CLASS identifier EXTENDS identifier classBody;
-
-classBody: LCBRACKET ( varDeclaration )* ( methodDeclaration )* RCBRACKET;
+classDeclaration: CLASS className=identifier (EXTENDS identifier)? LCBRACKET ( varDeclaration )* ( methodDeclaration )* RCBRACKET;
 
 varDeclaration: type identifier SEMICOLON;
-methodDeclaration: PUBLIC type identifier LBRACKET ( type identifier ( COMMA type identifier )* )? RBRACKET LCBRACKET ( varDeclaration )* ( statement )* RETURN expression SEMICOLON RCBRACKET;
+
+methodDeclaration: PUBLIC returnType=type methodName=identifier LBRACKET ( type identifier ( COMMA type identifier )* )? RBRACKET LCBRACKET (varDeclaration )* ( statement )* RETURN expression SEMICOLON RCBRACKET;
 
 type: INT LSBRACKET RSBRACKET # intArrayType
 	|  BOOLEAN            # booleanType
