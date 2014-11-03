@@ -41,6 +41,13 @@ import minijava.syntax.ast.ExpTrue;
 import minijava.MiniJavaParser.VarDeclarationContext;
 import minijava.syntax.ast.Parameter;
 import minijava.syntax.ast.Stm;
+import minijava.syntax.ast.StmArrayAssign;
+import minijava.syntax.ast.StmAssign;
+import minijava.syntax.ast.StmIf;
+import minijava.syntax.ast.StmList;
+import minijava.syntax.ast.StmPrintChar;
+import minijava.syntax.ast.StmPrintlnInt;
+import minijava.syntax.ast.StmWhile;
 import minijava.syntax.ast.Ty;
 import minijava.syntax.ast.TyArr;
 import minijava.syntax.ast.TyBool;
@@ -123,12 +130,73 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 		return new TyClass(name);
 	}
 
-	@Override public Object visitBracketStatement(@NotNull MiniJavaParser.BracketStatementContext ctx) { return visitChildren(ctx); }
+	/* ####### STATEMENTS ####### */
+	
+	@Override
+	public Object visitBracketStatement(@NotNull MiniJavaParser.BracketStatementContext ctx) {
+		
+		LinkedList<Stm> stms = new LinkedList<>();
+		for (StatementContext stmCtx : ctx.statement()) {
+			stms.add((Stm) visit(stmCtx));
+		}
+		
+		return new StmList(stms);
+	}
 
-	@Override public Object visitIfStatement(@NotNull MiniJavaParser.IfStatementContext ctx) { return visitChildren(ctx); }
+	@Override
+	public Object visitIfStatement(@NotNull MiniJavaParser.IfStatementContext ctx) {
+		
+		Exp cond = (Exp) visit(ctx.condition);
+		Stm bodyTrue = (Stm) visit(ctx.trueStatement);
+		Stm bodyFalse = (Stm) visit(ctx.falseStatement);
+		
+		return new StmIf(cond, bodyTrue, bodyFalse);
+	}
 
-	@Override public Object visitProg(@NotNull MiniJavaParser.ProgContext ctx) { return visitChildren(ctx); }
+	@Override
+	public Object visitWhileStatement(@NotNull MiniJavaParser.WhileStatementContext ctx) {
+		
+		Exp cond = (Exp) visit(ctx.expression());
+		Stm body = (Stm) visit(ctx.statement());
+		
+		return new StmWhile(cond, body);
+	}
 
+	@Override
+	public Object visitSystemOutPrintlnStatement(@NotNull MiniJavaParser.SystemOutPrintlnStatementContext ctx) {
+		
+		Exp arg = (Exp) visit(ctx.expression());
+		
+		return new StmPrintlnInt(arg);
+	}
+
+	@Override
+	public Object visitAssignStatement(@NotNull MiniJavaParser.AssignStatementContext ctx) {
+		
+		String id = (String) visit(ctx.identifier());
+		Exp rhs = (Exp) visit(ctx.expression());
+		
+		return new StmAssign(id, rhs);
+	}
+
+	@Override
+	public Object visitSystemOutPrintStatement(@NotNull MiniJavaParser.SystemOutPrintStatementContext ctx) {
+		
+		Exp arg = (Exp) visit(ctx.expression());
+		
+		return new StmPrintChar(arg);
+	}
+
+	@Override
+	public Object visitArrayAssignStatement(@NotNull MiniJavaParser.ArrayAssignStatementContext ctx) {
+		
+		String id = (String) visit(ctx.identifier());
+		Exp index = (Exp) visit(ctx.index);
+		Exp rhs = (Exp) visit(ctx.rhs);
+		
+		return new StmArrayAssign(id, index, rhs);
+	}
+	
 	@Override
 	public Object visitVarDeclaration(@NotNull MiniJavaParser.VarDeclarationContext ctx) {
 

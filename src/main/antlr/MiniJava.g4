@@ -63,12 +63,12 @@ type: INT LSBRACKET RSBRACKET # intArrayType
 	;
 
 statement: LCBRACKET ( statement )* RCBRACKET							# bracketStatement
-	|  IF LBRACKET expression RBRACKET statement ELSE statement				# ifStatement
+	|  IF LBRACKET condition=expression RBRACKET trueStatement=statement ELSE falseStatement=statement # ifStatement
 	|  WHILE LBRACKET expression RBRACKET statement						# whileStatement
 	|  SYSTEM_OUT_PRINTLN LBRACKET expression RBRACKET SEMICOLON				# systemOutPrintlnStatement
 	|  SYSTEM_OUT_PRINT LBRACKET LBRACKET CHAR RBRACKET expression RBRACKET SEMICOLON	# systemOutPrintStatement
 	|  identifier EQUAL_SIGN expression SEMICOLON						# assignStatement
-	|  identifier LSBRACKET expression RSBRACKET EQUAL_SIGN expression SEMICOLON		# arrayAssignStatement
+	|  identifier LSBRACKET index=expression RSBRACKET EQUAL_SIGN rhs=expression SEMICOLON		# arrayAssignStatement
 	;
 
 expression: expression ( STAR | SLASH ) expression						# binOpExpression
