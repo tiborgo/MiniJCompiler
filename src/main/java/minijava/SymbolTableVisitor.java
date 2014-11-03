@@ -6,7 +6,6 @@ import minijava.MiniJavaParser.ClassDeclarationSimpleContext;
 import minijava.MiniJavaParser.MethodDeclarationContext;
 import minijava.MiniJavaParser.OtherTypeContext;
 import minijava.MiniJavaParser.VarDeclarationContext;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class SymbolTableVisitor extends MiniJavaBaseVisitor<SymbolTable> {
 	private final Program program;
@@ -30,7 +29,7 @@ public class SymbolTableVisitor extends MiniJavaBaseVisitor<SymbolTable> {
 
 	@Override
 	public SymbolTable visitClassDeclarationExtends(ClassDeclarationExtendsContext ctx) {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException("Not implemented.");
 	}
 
 	@Override
