@@ -1,14 +1,14 @@
-package minijava.symboltable;
+package minijava.symboltable.tree;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Class implements Entry {
+public class Class implements Node {
 	public final String name;
 	public final Map<String, Variable> fields;
 	public final Map<String, Method> methods;
-
+	
 	public Class(String name,
 			List<Variable> fields,
 			List<Method> methods) {

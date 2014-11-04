@@ -1,28 +1,32 @@
-package minijava.symboltable;
+package minijava.symboltable.tree;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Method implements Entry {
+import minijava.ast.rules.Ty;
+
+public class Method implements Node {
 	
 	public final String name;
-	public final String returnType;
-	public final Map<String, Variable> parameters;
+	public final Ty returnType;
+	public final Map<String, Variable> parametersMap;
 	public final Map<String, Variable> localVariables;
-
+	public final List<Variable> parametersList;
+	
 	public Method(String name,
-			String returnType,
+			Ty returnType,
 			List<Variable> parameters,
 			List<Variable> localVariables) {
 		
 		this.name = name;
 		this.returnType = returnType;
-		this.parameters = new HashMap<>();
+		this.parametersMap = new HashMap<>();
 		this.localVariables = new HashMap<>();
+		this.parametersList = parameters;
 		
 		for (Variable parameter : parameters) {
-			this.parameters.put(parameter.name, parameter);
+			this.parametersMap.put(parameter.name, parameter);
 		}
 		
 		for (Variable localVariable : localVariables) {
