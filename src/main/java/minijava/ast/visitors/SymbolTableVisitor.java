@@ -8,15 +8,15 @@ import minijava.ast.rules.DeclMeth;
 import minijava.ast.rules.DeclVar;
 import minijava.ast.rules.Parameter;
 import minijava.ast.rules.Prg;
-import minijava.symboltable.Class;
-import minijava.symboltable.Entry;
-import minijava.symboltable.Method;
-import minijava.symboltable.Program;
-import minijava.symboltable.Variable;
+import minijava.symboltable.tree.Class;
+import minijava.symboltable.tree.Node;
+import minijava.symboltable.tree.Method;
+import minijava.symboltable.tree.Program;
+import minijava.symboltable.tree.Variable;
 
 public class SymbolTableVisitor implements
 		PrgVisitor<Program, RuntimeException>,
-		DeclVisitor<Entry, RuntimeException>,
+		DeclVisitor<Node, RuntimeException>,
 		ParameterVisitor<Variable, RuntimeException> {
 	
 	private LinkedList<String> types = new LinkedList<>();
@@ -83,16 +83,16 @@ public class SymbolTableVisitor implements
 			localVariables.add(visit(localVariable));
 		}
 
-		return new Method(m.methodName, m.ty.toString(), parameters, localVariables);
+		return new Method(m.methodName, m.ty, parameters, localVariables);
 	}
 
 	@Override
 	public Variable visit(DeclVar d) throws RuntimeException {
-		return new Variable(d.name, d.ty.toString());
+		return new Variable(d.name, d.ty);
 	}
 
 	@Override
 	public Variable visit(Parameter p) throws RuntimeException {
-		return new Variable(p.id, p.ty.toString());
+		return new Variable(p.id, p.ty);
 	}
 }
