@@ -1,24 +1,17 @@
 package minijava.symboltable;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Program {
-	private final Map<String, Class> classes;
+	
+	public final Map<String, Class> classes;
 
-	public Program() {
-		classes = new HashMap<>();
-	}
-
-	public void add(Class clazz) {
-		classes.put(clazz.name, clazz);
-	}
-
-	public Class get(String identifier) {
-		return classes.get(identifier);
-	}
-
-	public boolean contains(String identifier) {
-		return classes.containsKey(identifier);
+	public Program(List<Class> classes) {
+		this.classes = new HashMap<>();
+		for (Class clazz : classes) {
+			this.classes.put(clazz.name, clazz);
+		}
 	}
 }

@@ -1,38 +1,32 @@
 package minijava.symboltable;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Method implements Entry {
-	private final String name;
-	private final String returnType;
-	private final Map<String, Variable> parameters;
-	private final Map<String, Variable> localVariables;
+	
+	public final String name;
+	public final String returnType;
+	public final Map<String, Variable> parameters;
+	public final Map<String, Variable> localVariables;
 
-	public Method(String name, String returnType) {
+	public Method(String name,
+			String returnType,
+			List<Variable> parameters,
+			List<Variable> localVariables) {
+		
 		this.name = name;
 		this.returnType = returnType;
-		parameters = new HashMap<>();
-		localVariables = new HashMap<>();
-	}
-
-	public void addParameters(Variable... parameters) {
-		for (Variable variable : parameters) {
-			this.parameters.put(variable.getName(), variable);
+		this.parameters = new HashMap<>();
+		this.localVariables = new HashMap<>();
+		
+		for (Variable parameter : parameters) {
+			this.parameters.put(parameter.name, parameter);
 		}
-	}
-	
-	public void addLocalVariable(Variable... localVariables) {
-		for (Variable variable : localVariables) {
-			this.localVariables.put(variable.getName(), variable);
+		
+		for (Variable localVariable : localVariables) {
+			this.localVariables.put(localVariable.name, localVariable);
 		}
-	}
-	
-	@Override
-	public boolean contains(Entry entry) {
-		/*if (entry instanceof Variable) {
-			Variable
-		}*/
-		return false;
 	}
 }
