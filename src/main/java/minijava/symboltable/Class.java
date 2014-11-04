@@ -1,42 +1,34 @@
 package minijava.symboltable;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Class implements Entry {
-	private final String name;
-	private final Map<String, Variable> fields;
-	private final Map<String, Method> methods;
+	public final String name;
+	public final Map<String, Variable> fields;
+	public final Map<String, Method> methods;
 
+	public Class(String name,
+			List<Variable> fields,
+			List<Method> methods) {
+		
+		this.name = name;
+		this.fields = new HashMap<>();
+		this.methods = new HashMap<>();
+		
+		for (Variable field : fields) {
+			this.fields.put(field.name, field);
+		}
+		
+		for (Method method : methods) {
+			this.methods.put(method.name, method);
+		}
+	}
+	
 	public Class(String name) {
 		this.name = name;
-		fields = new HashMap<>();
-		methods = new HashMap<>();
-	}
-	
-	public void add(Variable field) {
-		fields.put(field.getName(), field);
-	}
-	
-	public void add(Method method) {
-		methods.put(method.getName(), method);
-	}
-
-	@Override
-	public String getName() {
-		return name;
-	}
-
-	@Override
-	public boolean contains(Entry entry) {
-		return false;
-	}
-	
-	public boolean contains(Variable field) {
-		return fields.containsKey(field.getName());
-	}
-	
-	public boolean contains(Method method) {
-		return methods.containsKey(method.getName());
+		this.fields = new HashMap<>();
+		this.methods = new HashMap<>();
 	}
 }
