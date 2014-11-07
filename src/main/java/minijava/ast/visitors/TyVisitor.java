@@ -6,15 +6,11 @@ import minijava.ast.rules.TyClass;
 import minijava.ast.rules.TyInt;
 import minijava.ast.rules.TyVoid;
 
-public interface TyVisitor<A> {
+public interface TyVisitor<A, T extends Throwable> {
 
-  public A visit(TyVoid t);
-
-  public A visit(TyBool t);
-
-  public A visit(TyInt t);
-
-  public A visit(TyClass t);
-
-  public A visit(TyArr t);
+  public A visit(TyVoid t)  throws T;
+  public A visit(TyBool t)  throws T;
+  public A visit(TyInt t)   throws T;
+  public A visit(TyClass t) throws T;
+  public A visit(TyArr t)   throws T;
 }

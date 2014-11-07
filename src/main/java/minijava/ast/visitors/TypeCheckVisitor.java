@@ -22,6 +22,13 @@ import minijava.ast.rules.ExpTrue;
 import minijava.ast.rules.Parameter;
 import minijava.ast.rules.Prg;
 import minijava.ast.rules.Stm;
+import minijava.ast.rules.StmArrayAssign;
+import minijava.ast.rules.StmAssign;
+import minijava.ast.rules.StmIf;
+import minijava.ast.rules.StmList;
+import minijava.ast.rules.StmPrintChar;
+import minijava.ast.rules.StmPrintlnInt;
+import minijava.ast.rules.StmWhile;
 import minijava.ast.rules.Ty;
 import minijava.ast.rules.TyArr;
 import minijava.ast.rules.TyBool;
@@ -37,7 +44,8 @@ import minijava.symboltable.visitors.MethodVisitor;
 public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		DeclVisitor<Boolean, RuntimeException>,
 		ExpVisitor<Ty, RuntimeException>,
-		TyVisitor<Boolean> {
+		TyVisitor<Boolean, RuntimeException>,
+		StmVisitor<Boolean, RuntimeException> {
 	
 	private final Program symbolTable;
 	private Class classContext;
@@ -53,11 +61,11 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		boolean ok = true;
 		ok = visit(p.mainClass) ? ok : false;
 		for (DeclClass clazz : p.classes) {
-			ok = visit(clazz) ? ok : false;
+			ok = clazz.accept(this) ? ok : false;
 		}
 		return ok;
 	}
-
+	
 	@Override
 	public Boolean visit(DeclClass c) throws RuntimeException {
 		
@@ -65,11 +73,11 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		
 		boolean ok = true;
 		for (DeclVar variable : c.fields) {
-			ok = visit(variable) ? ok : false;
+			ok = variable.accept(this) ? ok : false;
 		}
 		
 		for (DeclMeth method : c.methods) {
-			ok = visit(method) ? ok : false;
+			ok = method.accept(this) ? ok : false;
 		}
 		
 		classContext = null;
@@ -89,10 +97,10 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		
 		boolean ok = true;
 		for (Stm stm : m.body) {
-			ok = visit(stm) ? ok : false;
+			ok = stm.accept(this) ? ok : false;
 		}
 		
-		ok = (visit(m.returnExp).equals(m.ty)) ? ok : false;
+		ok = (m.returnExp.accept(this).equals(m.ty)) ? ok : false;
 		
 		methodContext = null;
 		
@@ -102,11 +110,6 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 	@Override
 	public Boolean visit(DeclVar d) throws RuntimeException {
 		return visit(d.ty);
-	}
-
-	
-	public Ty visit(Exp e) throws RuntimeException {
-		return null;
 	}
 	
 	@Override
@@ -127,7 +130,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 	@Override
 	public Ty visit(ExpNewIntArray e) throws RuntimeException {
 		
-		if (visit(e.size) instanceof TyInt) {
+		if (e.size.accept(this) instanceof TyInt) {
 			return new TyArr(new TyInt());
 		}
 		else {
@@ -151,7 +154,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 
 	@Override
 	public Ty visit(ExpNeg e) throws RuntimeException {
-		if (visit(e.body) instanceof TyBool) {
+		if (e.body.accept(this) instanceof TyBool) {
 			return new TyBool();
 		}
 		else {
@@ -168,8 +171,8 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		case MINUS:
 		case TIMES:
 		case DIV:
-			if (visit(e.left) instanceof TyInt &&
-					visit(e.right) instanceof TyInt) {
+			if (e.left.accept(this) instanceof TyInt &&
+					e.right.accept(this) instanceof TyInt) {
 				return new TyInt();
 			}
 			else {
@@ -179,8 +182,8 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 			
 		case AND:
 		case LT:
-			if (visit(e.left) instanceof TyBool &&
-					visit(e.right) instanceof TyBool) {
+			if (e.left.accept(this) instanceof TyBool &&
+					e.right.accept(this) instanceof TyBool) {
 				return new TyBool();
 			}
 			else {
@@ -196,8 +199,8 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 	@Override
 	public Ty visit(ExpArrayGet e) throws RuntimeException {
 		
-		Ty indexType = visit(e.index);
-		Ty arrayType = visit(e.array);
+		Ty indexType = e.index.accept(this);
+		Ty arrayType = e.array.accept(this);
 		
 		if (indexType instanceof TyInt &&
 				arrayType instanceof TyArr) {
@@ -211,7 +214,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 
 	@Override
 	public Ty visit(ExpArrayLength e) throws RuntimeException {
-		if (visit(e.array) instanceof TyArr) {
+		if (e.array.accept(this) instanceof TyArr) {
 			return new TyInt();
 		}
 		else {
@@ -223,7 +226,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 	@Override
 	public Ty visit(ExpInvoke e) throws RuntimeException {
 		
-		TyClass object = (TyClass) visit(e.obj);
+		TyClass object = (TyClass) e.obj.accept(this);
 		
 		// Check class
 		Class clazz   = symbolTable.classes.get(object.c);
@@ -244,7 +247,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 			
 			boolean ok = true;
 			for (int i = 0; i < e.args.size(); i++) {
-				Ty argType = visit(e.args.get(i));
+				Ty argType = e.args.get(i).accept(this);
 				if (!argType.equals(method.parametersList.get(i).type)) {
 					ok = false;
 					// TODO: error
@@ -310,6 +313,48 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 	@Override
 	public Boolean visit(TyArr t) {
 		return visit(t.ty);
+	}
+
+	@Override
+	public Boolean visit(StmList s) throws RuntimeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Boolean visit(StmIf s) throws RuntimeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Boolean visit(StmWhile s) throws RuntimeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Boolean visit(StmPrintlnInt s) throws RuntimeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Boolean visit(StmPrintChar s) throws RuntimeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Boolean visit(StmAssign s) throws RuntimeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Boolean visit(StmArrayAssign s) throws RuntimeException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

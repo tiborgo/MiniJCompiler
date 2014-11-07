@@ -2,7 +2,9 @@ package minijava.ast.rules;
 
 import java.util.List;
 
-public class DeclClass {
+import minijava.ast.visitors.DeclVisitor;
+
+public class DeclClass extends Decl {
 
   final public String className;
   final public String superName; // null if no superclass
@@ -16,4 +18,9 @@ public class DeclClass {
     this.fields = fields;
     this.methods = methods;
   }
+
+	@Override
+	public <A, T extends Throwable> A accept(DeclVisitor<A, T> v) throws T {
+		return v.visit(this);
+	}
 }

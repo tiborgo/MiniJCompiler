@@ -18,7 +18,7 @@ public class TyBool extends Ty {
   }
 
   @Override
-  public <A> A accept(TyVisitor<A> v) {
+  public <A, T extends Throwable> A accept(TyVisitor<A, T> v) throws T {
     return v.visit(this);
   }
 
