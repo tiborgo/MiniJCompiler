@@ -7,6 +7,7 @@ import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Prg;
 import minijava.ast.visitors.PrettyPrintVisitor;
 import minijava.ast.visitors.SymbolTableVisitor;
+import minijava.ast.visitors.TypeCheckVisitor;
 import minijava.symboltable.tree.Program;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
@@ -33,11 +34,17 @@ public class MiniJavaCompiler {
 			ASTVisitor astVisitor = new ASTVisitor();
 			Prg program = (Prg) astVisitor.visit(tree);
 
-			String output = PrettyPrintVisitor.prettyPrint(program);
+			PrettyPrintVisitor prettyPrintVisitor = new PrettyPrintVisitor("");
+			String output = program.accept(prettyPrintVisitor);
 			System.out.print(output);
 			
 			SymbolTableVisitor symbolTableVisitor = new SymbolTableVisitor(); 
-			Program syntaxTable = symbolTableVisitor.visit(program);
+			Program symbolTable = program.accept(symbolTableVisitor);
+			
+			TypeCheckVisitor typeCheckVisitor = new TypeCheckVisitor(symbolTable);
+			if (program.accept(typeCheckVisitor)) {
+				System.out.println("No Type Errors");
+			}
 			
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -1,12 +1,19 @@
 package minijava.ast.rules;
 
-public class DeclVar {
+import minijava.ast.visitors.DeclVisitor;
 
-  final public Ty ty;
-  final public String name;
+public class DeclVar extends Decl {
 
-  public DeclVar(Ty ty, String name) {
-    this.ty = ty;
-    this.name = name;
-  }
+	final public Ty ty;
+	final public String name;
+
+	public DeclVar(Ty ty, String name) {
+		this.ty = ty;
+		this.name = name;
+	}
+
+	@Override
+	public <A, T extends Throwable> A accept(DeclVisitor<A, T> v) throws T {
+		return v.visit(this);
+	}
 }

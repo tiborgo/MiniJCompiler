@@ -1,15 +1,21 @@
 package minijava.ast.rules;
 
-public class DeclMain {
+import minijava.ast.visitors.DeclVisitor;
 
-  final public String className;
-  final public String mainArg;
-  final public Stm mainBody;
+public class DeclMain extends Decl {
 
-  public DeclMain(String className, String mainArg, Stm mainBody) {
-    this.className = className;
-    this.mainArg = mainArg;
-    this.mainBody = mainBody;
-  }
+	final public String className;
+	final public String mainArg;
+	final public Stm mainBody;
+
+	public DeclMain(String className, String mainArg, Stm mainBody) {
+		this.className = className;
+		this.mainArg = mainArg;
+		this.mainBody = mainBody;
+	}
+
+	@Override
+	public <A, T extends Throwable> A accept(DeclVisitor<A, T> v) throws T {
+		return v.visit(this);
+	}
 }
-

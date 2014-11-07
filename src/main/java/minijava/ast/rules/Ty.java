@@ -7,7 +7,7 @@ public abstract class Ty {
   @Override
   public abstract String toString();
 
-  public abstract <A> A accept(TyVisitor<A> v);
+  public abstract <A, T extends Throwable> A accept(TyVisitor<A, T> v) throws T;
 }
 
 

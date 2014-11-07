@@ -1,5 +1,6 @@
 package minijava.ast.rules;
 
+import minijava.ast.visitors.StmVisitor;
 import minijava.ast.visitors.TyVisitor;
 
 public class TyArr extends Ty {
@@ -16,7 +17,7 @@ public class TyArr extends Ty {
   }
 
   @Override
-  public <A> A accept(TyVisitor<A> v) {
+  public <A, T extends Throwable> A accept(TyVisitor<A, T> v) throws T {
     return v.visit(this);
   }
 

@@ -2,7 +2,7 @@ package minijava.ast.rules;
 
 import java.util.List;
 
-import minijava.ast.visitors.PrettyPrintVisitor;
+import minijava.ast.visitors.PrgVisitor;
 
 public class Prg {
 
@@ -14,7 +14,7 @@ public class Prg {
     this.classes = classes;
   }
 
-  public String prettyPrint() {
-    return PrettyPrintVisitor.prettyPrint(this);
+  public <A, T extends Throwable> A accept(PrgVisitor<A, T> v) throws T {
+    return v.visit(this);
   }
 }
