@@ -1,12 +1,9 @@
 package minijava.ast.visitors;
 
-import java.util.List;
-
 import minijava.ast.rules.DeclClass;
 import minijava.ast.rules.DeclMain;
 import minijava.ast.rules.DeclMeth;
 import minijava.ast.rules.DeclVar;
-import minijava.ast.rules.Exp;
 import minijava.ast.rules.ExpArrayGet;
 import minijava.ast.rules.ExpArrayLength;
 import minijava.ast.rules.ExpBinOp;
@@ -19,7 +16,6 @@ import minijava.ast.rules.ExpNew;
 import minijava.ast.rules.ExpNewIntArray;
 import minijava.ast.rules.ExpThis;
 import minijava.ast.rules.ExpTrue;
-import minijava.ast.rules.Parameter;
 import minijava.ast.rules.Prg;
 import minijava.ast.rules.Stm;
 import minijava.ast.rules.StmArrayAssign;
@@ -35,9 +31,9 @@ import minijava.ast.rules.TyBool;
 import minijava.ast.rules.TyClass;
 import minijava.ast.rules.TyInt;
 import minijava.ast.rules.TyVoid;
+import minijava.symboltable.tree.Class;
 import minijava.symboltable.tree.Method;
 import minijava.symboltable.tree.Program;
-import minijava.symboltable.tree.Class;
 import minijava.symboltable.tree.Variable;
 import minijava.symboltable.visitors.MethodVisitor;
 
@@ -317,44 +313,61 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 
 	@Override
 	public Boolean visit(StmList s) throws RuntimeException {
-		// TODO Auto-generated method stub
-		return null;
+		for (Stm statement : s.stms) {
+			if (!statement.accept(this)) {
+				return Boolean.FALSE;
+			}
+		}
+		return Boolean.TRUE;
 	}
 
 	@Override
 	public Boolean visit(StmIf s) throws RuntimeException {
-		// TODO Auto-generated method stub
-		return null;
+		Ty type = s.cond.accept(this);
+		if (!(type instanceof TyBool)) {
+			return Boolean.FALSE;
+		}
+		return s.bodyTrue.accept(this).booleanValue() && s.bodyFalse.accept(this).booleanValue();
 	}
 
 	@Override
 	public Boolean visit(StmWhile s) throws RuntimeException {
-		// TODO Auto-generated method stub
-		return null;
+		Ty type = s.cond.accept(this);
+		if (!(type instanceof TyBool)) {
+			return Boolean.FALSE;
+		}
+		return s.body.accept(this);
 	}
 
 	@Override
 	public Boolean visit(StmPrintlnInt s) throws RuntimeException {
-		// TODO Auto-generated method stub
-		return null;
+		Ty expressionType = s.arg.accept(this);
+		if (!(expressionType instanceof TyInt)) {
+			return Boolean.FALSE;
+		}
+		return Boolean.TRUE;
 	}
 
 	@Override
 	public Boolean visit(StmPrintChar s) throws RuntimeException {
-		// TODO Auto-generated method stub
-		return null;
+		//Ty expressionType = s.arg.accept(this);
+		// TODO: No type class for type char?
+		return Boolean.TRUE;
 	}
 
 	@Override
 	public Boolean visit(StmAssign s) throws RuntimeException {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO: Infer type of the variable to be assigned
+		Ty assigningType = s.rhs.accept(this);
+		// TODO: Compare type of the assigned variable and the assigning expression
+		return Boolean.TRUE;
 	}
 
 	@Override
 	public Boolean visit(StmArrayAssign s) throws RuntimeException {
-		// TODO Auto-generated method stub
-		return null;
+		// TODO: Infer type of the variable to be assigned
+		Ty assigningType = s.rhs.accept(this);
+		// TODO: Compare type of the assigned variable and the assigning expression
+		return Boolean.TRUE;
 	}
-
 }
