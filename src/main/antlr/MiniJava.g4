@@ -72,13 +72,13 @@ statement: LCBRACKET ( statement )* RCBRACKET							# bracketStatement
 	|  identifier LSBRACKET index=expression RSBRACKET EQUAL_SIGN rhs=expression SEMICOLON		# arrayAssignStatement
 	;
 
-expression: expression ( STAR | SLASH ) expression						# binOpExpression
+expression: expression LSBRACKET expression RSBRACKET					# arrayAccessExpression
+	|  expression DOT LENGTH											# arrayLengthExpression
+	|  expression DOT identifier LBRACKET ( expression ( COMMA expression )* )? RBRACKET # invokeExpression
+	|  expression ( STAR | SLASH ) expression							# binOpExpression
 	|  expression ( PLUS | MINUS ) expression							# binOpExpression
 	|  expression ( SMALLER ) expression								# binOpExpression
 	|  expression ( DOUBLE_AMPERSAND ) expression						# binOpExpression
-	|  expression LSBRACKET expression RSBRACKET						# arrayAccessExpression
-	|  expression DOT LENGTH											# arrayLengthExpression
-	|  expression DOT identifier LBRACKET ( expression ( COMMA expression )* )? RBRACKET # invokeExpression
 	|  INTEGER_LITERAL													# integerLiteralExpression
 	|  identifier														# identifierExpression
 	|  NEW INT LSBRACKET expression RSBRACKET							# newIntArrayExpression
