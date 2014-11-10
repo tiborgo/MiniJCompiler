@@ -5,6 +5,7 @@ grammar MiniJava;
 INT: 'int';
 WS: [ \t\r\n] -> skip;
 COMMENT: '//'.*?'\n' -> skip;
+MULTILINE_COMMENT: '/*'.*?'*/' -> skip;
 LSBRACKET: '[';
 RSBRACKET: ']';
 CLASS: 'class';
