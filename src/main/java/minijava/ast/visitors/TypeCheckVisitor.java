@@ -175,9 +175,18 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 				System.err.println("Both operands of binary operation '" + e.op + "' must have type int");
 				return null;
 			}
-			
-		case AND:
+
 		case LT:
+			if (e.left.accept(this) instanceof TyInt &&
+					e.right.accept(this) instanceof TyInt) {
+				return new TyBool();
+			}
+			else {
+				System.err.println("Both operands of binary operation '" + e.op + "' must have type int");
+				return null;
+			}
+
+		case AND:
 			if (e.left.accept(this) instanceof TyBool &&
 					e.right.accept(this) instanceof TyBool) {
 				return new TyBool();
@@ -186,7 +195,6 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 				System.err.println("Both operands of binary operation '" + e.op + "' must have type bool");
 				return null;
 			}
-			
 		default:
 			return null;
 		}
