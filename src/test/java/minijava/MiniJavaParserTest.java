@@ -1,7 +1,5 @@
 package minijava;
 
-import static org.junit.Assert.fail;
-
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.FileVisitor;
@@ -10,6 +8,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+
+import static org.junit.Assert.fail;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
@@ -28,6 +28,7 @@ public class MiniJavaParserTest {
 		FileVisitor<Path> workingFilesVisitior = new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				System.out.println("Testing parser input from file \""+file.toString()+"\"");
 				ANTLRFileStream antlrStream = new ANTLRFileStream(file.toString());
 				MiniJavaLexer lexer = new MiniJavaLexer(antlrStream);
 				TokenStream tokens = new CommonTokenStream(lexer);
@@ -45,6 +46,7 @@ public class MiniJavaParserTest {
 		FileVisitor<Path> workingFilesVisitior = new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				System.out.println("Testing parser input from file \""+file.toString()+"\"");
 				ANTLRFileStream antlrStream = new ANTLRFileStream(file.toString());
 				MiniJavaLexer lexer = new MiniJavaLexer(antlrStream);
 				TokenStream tokens = new CommonTokenStream(lexer);
