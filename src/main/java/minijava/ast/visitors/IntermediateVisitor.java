@@ -384,11 +384,4 @@ public class IntermediateVisitor implements
 			});
 			
 		}
-	}
-
-	@Override
-	public TreeStm visit(StmArrayAssign s) throws RuntimeException {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }
