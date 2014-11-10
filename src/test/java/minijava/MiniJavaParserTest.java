@@ -10,18 +10,27 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import static org.junit.Assert.fail;
+import minijava.antlr.visitors.ASTVisitor;
+import minijava.ast.rules.Prg;
+import minijava.ast.visitors.PrettyPrintVisitor;
+import minijava.ast.visitors.SymbolTableVisitor;
+import minijava.ast.visitors.TypeCheckVisitor;
+import minijava.symboltable.tree.Program;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Test;
 
 public class MiniJavaParserTest {
 	private static final Path EXAMPLE_PROGRAM_PATH_BASE = Paths.get("src/test/resources/minijava-examples");
 	private static final Path EXAMPLE_PROGRAM_PATH_WORKING = EXAMPLE_PROGRAM_PATH_BASE.resolve("working");
 	private static final Path EXAMPLE_PROGRAM_PATH_FAILING = EXAMPLE_PROGRAM_PATH_BASE.resolve("parseErrors");
+	private static final Path EXAMPLE_PROGRAM_PATH_TYPE_FAILING = EXAMPLE_PROGRAM_PATH_BASE.resolve("typeErrors");
 
 	@Test
 	public void testParseWorkingExamples() throws IOException {
@@ -66,5 +75,34 @@ public class MiniJavaParserTest {
 			}
 		};
 		Files.walkFileTree(EXAMPLE_PROGRAM_PATH_FAILING, workingFilesVisitior);
+	}
+	
+	@Test
+	public void testTypeFailingExamples() throws IOException {
+		FileVisitor<Path> typeFailingFilesVisitior = new SimpleFileVisitor<Path>() {
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				System.out.println("Testing type for file \""+file.toString()+"\"");
+				ANTLRFileStream antlrStream = new ANTLRFileStream(file.toString());
+				MiniJavaLexer lexer = new MiniJavaLexer(antlrStream);
+				TokenStream tokens = new CommonTokenStream(lexer);
+				MiniJavaParser parser = new MiniJavaParser(tokens);
+				
+				ParseTree tree = parser.prog();
+				ASTVisitor astVisitor = new ASTVisitor();
+				Prg program = (Prg) astVisitor.visit(tree);
+				
+				SymbolTableVisitor symbolTableVisitor = new SymbolTableVisitor(); 
+				Program symbolTable = program.accept(symbolTableVisitor);
+				
+				TypeCheckVisitor typeCheckVisitor = new TypeCheckVisitor(symbolTable);
+				if (program.accept(typeCheckVisitor)) {
+					fail("The example "+file.toString()+" should have failed, but was accepted by the type checker.");
+				}
+				
+				return super.visitFile(file, attrs);
+			}
+		};
+		Files.walkFileTree(EXAMPLE_PROGRAM_PATH_TYPE_FAILING, typeFailingFilesVisitior);
 	}
 }
