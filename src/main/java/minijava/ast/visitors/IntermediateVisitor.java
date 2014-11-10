@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import minijava.ast.rules.DeclClass;
 import minijava.ast.rules.DeclMain;
@@ -31,16 +32,21 @@ import minijava.ast.rules.StmPrintChar;
 import minijava.ast.rules.StmPrintlnInt;
 import minijava.ast.rules.StmWhile;
 import minijava.intermediate.Label;
+import minijava.intermediate.Temp;
 import minijava.intermediate.tree.TreeExp;
 import minijava.intermediate.tree.TreeExpCALL;
 import minijava.intermediate.tree.TreeExpCONST;
 import minijava.intermediate.tree.TreeExpMEM;
 import minijava.intermediate.tree.TreeExpNAME;
 import minijava.intermediate.tree.TreeExpOP;
+import minijava.intermediate.tree.TreeExpTEMP;
+import minijava.intermediate.tree.TreeStmMOVE;
 import minijava.intermediate.tree.TreeExpOP.Op;
 import minijava.intermediate.tree.TreeStm;
 import minijava.intermediate.tree.TreeStmCJUMP;
 import minijava.intermediate.tree.TreeStmCJUMP.Rel;
+import minijava.intermediate.tree.TreeStmEXP;
+import minijava.intermediate.tree.TreeStmJUMP;
 import minijava.intermediate.tree.TreeStmLABEL;
 
 public class IntermediateVisitor implements
@@ -60,6 +66,12 @@ public class IntermediateVisitor implements
 	 * 
 	 * @Override public String visit(TyArr x) { } }
 	 */
+	
+	private final Map<String, Temp> localVariables;
+	
+	public IntermediateVisitor(Map<String, Temp> localVariables) {
+		this.localVariables = localVariables;
+	}
 
 		@Override
 		public TreeExp visit(ExpTrue e) throws RuntimeException {
@@ -104,7 +116,7 @@ public class IntermediateVisitor implements
 		}
 
 		@Override
-		public TreeExp visit(ExpBinOp e) throws RuntimeException {
+		public 	 visit(ExpBinOp e) throws RuntimeException {
 			Op operator = null;
 			switch (e.op) {
 			case PLUS:
@@ -196,7 +208,7 @@ public class IntermediateVisitor implements
 			
 			Label trueLabel  = new Label();
 			Label falseLabel = new Label();
-			
+			Label afterLabel = new Label();
 			
 			TreeStm[] treeStms = {
 					new TreeStmCJUMP(Rel.EQ,
@@ -206,8 +218,10 @@ public class IntermediateVisitor implements
 							falseLabel),
 					new TreeStmLABEL(trueLabel),
 					s.bodyTrue.accept(this),
+					TreeStmJUMP.jumpToLabel(afterLabel),
 					new TreeStmLABEL(falseLabel),
-					s.bodyFalse.accept(this)
+					s.bodyFalse.accept(this),
+					new TreeStmLABEL(afterLabel)
 			};
 			
 			return TreeStm.fromList(Arrays.asList(treeStms));
@@ -215,26 +229,66 @@ public class IntermediateVisitor implements
 
 		@Override
 		public TreeStm visit(StmWhile s) throws RuntimeException {
-			// TODO Auto-generated method stub
-			return null;
+			
+			Label beforeLabel = new Label(); 
+			Label bodyLabel   = new Label();
+			Label afterLabel  = new Label();
+			
+			TreeStm[] treeStms = {
+					new TreeStmLABEL(beforeLabel),
+					new TreeStmCJUMP(Rel.EQ,
+							s.cond.accept(this),
+							new TreeExpCONST(1),
+							bodyLabel,
+							afterLabel),
+					new TreeStmLABEL(bodyLabel),
+					s.body.accept(this),
+					TreeStmJUMP.jumpToLabel(beforeLabel),
+					new TreeStmLABEL(afterLabel)
+			};
+			
+			return TreeStm.fromList(Arrays.asList(treeStms));
 		}
 
 		@Override
 		public TreeStm visit(StmPrintlnInt s) throws RuntimeException {
-			// TODO Auto-generated method stub
-			return null;
+			
+			Label printlnIntLabel = new Label("L_println_int");
+			
+			return new TreeStmEXP(
+					new TreeExpCALL(
+							new TreeExpNAME(printlnIntLabel), 
+							Arrays.asList(s.arg.accept(this))
+							)
+					);
 		}
 
 		@Override
 		public TreeStm visit(StmPrintChar s) throws RuntimeException {
-			// TODO Auto-generated method stub
-			return null;
+			
+			Label printCharLabel = new Label("L_print_char");
+			
+			return new TreeStmEXP(
+					new TreeExpCALL(
+							new TreeExpNAME(printCharLabel), 
+							Arrays.asList(s.arg.accept(this))
+							)
+					);
 		}
 
 		@Override
 		public TreeStm visit(StmAssign s) throws RuntimeException {
-			// TODO Auto-generated method stub
-			return null;
+			
+			Temp dest = this.localVariables.get(s.id);
+			
+			if (dest != null) {
+				return new TreeStmMOVE(new TreeExpTEMP(dest),
+						s.rhs.accept(this));
+			}
+			else {
+				// TODO: error
+				return null;
+			}
 		}
 
 		@Override
