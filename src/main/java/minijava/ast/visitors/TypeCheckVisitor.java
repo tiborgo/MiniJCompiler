@@ -274,6 +274,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		
 		if (object == null) {
 			// TODO: error
+			System.err.println("Unknown variable \""+e.id+"\"");
 			return null;
 		}
 		else {
