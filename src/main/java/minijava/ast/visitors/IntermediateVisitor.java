@@ -31,6 +31,7 @@ import minijava.ast.rules.StmList;
 import minijava.ast.rules.StmPrintChar;
 import minijava.ast.rules.StmPrintlnInt;
 import minijava.ast.rules.StmWhile;
+import minijava.backend.MachineSpecifics;
 import minijava.intermediate.Label;
 import minijava.intermediate.Temp;
 import minijava.intermediate.tree.TreeExp;
@@ -68,9 +69,11 @@ public class IntermediateVisitor implements
 	 */
 	
 	private final Map<String, Temp> localVariables;
+	private final MachineSpecifics  machineSpecifics;
 	
-	public IntermediateVisitor(Map<String, Temp> localVariables) {
+	public IntermediateVisitor(Map<String, Temp> localVariables, MachineSpecifics machineSpecifics) {
 		this.localVariables = localVariables;
+		this.machineSpecifics = machineSpecifics;
 	}
 
 		@Override
@@ -210,21 +213,19 @@ public class IntermediateVisitor implements
 			Label falseLabel = new Label();
 			Label afterLabel = new Label();
 			
-			TreeStm[] treeStms = {
-					new TreeStmCJUMP(Rel.EQ,
-							s.cond.accept(this),
-							new TreeExpCONST(1),
-							trueLabel,
-							falseLabel),
-					new TreeStmLABEL(trueLabel),
-					s.bodyTrue.accept(this),
-					TreeStmJUMP.jumpToLabel(afterLabel),
-					new TreeStmLABEL(falseLabel),
-					s.bodyFalse.accept(this),
-					new TreeStmLABEL(afterLabel)
-			};
-			
-			return TreeStm.fromList(Arrays.asList(treeStms));
+			return TreeStm.fromArray(new TreeStm[]{
+						new TreeStmCJUMP(Rel.EQ,
+								s.cond.accept(this),
+								new TreeExpCONST(1),
+								trueLabel,
+								falseLabel),
+						new TreeStmLABEL(trueLabel),
+						s.bodyTrue.accept(this),
+						TreeStmJUMP.jumpToLabel(afterLabel),
+						new TreeStmLABEL(falseLabel),
+						s.bodyFalse.accept(this),
+						new TreeStmLABEL(afterLabel)
+				});
 		}
 
 		@Override
@@ -234,20 +235,20 @@ public class IntermediateVisitor implements
 			Label bodyLabel   = new Label();
 			Label afterLabel  = new Label();
 			
-			TreeStm[] treeStms = {
-					new TreeStmLABEL(beforeLabel),
-					new TreeStmCJUMP(Rel.EQ,
-							s.cond.accept(this),
-							new TreeExpCONST(1),
-							bodyLabel,
-							afterLabel),
-					new TreeStmLABEL(bodyLabel),
-					s.body.accept(this),
-					TreeStmJUMP.jumpToLabel(beforeLabel),
-					new TreeStmLABEL(afterLabel)
-			};
 			
-			return TreeStm.fromList(Arrays.asList(treeStms));
+			
+			return TreeStm.fromArray(new TreeStm[]{
+				new TreeStmLABEL(beforeLabel),
+				new TreeStmCJUMP(Rel.EQ,
+						s.cond.accept(this),
+						new TreeExpCONST(1),
+						bodyLabel,
+						afterLabel),
+				new TreeStmLABEL(bodyLabel),
+				s.body.accept(this),
+				TreeStmJUMP.jumpToLabel(beforeLabel),
+				new TreeStmLABEL(afterLabel)
+		});
 		}
 
 		@Override
@@ -282,8 +283,7 @@ public class IntermediateVisitor implements
 			Temp dest = this.localVariables.get(s.id);
 			
 			if (dest != null) {
-				return new TreeStmMOVE(new TreeExpTEMP(dest),
-						s.rhs.accept(this));
+				return new TreeStmMOVE(new TreeExpTEMP(dest), s.rhs.accept(this));
 			}
 			else {
 				// TODO: error
@@ -293,7 +293,26 @@ public class IntermediateVisitor implements
 
 		@Override
 		public TreeStm visit(StmArrayAssign s) throws RuntimeException {
-			// TODO Auto-generated method stub
-			return null;
+			
+			Temp array = this.localVariables.get(s.id);
+			TreeExp arrayExp = new TreeExpTEMP(array);
+			
+			TreeExp indexExp = s.index.accept(this);
+			TreeExp assignExp = s.rhs.accept(this);
+			
+			Temp indexTemp = new Temp();
+			TreeExpTEMP indexTempExp = new TreeExpTEMP(indexTemp);
+			
+			return TreeStm.fromArray(new TreeStm[]{
+				// Calculate address of array item
+				new TreeStmMOVE(indexTempExp, indexExp),
+				new TreeStmMOVE(indexTempExp, new TreeExpOP(Op.PLUS, indexTempExp, new TreeExpCONST(1))),
+				new TreeStmMOVE(indexTempExp, new TreeExpOP(Op.MUL, indexTempExp, new TreeExpCONST(this.machineSpecifics.getWordSize()))),
+				new TreeStmMOVE(indexTempExp, new TreeExpOP(Op.PLUS, indexTempExp, arrayExp)),
+				
+				// Assign array item value
+				new TreeStmMOVE(new TreeExpMEM(indexTempExp), assignExp)
+			});
+			
 		}
 }
