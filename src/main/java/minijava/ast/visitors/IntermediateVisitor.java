@@ -1,6 +1,7 @@
 package minijava.ast.visitors;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -38,8 +39,13 @@ import minijava.intermediate.tree.TreeExpNAME;
 import minijava.intermediate.tree.TreeExpOP;
 import minijava.intermediate.tree.TreeExpOP.Op;
 import minijava.intermediate.tree.TreeStm;
+import minijava.intermediate.tree.TreeStmCJUMP;
+import minijava.intermediate.tree.TreeStmCJUMP.Rel;
+import minijava.intermediate.tree.TreeStmLABEL;
 
-public class IntermediateVisitor {
+public class IntermediateVisitor implements
+	ExpVisitor<TreeExp, RuntimeException>,
+	StmVisitor<TreeStm, RuntimeException> {
 
 	/*
 	 * static class IntermediateVisitorTy implements TyVisitor<String> {
@@ -54,9 +60,6 @@ public class IntermediateVisitor {
 	 * 
 	 * @Override public String visit(TyArr x) { } }
 	 */
-
-	public static class IntermediateVisitorExp implements
-			ExpVisitor<TreeExp, RuntimeException> {
 
 		@Override
 		public TreeExp visit(ExpTrue e) throws RuntimeException {
@@ -181,10 +184,6 @@ public class IntermediateVisitor {
 		private String mangle(String className, String methodName) {
 			return className + "$" + methodName;
 		}
-	}
-
-	public static class IntermediateVisitorStm implements
-			StmVisitor<TreeStm, RuntimeException> {
 
 		@Override
 		public TreeStm visit(StmList s) throws RuntimeException {
@@ -194,8 +193,24 @@ public class IntermediateVisitor {
 
 		@Override
 		public TreeStm visit(StmIf s) throws RuntimeException {
-			// TODO Auto-generated method stub
-			return null;
+			
+			Label trueLabel  = new Label();
+			Label falseLabel = new Label();
+			
+			
+			TreeStm[] treeStms = {
+					new TreeStmCJUMP(Rel.EQ,
+							s.cond.accept(this),
+							new TreeExpCONST(1),
+							trueLabel,
+							falseLabel),
+					new TreeStmLABEL(trueLabel),
+					s.bodyTrue.accept(this),
+					new TreeStmLABEL(falseLabel),
+					s.bodyFalse.accept(this)
+			};
+			
+			return TreeStm.fromList(Arrays.asList(treeStms));
 		}
 
 		@Override
@@ -227,6 +242,4 @@ public class IntermediateVisitor {
 			// TODO Auto-generated method stub
 			return null;
 		}
-
-	}
 }
