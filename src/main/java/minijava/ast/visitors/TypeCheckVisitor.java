@@ -270,7 +270,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 
 	@Override
 	public Ty visit(ExpId e) throws RuntimeException {
-		Variable object = methodContext.localVariables.get(e.id);
+		Variable object = methodContext.get(e.id);
 		
 		if (object == null) {
 			// TODO: error

@@ -10,10 +10,10 @@ public class Method implements Node {
 	
 	public final String name;
 	public final Ty returnType;
-	public final Map<String, Variable> parametersMap;
-	public final Map<String, Variable> localVariables;
 	public final List<Variable> parametersList;
-	
+	private final Map<String, Variable> parametersMap;
+	private final Map<String, Variable> localVariables;
+
 	public Method(String name,
 			Ty returnType,
 			List<Variable> parameters,
@@ -32,5 +32,9 @@ public class Method implements Node {
 		for (Variable localVariable : localVariables) {
 			this.localVariables.put(localVariable.name, localVariable);
 		}
+	}
+
+	public Variable get(String variableName) {
+		return parametersMap.containsKey(variableName) ? parametersMap.get(variableName) : localVariables.get(variableName);
 	}
 }
