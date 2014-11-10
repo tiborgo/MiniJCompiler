@@ -370,17 +370,29 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 
 	@Override
 	public Boolean visit(StmAssign s) throws RuntimeException {
-		// TODO: Infer type of the variable to be assigned
-		Ty assigningType = s.rhs.accept(this);
-		// TODO: Compare type of the assigned variable and the assigning expression
-		return Boolean.TRUE;
+		Ty idType     =  new ExpId(s.id).accept(this);
+		Ty assignType = s.rhs.accept(this);
+		
+		if (idType.equals(assignType)) {
+			return Boolean.TRUE;
+		}
+		else {
+			return Boolean.FALSE;
+		}
 	}
 
 	@Override
 	public Boolean visit(StmArrayAssign s) throws RuntimeException {
-		// TODO: Infer type of the variable to be assigned
-		Ty assigningType = s.rhs.accept(this);
-		// TODO: Compare type of the assigned variable and the assigning expression
-		return Boolean.TRUE;
+		Ty arrayType  = new ExpId(s.id).accept(this);
+		Ty assignType = s.rhs.accept(this);
+		Ty indexType  = s.index.accept(this);
+		
+		if (assignType.equals(arrayType) &&
+				indexType.equals(new TyInt())) {
+			return Boolean.TRUE;
+		}
+		else {
+			return Boolean.FALSE;
+		}
 	}
 }
