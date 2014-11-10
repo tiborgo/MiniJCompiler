@@ -6,10 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import minijava.ast.rules.DeclClass;
-import minijava.ast.rules.DeclMain;
-import minijava.ast.rules.DeclMeth;
-import minijava.ast.rules.DeclVar;
 import minijava.ast.rules.Exp;
 import minijava.ast.rules.ExpArrayGet;
 import minijava.ast.rules.ExpArrayLength;
@@ -23,7 +19,6 @@ import minijava.ast.rules.ExpNew;
 import minijava.ast.rules.ExpNewIntArray;
 import minijava.ast.rules.ExpThis;
 import minijava.ast.rules.ExpTrue;
-import minijava.ast.rules.Prg;
 import minijava.ast.rules.StmArrayAssign;
 import minijava.ast.rules.StmAssign;
 import minijava.ast.rules.StmIf;
@@ -32,23 +27,32 @@ import minijava.ast.rules.StmPrintChar;
 import minijava.ast.rules.StmPrintlnInt;
 import minijava.ast.rules.StmWhile;
 import minijava.backend.MachineSpecifics;
+import minijava.ast.rules.Ty;
+import minijava.ast.rules.TyArr;
+import minijava.ast.rules.TyBool;
+import minijava.ast.rules.TyClass;
+import minijava.ast.rules.TyInt;
 import minijava.intermediate.Label;
 import minijava.intermediate.Temp;
 import minijava.intermediate.tree.TreeExp;
 import minijava.intermediate.tree.TreeExpCALL;
 import minijava.intermediate.tree.TreeExpCONST;
+import minijava.intermediate.tree.TreeExpESEQ;
 import minijava.intermediate.tree.TreeExpMEM;
 import minijava.intermediate.tree.TreeExpNAME;
 import minijava.intermediate.tree.TreeExpOP;
-import minijava.intermediate.tree.TreeExpTEMP;
-import minijava.intermediate.tree.TreeStmMOVE;
 import minijava.intermediate.tree.TreeExpOP.Op;
+import minijava.intermediate.tree.TreeExpTEMP;
 import minijava.intermediate.tree.TreeStm;
 import minijava.intermediate.tree.TreeStmCJUMP;
 import minijava.intermediate.tree.TreeStmCJUMP.Rel;
 import minijava.intermediate.tree.TreeStmEXP;
 import minijava.intermediate.tree.TreeStmJUMP;
 import minijava.intermediate.tree.TreeStmLABEL;
+import minijava.intermediate.tree.TreeStmMOVE;
+import minijava.intermediate.tree.TreeStmSEQ;
+import minijava.symboltable.tree.Program;
+import minijava.symboltable.tree.Variable;
 
 public class IntermediateVisitor implements
 	ExpVisitor<TreeExp, RuntimeException>,
@@ -67,7 +71,9 @@ public class IntermediateVisitor implements
 	 * 
 	 * @Override public String visit(TyArr x) { } }
 	 */
-	
+
+	// FIXME: Symbol table is always null
+	private Program symbolTable;
 	private final Map<String, Temp> localVariables;
 	private final MachineSpecifics  machineSpecifics;
 	
@@ -76,52 +82,87 @@ public class IntermediateVisitor implements
 		this.machineSpecifics = machineSpecifics;
 	}
 
-		@Override
-		public TreeExp visit(ExpTrue e) throws RuntimeException {
-			return new TreeExpCONST(1);
+	@Override
+	public TreeExp visit(ExpTrue e) throws RuntimeException {
+		return new TreeExpCONST(1);
+	}
+
+	@Override
+	public TreeExp visit(ExpFalse e) throws RuntimeException {
+		return new TreeExpCONST(0);
+	}
+
+	@Override
+	public TreeExp visit(ExpThis e) throws RuntimeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public TreeExp visit(ExpNewIntArray e) throws RuntimeException {
+		TreeExp arraySize = new TreeExpOP(
+				Op.PLUS,
+				e.size.accept(this),
+				new TreeExpCONST(1)
+		);
+		Temp arrayMemoryLocation = new Temp();
+		TreeExp memoryAllocation = new TreeExpCALL(new TreeExpNAME(new Label("L_halloc")), Collections.singletonList(arraySize));
+		TreeStm writeArrayLength = new TreeStmMOVE(new TreeExpTEMP(arrayMemoryLocation), arraySize);
+		return new TreeExpESEQ(
+				TreeStmSEQ.fromArray(
+						new TreeStmMOVE(new TreeExpTEMP(arrayMemoryLocation), memoryAllocation),
+						writeArrayLength
+				),
+				new TreeExpTEMP(arrayMemoryLocation)
+		);
+	}
+
+	@Override
+	public TreeExp visit(ExpNew e) throws RuntimeException {
+		minijava.symboltable.tree.Class clazz = symbolTable.classes.get(e.className);
+		int classMemoryFootprint = 0;
+		for (Variable field : clazz.fields.values()) {
+			classMemoryFootprint += getMemoryFootprint(field);
 		}
 
-		@Override
-		public TreeExp visit(ExpFalse e) throws RuntimeException {
-			return new TreeExpCONST(0);
-		}
+		// Allocate space according to the size of the class
+		TreeExp classMemoryFootprintExp = new TreeExpCONST(classMemoryFootprint);
+		return new TreeExpCALL(new TreeExpNAME(new Label("L_halloc")),
+				Collections.singletonList(classMemoryFootprintExp));
+	}
 
-		@Override
-		public TreeExp visit(ExpThis e) throws RuntimeException {
-			// TODO Auto-generated method stub
-			return null;
+	private int getMemoryFootprint(Variable variable) {
+		int size = 0;
+		Ty type = variable.type;
+		if (type instanceof TyInt) {
+			size += 4;
+		} else if (type instanceof TyBool) {
+			size += 4;
+		} else if (type instanceof TyArr) {
+			size += 4;
+		} else if (type instanceof TyClass) {
+			size += 4;
 		}
+		return size;
+	}
 
-		@Override
-		public TreeExp visit(ExpNewIntArray e) throws RuntimeException {
-			TreeExp arraySize = e.size.accept(this);
-			return new TreeExpCALL(new TreeExpNAME(new Label("L_halloc")),
-					Collections.singletonList(arraySize));
+	@Override
+	public TreeExp visit(ExpNeg e) throws RuntimeException {
+		TreeExp negatedExpression = e.body.accept(this);
+		if (!(negatedExpression instanceof TreeExpCONST)) {
+			throw new IllegalArgumentException(
+					"Unable to negate the expression \"" + e.accept(new PrettyPrintVisitor.PrettyPrintVisitorExp())
+							+ "\"");
 		}
+		TreeExpCONST negatedBoolean = (TreeExpCONST) negatedExpression;
+		assert (negatedBoolean.value == 0 || negatedBoolean.value == 1);
+		return new TreeExpCONST(1 - negatedBoolean.value);
+	}
 
-		@Override
-		public TreeExp visit(ExpNew e) throws RuntimeException {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public TreeExp visit(ExpNeg e) throws RuntimeException {
-			TreeExp negatedExpression = e.body.accept(this);
-			if (!(negatedExpression instanceof TreeExpCONST)) {
-				throw new IllegalArgumentException(
-						"Unable to negate the expression \"" + e.accept(new PrettyPrintVisitor.PrettyPrintVisitorExp())
-								+ "\"");
-			}
-			TreeExpCONST negatedBoolean = (TreeExpCONST) negatedExpression;
-			assert (negatedBoolean.value == 0 || negatedBoolean.value == 1);
-			return new TreeExpCONST(1 - negatedBoolean.value);
-		}
-
-		@Override
-		public 	 visit(ExpBinOp e) throws RuntimeException {
-			Op operator = null;
-			switch (e.op) {
+	@Override
+	public TreeExp visit(ExpBinOp e) throws RuntimeException {
+		Op operator = null;
+		switch (e.op) {
 			case PLUS:
 				operator = Op.PLUS;
 				break;
@@ -138,73 +179,101 @@ public class IntermediateVisitor implements
 				operator = Op.AND;
 				break;
 			case LT:
-				// TODO
-				break;
+				/*TreeExp subtractionResult = new TreeExpOP(Op.MINUS, e.left.accept(this), e.right.accept(this));
+				TreeExp smallerThan = new TreeExpOP(
+						Op.LSHIFT,
+						new TreeExpOP(Op.AND, new TreeExpCONST(0x10000000), subtractionResult),
+						new TreeExpCONST(7)
+				);
+				return smallerThan;*/
+				Temp result = new Temp();
+				Label jumpPointTrue = new Label();
+				Label jumpPointFalse = new Label();
+				return new TreeExpESEQ(
+						TreeStm.fromArray(
+								new TreeStmMOVE(new TreeExpTEMP(result), new TreeExpCONST(0)),
+								new TreeStmCJUMP(
+										TreeStmCJUMP.Rel.LT,
+										e.left.accept(this),
+										e.right.accept(this),
+										jumpPointTrue,
+										jumpPointFalse
+								),
+								new TreeStmLABEL(jumpPointTrue),
+								new TreeStmMOVE(new TreeExpTEMP(result), new TreeExpCONST(1)),
+								new TreeStmLABEL(jumpPointFalse)
+						),
+						new TreeExpTEMP(result)
+				);
 			default:
 				throw new IllegalArgumentException("Unknown operator: " + e.op);
-			}
-			return new TreeExpOP(operator, e.left.accept(this),
-					e.right.accept(this));
 		}
+		return new TreeExpOP(operator, e.left.accept(this),
+				e.right.accept(this));
+	}
 
-		@Override
-		public TreeExp visit(ExpArrayGet e) throws RuntimeException {
-			// MEM(BinOp(+, translate(array), BinOp(*, translate(index),
-			// BinOp(+, WORD_SIZE, CONST(1))))
-			/*
-			 * TreeExp array = e.array.accept(this); TreeExp index =
-			 * e.index.accept(this); new TreeExpMEM(addr);
-			 */
-			return null;
-		}
+	@Override
+	public TreeExp visit(ExpArrayGet e) throws RuntimeException {
+		TreeExp array = e.array.accept(this);
+		TreeExp index = e.index.accept(this);
+		TreeExp arrayOffset = new TreeExpOP(Op.MUL, index, new TreeExpCONST(4));
+		TreeExp memoryLocation = new TreeExpOP(
+				Op.PLUS,
+				new TreeExpOP(Op.PLUS, array, arrayOffset),
+				new TreeExpCONST(1)
+		);
+		return new TreeExpMEM(memoryLocation);
+	}
 
-		@Override
-		public TreeExp visit(ExpArrayLength e) throws RuntimeException {
-			// TODO Auto-generated method stub
-			return null;
-		}
+	@Override
+	public TreeExp visit(ExpArrayLength e) throws RuntimeException {
+		TreeExp array = e.array.accept(this);
+		return new TreeExpMEM(array);
+	}
 
-		@Override
-		public TreeExp visit(ExpInvoke e) throws RuntimeException {
-			// TODO
-			/*
-			 * TreeExp object = e.obj.accept(this); if (!(object instanceof
-			 * TreeExpCONST)) { throw new
-			 * RuntimeException("Unable to invoke method on object \""
-			 * +e.obj.prettyPrint()+"\""); }
-			 */
-			String className = "";
-			String methodName = e.method;
-			// FIXME: Retrieve function label with the respective mangled name
-			TreeExp function = new TreeExpNAME(new Label(mangle(className,
-					methodName)));
-			List<TreeExp> arguments = new ArrayList<>(e.args.size());
-			for (Exp exp : e.args) {
-				TreeExp iRExpression = exp.accept(this);
-				arguments.add(iRExpression);
-			}
-			return null;
+	@Override
+	public TreeExp visit(ExpInvoke e) throws RuntimeException {
+		/*
+		 * TreeExp object = e.obj.accept(this); if (!(object instanceof
+		 * TreeExpCONST)) { throw new
+		 * RuntimeException("Unable to invoke method on object \""
+		 * +e.obj.prettyPrint()+"\""); }
+		 */
+		TreeExp object = e.obj.accept(this);
+		// TODO Retrieve class name
+		String className = "";
+		String methodName = e.method;
+		// FIXME: Retrieve function label with the respective mangled name
+		TreeExp function = new TreeExpNAME(new Label(mangle(className,
+				methodName)));
+		List<TreeExp> arguments = new ArrayList<>(e.args.size());
+		for (Exp exp : e.args) {
+			TreeExp iRExpression = exp.accept(this);
+			arguments.add(iRExpression);
 		}
+		return new TreeExpCALL(function, arguments);
+	}
 
-		@Override
-		public TreeExp visit(ExpIntConst e) throws RuntimeException {
-			return new TreeExpCONST(e.value);
-		}
+	@Override
+	public TreeExp visit(ExpIntConst e) throws RuntimeException {
+		return new TreeExpCONST(e.value);
+	}
 
-		@Override
-		public TreeExp visit(ExpId e) throws RuntimeException {
-			return new TreeExpNAME(new Label(e.id));
-		}
+	@Override
+	public TreeExp visit(ExpId e) throws RuntimeException {
+		// TODO: What should be returned?
+		return null;
+	}
 
-		private String mangle(String className, String methodName) {
-			return className + "$" + methodName;
-		}
+	private String mangle(String className, String methodName) {
+		return className + "$" + methodName;
+	}
 
-		@Override
-		public TreeStm visit(StmList s) throws RuntimeException {
-			// TODO Auto-generated method stub
-			return null;
-		}
+	@Override
+	public TreeStm visit(StmList s) throws RuntimeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 		@Override
 		public TreeStm visit(StmIf s) throws RuntimeException {
@@ -315,4 +384,11 @@ public class IntermediateVisitor implements
 			});
 			
 		}
+	}
+
+	@Override
+	public TreeStm visit(StmArrayAssign s) throws RuntimeException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

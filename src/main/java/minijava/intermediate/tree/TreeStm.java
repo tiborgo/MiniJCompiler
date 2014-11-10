@@ -8,7 +8,7 @@ public abstract class TreeStm {
   public abstract <A> A accept(TreeStmVisitor<A> visitor);
 
   // construct single TreeStm from a sequence of TreeStms
-  public static TreeStm fromArray(TreeStm[] stms) {
+  public static TreeStm fromArray(TreeStm... stms) {
     TreeStm s = null;
     for (int i = stms.length - 1; i >= 0; i--) {
       s = (s == null) ? stms[i] : new TreeStmSEQ(stms[i], s);
