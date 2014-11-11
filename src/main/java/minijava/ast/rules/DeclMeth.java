@@ -10,11 +10,11 @@ public class DeclMeth extends Decl {
 	final public String methodName;
 	final public List<Parameter> parameters;
 	final public List<DeclVar> localVars;
-	final public List<Stm> body;
+	final public Stm body;
 	final public Exp returnExp;
 
 	public DeclMeth(Ty ty, String methodName, List<Parameter> parameters,
-			List<DeclVar> localVars, List<Stm> body, Exp returnExp) {
+			List<DeclVar> localVars, Stm body, Exp returnExp) {
 		this.ty = ty;
 		this.methodName = methodName;
 		this.parameters = parameters;

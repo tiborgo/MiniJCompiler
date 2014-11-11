@@ -100,18 +100,11 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 				sep = ", ";
 			}
 
-			StringBuilder body = new StringBuilder();
-			for (Stm stm : m.body) {
-				String stmRepresentation = stm
-						.accept(new PrettyPrintVisitorStm(indent + indentStep));
-				body.append(stmRepresentation);
-			}
-
 			return indent + "public " + m.ty.accept(new PrettyPrintVisitorTy())
 					+ " " + m.methodName + " (" + params + ") {\n"
 					+ prettyPrintVarList(m.localVars, indent + indentStep)
-					+ body.toString() + indent + indentStep + "return "
-					+ m.returnExp.accept(new PrettyPrintVisitorExp()) + ";\n"
+					+ m.body.accept(new PrettyPrintVisitorStm(indent + indentStep)) + indent + indentStep
+		            + "return " + m.returnExp.accept(new PrettyPrintVisitorExp()) + ";\n"
 					+ indent + "}\n";
 		}
 

@@ -1,12 +1,20 @@
 package minijava;
 import java.io.IOException;
+import java.util.List;
 
 import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Prg;
+import minijava.ast.visitors.IntermediateVisitor;
 import minijava.ast.visitors.PrettyPrintVisitor;
 import minijava.ast.visitors.SymbolTableVisitor;
 import minijava.ast.visitors.TypeCheckVisitor;
+import minijava.backend.MachineSpecifics;
+import minijava.backend.dummymachine.DummyMachineSpecifics;
+import minijava.backend.dummymachine.IntermediateToCmm;
+import minijava.intermediate.Fragment;
+import minijava.intermediate.tree.TreeStm;
 import minijava.symboltable.tree.Program;
+
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -44,7 +52,16 @@ public class MiniJavaCompiler implements Frontend {
 			TypeCheckVisitor typeCheckVisitor = new TypeCheckVisitor(symbolTable);
 			if (program.accept(typeCheckVisitor)) {
 				System.out.println("No Type Errors");
+			} else {
+				System.err.println("Type errors");
 			}
+			
+			MachineSpecifics machineSpecifics = new DummyMachineSpecifics();
+			IntermediateVisitor intermediateVisitor = new IntermediateVisitor(machineSpecifics);
+			List<Fragment<TreeStm>> procFragements = program.accept(intermediateVisitor);
+			
+			String intermediateOutput = IntermediateToCmm.stmFragmentsToCmm(procFragements);
+			System.out.println(intermediateOutput);
 			
 		} catch (IOException e) {
 			e.printStackTrace();

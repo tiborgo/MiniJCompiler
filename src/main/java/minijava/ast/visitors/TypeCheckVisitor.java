@@ -92,10 +92,8 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		methodContext = classContext.methods.get(m.methodName);
 		
 		boolean ok = true;
-		for (Stm stm : m.body) {
-			ok = stm.accept(this) ? ok : false;
-		}
 		
+		ok = (m.body.accept(this)) ? ok : false;
 		ok = (m.returnExp.accept(this).equals(m.ty)) ? ok : false;
 		
 		methodContext = null;
