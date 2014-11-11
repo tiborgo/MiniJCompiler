@@ -103,7 +103,7 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 
 		Exp returnExp = (Exp) visit(ctx.returnExpression);
 
-		return new DeclMeth(ty, methodName, parameters, localVars, body, returnExp);
+		return new DeclMeth(ty, methodName, parameters, localVars, new StmList(body), returnExp);
 	}
 
 	@Override
