@@ -235,7 +235,7 @@ public class IntermediateVisitor implements
 			if (!(negatedExpression instanceof TreeExpCONST)) {
 				throw new IllegalArgumentException(
 						"Unable to negate the expression \"" + e.accept(new PrettyPrintVisitor.PrettyPrintVisitorExp())
-								+ "\"");
+								+ "\" of type " + negatedExpression.getClass().getSimpleName());
 			}
 			TreeExpCONST negatedBoolean = (TreeExpCONST) negatedExpression;
 			assert (negatedBoolean.value == 0 || negatedBoolean.value == 1);
