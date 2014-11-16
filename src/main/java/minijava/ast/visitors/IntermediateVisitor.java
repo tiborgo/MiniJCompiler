@@ -96,10 +96,11 @@ public class IntermediateVisitor implements
 	}
 
 	private int getMemoryFootprint(DeclClass clazz) {
-		int size = 0;
+		// FIXME: Use MachineSpecifics to determine word size
+		// Memory representation of a class starts with the class ID.
+		int size = 4;
 		for (DeclVar field : clazz.fields) {
 			Ty type = field.ty;
-			// FIXME: Use MachineSpecifics to determine word size
 			if (type instanceof TyInt) {
 				size += 4;
 			} else if (type instanceof TyBool) {
