@@ -232,14 +232,34 @@ public class IntermediateVisitor implements
 		@Override
 		public TreeExp visit(ExpNeg e) throws RuntimeException {
 			TreeExp negatedExpression = e.body.accept(this);
-			if (!(negatedExpression instanceof TreeExpCONST)) {
-				throw new IllegalArgumentException(
-						"Unable to negate the expression \"" + e.accept(new PrettyPrintVisitor.PrettyPrintVisitorExp())
-								+ "\" of type " + negatedExpression.getClass().getSimpleName());
+			return negateExpression(negatedExpression);
+		}
+
+		private TreeStm negateStatement(TreeStm statement) {
+			if (statement instanceof TreeStmEXP) {
+				TreeExp expression = ((TreeStmEXP) statement).exp;
+				return new TreeStmEXP(negateExpression(expression));
+			} else if (statement instanceof TreeStmSEQ) {
+				TreeStmSEQ sequentialStatement = (TreeStmSEQ) statement;
+				return new TreeStmSEQ(negateStatement(sequentialStatement.first), negateStatement(sequentialStatement.second));
+			} else if (statement instanceof TreeStmCJUMP) {
+				TreeStmCJUMP conditionalJump = (TreeStmCJUMP) statement;
+				return new TreeStmCJUMP(conditionalJump.rel.neg(), conditionalJump.left, conditionalJump.right,
+						conditionalJump.ltrue, conditionalJump.lfalse);
 			}
-			TreeExpCONST negatedBoolean = (TreeExpCONST) negatedExpression;
-			assert (negatedBoolean.value == 0 || negatedBoolean.value == 1);
-			return new TreeExpCONST(1 - negatedBoolean.value);
+			return statement;
+		}
+
+		private TreeExp negateExpression(TreeExp expression) {
+			if (expression instanceof TreeExpCONST) {
+				TreeExpCONST negatedBoolean = (TreeExpCONST) expression;
+				assert (negatedBoolean.value == 0 || negatedBoolean.value == 1);
+				return new TreeExpCONST(1 - negatedBoolean.value);
+			} else if (expression instanceof TreeExpESEQ) {
+				TreeExpESEQ negatedESEQ = (TreeExpESEQ) expression;
+				return new TreeExpESEQ(negateStatement(negatedESEQ.stm), negatedESEQ.res);
+			}
+			throw new IllegalArgumentException("Unable to negate expression \"" + expression.toString() + "\"");
 		}
 	
 		@Override
