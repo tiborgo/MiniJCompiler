@@ -332,8 +332,7 @@ public class IntermediateVisitor implements
 	
 		@Override
 		public TreeExp visit(ExpId e) throws RuntimeException {
-			// TODO: What should be returned?
-			return null;
+			return temps.get(e.id);
 		}
 	
 		@Override
