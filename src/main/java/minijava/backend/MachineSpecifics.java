@@ -4,6 +4,9 @@ import java.util.List;
 import minijava.intermediate.*;
 import minijava.intermediate.tree.TreeStm;
 
+/**
+ * Provides information about the target architecture of the compiler backend.
+ */
 public interface MachineSpecifics {
 
   /**
