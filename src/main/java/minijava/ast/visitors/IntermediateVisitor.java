@@ -72,10 +72,12 @@ public class IntermediateVisitor implements
 	private String contextClassName;
 	private final MachineSpecifics  machineSpecifics;
 	private final Map<String, TreeExpTEMP> classTemps;
-	
+	private final Map<String, TreeExpTEMP> methodTemps;
+
 	public IntermediateVisitor(MachineSpecifics machineSpecifics) {
 		this.machineSpecifics = machineSpecifics;
 		classTemps = new HashMap<>();
+		methodTemps = new HashMap<>();
 	}
 	
 	@Override
@@ -118,18 +120,20 @@ public class IntermediateVisitor implements
 
 	@Override
 	public List<Fragment<TreeStm>> visit(DeclMeth m) throws RuntimeException {
-		
 		Frame frame = this.machineSpecifics.newFrame(new Label(mangle(this.contextClassName, m.methodName)), m.parameters.size());
-		
-		Map<String, TreeExpTEMP> temps = new HashMap<>();
+
+		methodTemps.clear();
 		for (int i = 0; i < m.parameters.size(); i++) {
-			temps.put(m.parameters.get(i).id, (TreeExpTEMP) frame.getParameter(i));
+			methodTemps.put(m.parameters.get(i).id, (TreeExpTEMP) frame.getParameter(i));
 		}
 		for (DeclVar var : m.localVars) {
-			temps.put(var.name, new TreeExpTEMP(new Temp()));
+			methodTemps.put(var.name, new TreeExpTEMP(new Temp()));
 		}
-		
-		TreeStm body = m.body.accept(new IntermediateVisitorExpStm(temps, machineSpecifics));
+
+		Map<String, TreeExpTEMP> methodAndClassTemps = new HashMap<>();
+		methodAndClassTemps.putAll(classTemps);
+		methodAndClassTemps.putAll(methodTemps);
+		TreeStm body = m.body.accept(new IntermediateVisitorExpStm(methodAndClassTemps, machineSpecifics));
 		
 		Fragment<TreeStm> frag = new FragmentProc<>(frame, body);
 		
