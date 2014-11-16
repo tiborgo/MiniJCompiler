@@ -1,5 +1,9 @@
 package minijava.intermediate;
 
+/**
+ * Represents a
+ * @param <A>
+ */
 public class FragmentProc<A> extends Fragment<A> {
 
   public final Frame frame;
