@@ -62,8 +62,6 @@ import minijava.intermediate.tree.TreeStmJUMP;
 import minijava.intermediate.tree.TreeStmLABEL;
 import minijava.intermediate.tree.TreeStmMOVE;
 import minijava.intermediate.tree.TreeStmSEQ;
-import minijava.symboltable.tree.Program;
-import minijava.symboltable.tree.Variable;
 
 public class IntermediateVisitor implements
 	PrgVisitor<List<Fragment<TreeStm>>, RuntimeException>, 
@@ -73,22 +71,46 @@ public class IntermediateVisitor implements
 	private final MachineSpecifics  machineSpecifics;
 	private final Map<String, TreeExpTEMP> classTemps;
 	private final Map<String, TreeExpTEMP> methodTemps;
+	private final Map<String, Integer> memoryFootprintByClass;
 
 	public IntermediateVisitor(MachineSpecifics machineSpecifics) {
 		this.machineSpecifics = machineSpecifics;
 		classTemps = new HashMap<>();
 		methodTemps = new HashMap<>();
+		memoryFootprintByClass = new HashMap<>();
 	}
 	
 	@Override
 	public List<Fragment<TreeStm>> visit(Prg p) throws RuntimeException {
 		
+		for(DeclClass clazz : p.classes) {
+			memoryFootprintByClass.put(clazz.className, getMemoryFootprint(clazz));
+		}
+
 		// TODO: add main class
 		List<Fragment<TreeStm>> classes = new LinkedList<>();
 		for(DeclClass clazz : p.classes) {
 			classes.addAll(clazz.accept(this));
 		}
 		return classes;
+	}
+
+	private int getMemoryFootprint(DeclClass clazz) {
+		int size = 0;
+		for (DeclVar field : clazz.fields) {
+			Ty type = field.ty;
+			// FIXME: Use MachineSpecifics to determine word size
+			if (type instanceof TyInt) {
+				size += 4;
+			} else if (type instanceof TyBool) {
+				size += 4;
+			} else if (type instanceof TyArr) {
+				size += 4;
+			} else if (type instanceof TyClass) {
+				size += 4;
+			}
+		}
+		return size;
 	}
 
 	@Override
@@ -133,7 +155,7 @@ public class IntermediateVisitor implements
 		Map<String, TreeExpTEMP> methodAndClassTemps = new HashMap<>();
 		methodAndClassTemps.putAll(classTemps);
 		methodAndClassTemps.putAll(methodTemps);
-		TreeStm body = m.body.accept(new IntermediateVisitorExpStm(methodAndClassTemps, machineSpecifics));
+		TreeStm body = m.body.accept(new IntermediateVisitorExpStm(methodAndClassTemps, machineSpecifics, memoryFootprintByClass));
 		
 		Fragment<TreeStm> frag = new FragmentProc<>(frame, body);
 		
@@ -154,14 +176,15 @@ public class IntermediateVisitor implements
 		StmVisitor<TreeStm, RuntimeException> {
 		
 	
-		// FIXME: Symbol table is always null
-		private Program symbolTable;
+		private final Map<String, Integer> memoryFootprintByClass;
 		private final Map<String, TreeExpTEMP> temps;
 		private final MachineSpecifics  machineSpecifics;
 		
-		public IntermediateVisitorExpStm(Map<String, TreeExpTEMP> temps, MachineSpecifics machineSpecifics) {
+		public IntermediateVisitorExpStm(Map<String, TreeExpTEMP> temps, MachineSpecifics machineSpecifics,
+		                                 Map<String, Integer> memoryFootprintByClass) {
 			this.temps = temps;
 			this.machineSpecifics = machineSpecifics;
+			this.memoryFootprintByClass = new HashMap<>(memoryFootprintByClass);
 		}
 	
 		@Override
@@ -201,32 +224,12 @@ public class IntermediateVisitor implements
 	
 		@Override
 		public TreeExp visit(ExpNew e) throws RuntimeException {
-			minijava.symboltable.tree.Class clazz = symbolTable.classes.get(e.className);
-			int classMemoryFootprint = 0;
-			for (Variable field : clazz.fields.values()) {
-				// FIXME: use actual word size
-				classMemoryFootprint += getMemoryFootprint(field);
-			}
-	
+			int classMemoryFootprint = memoryFootprintByClass.get(e.className);
+
 			// Allocate space according to the size of the class
 			TreeExp classMemoryFootprintExp = new TreeExpCONST(classMemoryFootprint);
 			return new TreeExpCALL(new TreeExpNAME(new Label("L_halloc")),
 					Collections.singletonList(classMemoryFootprintExp));
-		}
-	
-		private int getMemoryFootprint(Variable variable) {
-			int size = 0;
-			Ty type = variable.type;
-			if (type instanceof TyInt) {
-				size += 4;
-			} else if (type instanceof TyBool) {
-				size += 4;
-			} else if (type instanceof TyArr) {
-				size += 4;
-			} else if (type instanceof TyClass) {
-				size += 4;
-			}
-			return size;
 		}
 	
 		@Override
