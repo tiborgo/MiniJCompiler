@@ -71,9 +71,11 @@ public class IntermediateVisitor implements
 
 	private String contextClassName;
 	private final MachineSpecifics  machineSpecifics;
+	private final Map<String, TreeExpTEMP> classTemps;
 	
 	public IntermediateVisitor(MachineSpecifics machineSpecifics) {
 		this.machineSpecifics = machineSpecifics;
+		classTemps = new HashMap<>();
 	}
 	
 	@Override
@@ -89,14 +91,20 @@ public class IntermediateVisitor implements
 
 	@Override
 	public List<Fragment<TreeStm>> visit(DeclClass c) throws RuntimeException {
-		
 		this.contextClassName = c.className;
-		
+
+		// Fields
+		classTemps.clear();
+		for (DeclVar variableDeclaration : c.fields) {
+			classTemps.put(variableDeclaration.name, new TreeExpTEMP(new Temp()));
+		}
+
+		// Methods
 		List<Fragment<TreeStm>> methods = new LinkedList<>();
 		for(DeclMeth method : c.methods) {
 			methods.addAll(method.accept(this));
 		}
-		
+
 		this.contextClassName = null;
 		
 		return methods;
