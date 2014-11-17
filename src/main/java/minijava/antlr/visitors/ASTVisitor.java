@@ -37,6 +37,7 @@ import minijava.ast.rules.ExpIntConst;
 import minijava.ast.rules.ExpInvoke;
 import minijava.ast.rules.ExpNeg;
 import minijava.ast.rules.ExpNew;
+import minijava.ast.rules.ExpNewIntArray;
 import minijava.ast.rules.ExpThis;
 import minijava.ast.rules.ExpTrue;
 import minijava.ast.rules.Parameter;
@@ -324,7 +325,7 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 	@Override
 	public Object visitNewIntArrayExpression(NewIntArrayExpressionContext ctx) {
 		Exp arraySize = (Exp) visit(ctx.expression());
-		return arraySize;
+		return new ExpNewIntArray(arraySize);
 	}
 	
 	@Override

@@ -69,7 +69,7 @@ public class IntermediateVisitor implements
 	private DeclClass classContext;
 	private DeclMeth methodContext;
 	private final MachineSpecifics  machineSpecifics;
-	private final Map<String, TreeExpTEMP> classTemps;
+	private final Map<String, TreeExp> classTemps;
 	private Map<String, Integer> memoryFootprint;
 	private final Program symbolTable;
 
@@ -102,12 +102,6 @@ public class IntermediateVisitor implements
 	public List<Fragment<TreeStm>> visit(DeclClass c) throws RuntimeException {
 		classContext = c;
 
-		// Fields
-		classTemps.clear();
-		for (DeclVar variableDeclaration : c.fields) {
-			classTemps.put(variableDeclaration.name, new TreeExpTEMP(new Temp()));
-		}
-
 		// Methods
 		List<Fragment<TreeStm>> methods = new LinkedList<>();
 		for(DeclMeth method : c.methods) {
@@ -124,7 +118,7 @@ public class IntermediateVisitor implements
 
 		Frame frame = this.machineSpecifics.newFrame(new Label("main"), 1);
 
-		TreeStm body = d.mainBody.accept(new IntermediateVisitorExpStm(Collections.<String, TreeExpTEMP>emptyMap(), machineSpecifics, classContext, methodContext, memoryFootprint, symbolTable));
+		TreeStm body = d.mainBody.accept(new IntermediateVisitorExpStm(Collections.<String, TreeExp>emptyMap(), machineSpecifics, classContext, methodContext, memoryFootprint, symbolTable));
 
 		TreeStm method = frame.makeProc(body, new TreeExpCONST(0));
 		Fragment<TreeStm> frag = new FragmentProc<>(frame, method);
@@ -139,17 +133,27 @@ public class IntermediateVisitor implements
 
 		Frame frame = this.machineSpecifics.newFrame(new Label(mangle(this.classContext.className, m.methodName)), m.parameters.size() + 1);
 
-		Map<String, TreeExpTEMP> methodTemps = new HashMap<>();
+		Map<String, TreeExp> methodTemps = new HashMap<>();
 		
-		methodTemps.put("this", (TreeExpTEMP) frame.getParameter(0));
+		TreeExp thisExp = frame.getParameter(0);
+		
+		methodTemps.put("this", thisExp);
 		for (int i = 1; i < m.parameters.size()+1; i++) {
-			methodTemps.put(m.parameters.get(i-1).id, (TreeExpTEMP) frame.getParameter(i));
+			methodTemps.put(m.parameters.get(i-1).id, frame.getParameter(i));
 		}
 		for (DeclVar var : m.localVars) {
 			methodTemps.put(var.name, new TreeExpTEMP(new Temp()));
 		}
+		
+		// Fields
+		// TODO: better in DeclClass visit ?
+		classTemps.clear();
+		for (int i = 0; i < classContext.fields.size(); i++) {
+			int offset = (i+1) * machineSpecifics.getWordSize();
+			classTemps.put(classContext.fields.get(i).name, new TreeExpMEM(new TreeExpOP(Op.PLUS, thisExp, new TreeExpCONST(offset))));
+		}
 
-		Map<String, TreeExpTEMP> methodAndClassTemps = new HashMap<>();
+		Map<String, TreeExp> methodAndClassTemps = new HashMap<>();
 		methodAndClassTemps.putAll(classTemps);
 		methodAndClassTemps.putAll(methodTemps);
 		TreeStm body = m.body.accept(new IntermediateVisitorExpStm(methodAndClassTemps, machineSpecifics, classContext, methodContext, memoryFootprint, symbolTable));
@@ -181,11 +185,14 @@ public class IntermediateVisitor implements
 		private final DeclClass classContext;
 		private final DeclMeth methodContext;
 		private final Map<String, Integer> memoryFootprint;
-		private final Map<String, TreeExpTEMP> temps;
+		private final Map<String, TreeExp> temps;
 		private final MachineSpecifics  machineSpecifics;
 
-		public IntermediateVisitorExpStm(Map<String, TreeExpTEMP> temps, MachineSpecifics machineSpecifics,
-				DeclClass classContext, DeclMeth methodContext, Map<String, Integer> memoryFootprint,
+		public IntermediateVisitorExpStm(Map<String, TreeExp> temps,
+				MachineSpecifics machineSpecifics,
+				DeclClass classContext,
+				DeclMeth methodContext,
+				Map<String, Integer> memoryFootprint,
 				Program symbolTable) {
 			this.temps = temps;
 			this.machineSpecifics = machineSpecifics;
@@ -212,20 +219,23 @@ public class IntermediateVisitor implements
 
 		@Override
 		public TreeExp visit(ExpNewIntArray e) throws RuntimeException {
-			TreeExp arraySize = new TreeExpOP(
+			
+			TreeExp arraySize = e.size.accept(this);
+			
+			TreeExp arrayMemorySize = new TreeExpOP(
 					Op.PLUS,
-					e.size.accept(this),
-					new TreeExpCONST(1)
+					new TreeExpOP(Op.MUL, arraySize, new TreeExpCONST(machineSpecifics.getWordSize())),
+					new TreeExpCONST(machineSpecifics.getWordSize())
 			);
-			Temp arrayMemoryLocation = new Temp();
-			TreeExp memoryAllocation = new TreeExpCALL(new TreeExpNAME(new Label("L_halloc")), Collections.singletonList(arraySize));
-			TreeStm writeArrayLength = new TreeStmMOVE(new TreeExpTEMP(arrayMemoryLocation), arraySize);
+			TreeExpTEMP arrayMemoryLocation = new TreeExpTEMP(new Temp());
+			TreeExp memoryAllocation = new TreeExpCALL(new TreeExpNAME(new Label("L_halloc")), Collections.singletonList(arrayMemorySize));
+			TreeStm writeArrayLength = new TreeStmMOVE(new TreeExpMEM(arrayMemoryLocation), arraySize);
 			return new TreeExpESEQ(
 					TreeStmSEQ.fromArray(
-							new TreeStmMOVE(new TreeExpTEMP(arrayMemoryLocation), memoryAllocation),
+							new TreeStmMOVE(arrayMemoryLocation, memoryAllocation),
 							writeArrayLength
 					),
-					new TreeExpTEMP(arrayMemoryLocation)
+					arrayMemoryLocation
 			);
 		}
 
@@ -462,7 +472,7 @@ public class IntermediateVisitor implements
 		@Override
 		public TreeStm visit(StmAssign s) throws RuntimeException {
 
-			TreeExpTEMP dest = this.temps.get(s.id);
+			TreeExp dest = this.temps.get(s.id);
 
 			if (dest != null) {
 				return new TreeStmMOVE(dest, s.rhs.accept(this));
@@ -476,7 +486,7 @@ public class IntermediateVisitor implements
 		@Override
 		public TreeStm visit(StmArrayAssign s) throws RuntimeException {
 
-			TreeExpTEMP array = this.temps.get(s.id);
+			TreeExp array = this.temps.get(s.id);
 			//TreeExp arrayExp = new TreeExpTEMP(array);
 
 			TreeExp indexExp = s.index.accept(this);
