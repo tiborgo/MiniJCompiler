@@ -34,6 +34,7 @@ public class IntermediateToCmm {
     code = new StringBuilder();
 
     declarations.append("#include <stdint.h>\n");
+    declarations.append("#include \"runtime.h\"\n");
     declarations.append("#define MEM(x) *((int32_t*)(x))\n\n");
 
     for (Fragment<List<TreeStm>> f : frags) {

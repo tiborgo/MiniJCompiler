@@ -228,7 +228,7 @@ public class IntermediateVisitor implements
 					new TreeExpCONST(machineSpecifics.getWordSize())
 			);
 			TreeExpTEMP arrayMemoryLocation = new TreeExpTEMP(new Temp());
-			TreeExp memoryAllocation = new TreeExpCALL(new TreeExpNAME(new Label("L_halloc")), Collections.singletonList(arrayMemorySize));
+			TreeExp memoryAllocation = new TreeExpCALL(new TreeExpNAME(new Label("_halloc")), Collections.singletonList(arrayMemorySize));
 			TreeStm writeArrayLength = new TreeStmMOVE(new TreeExpMEM(arrayMemoryLocation), arraySize);
 			return new TreeExpESEQ(
 					TreeStmSEQ.fromArray(
@@ -245,7 +245,7 @@ public class IntermediateVisitor implements
 
 			// Allocate space according to the size of the class
 			TreeExp classMemoryFootprintExp = new TreeExpCONST(classMemoryFootprint);
-			return new TreeExpCALL(new TreeExpNAME(new Label("L_halloc")),
+			return new TreeExpCALL(new TreeExpNAME(new Label("_halloc")),
 					Collections.singletonList(classMemoryFootprintExp));
 		}
 
@@ -446,7 +446,7 @@ public class IntermediateVisitor implements
 		@Override
 		public TreeStm visit(StmPrintlnInt s) throws RuntimeException {
 
-			Label printlnIntLabel = new Label("L_println_int");
+			Label printlnIntLabel = new Label("_println_int");
 
 			return new TreeStmEXP(
 					new TreeExpCALL(
@@ -459,7 +459,7 @@ public class IntermediateVisitor implements
 		@Override
 		public TreeStm visit(StmPrintChar s) throws RuntimeException {
 
-			Label printCharLabel = new Label("L_print_char");
+			Label printCharLabel = new Label("_print_char");
 
 			return new TreeStmEXP(
 					new TreeExpCALL(
