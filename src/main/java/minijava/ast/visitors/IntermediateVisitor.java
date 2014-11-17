@@ -8,6 +8,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.experimental.max.MaxHistory;
+
 import minijava.ast.rules.DeclClass;
 import minijava.ast.rules.DeclMain;
 import minijava.ast.rules.DeclMeth;
@@ -92,26 +94,14 @@ public class IntermediateVisitor implements
 		for(DeclClass clazz : p.classes) {
 			classes.addAll(clazz.accept(this));
 		}
+		
+		classes.addAll(p.mainClass.accept(this));
+		
 		return classes;
 	}
 
 	private int getMemoryFootprint(DeclClass clazz) {
-		// FIXME: Use MachineSpecifics to determine word size
-		// Memory representation of a class starts with the class ID.
-		int size = 4;
-		for (DeclVar field : clazz.fields) {
-			Ty type = field.ty;
-			if (type instanceof TyInt) {
-				size += 4;
-			} else if (type instanceof TyBool) {
-				size += 4;
-			} else if (type instanceof TyArr) {
-				size += 4;
-			} else if (type instanceof TyClass) {
-				size += 4;
-			}
-		}
-		return size;
+		return clazz.fields.size() * machineSpecifics.getWordSize();
 	}
 
 	@Override
@@ -137,8 +127,15 @@ public class IntermediateVisitor implements
 
 	@Override
 	public List<Fragment<TreeStm>> visit(DeclMain d) throws RuntimeException {
-		// TODO Auto-generated method stub
-		return null;
+		
+		Frame frame = this.machineSpecifics.newFrame(new Label(mangle(d.className, "main")), 1);
+		
+		TreeStm body = d.mainBody.accept(new IntermediateVisitorExpStm(Collections.<String, TreeExpTEMP>emptyMap(), machineSpecifics, memoryFootprintByClass));
+		
+		TreeStm method = frame.makeProc(body, new TreeExpCONST(0));
+		Fragment<TreeStm> frag = new FragmentProc<>(frame, method);
+
+		return Arrays.asList(frag);
 	}
 
 	@Override
@@ -157,8 +154,11 @@ public class IntermediateVisitor implements
 		methodAndClassTemps.putAll(classTemps);
 		methodAndClassTemps.putAll(methodTemps);
 		TreeStm body = m.body.accept(new IntermediateVisitorExpStm(methodAndClassTemps, machineSpecifics, memoryFootprintByClass));
+		TreeExp returnExp = m.returnExp.accept(new IntermediateVisitorExpStm(methodAndClassTemps, machineSpecifics, memoryFootprintByClass));
 		
-		Fragment<TreeStm> frag = new FragmentProc<>(frame, body);
+		TreeStm method = frame.makeProc(body, returnExp);
+		
+		Fragment<TreeStm> frag = new FragmentProc<>(frame, method);
 		
 		return Arrays.asList(frag);
 	}
