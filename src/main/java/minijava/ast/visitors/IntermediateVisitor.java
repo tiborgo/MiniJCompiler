@@ -65,19 +65,17 @@ import minijava.symboltable.tree.Program;
 public class IntermediateVisitor implements
 	PrgVisitor<List<Fragment<TreeStm>>, RuntimeException>,
 	DeclVisitor<List<Fragment<TreeStm>>, RuntimeException> {
-
+	
 	private DeclClass classContext;
 	private DeclMeth methodContext;
 	private final MachineSpecifics  machineSpecifics;
 	private final Map<String, TreeExpTEMP> classTemps;
-	private final Map<String, TreeExpTEMP> methodTemps;
 	private Map<String, Integer> memoryFootprint;
 	private final Program symbolTable;
 
 	public IntermediateVisitor(MachineSpecifics machineSpecifics, Program symbolTable) {
 		this.machineSpecifics = machineSpecifics;
 		classTemps = new HashMap<>();
-		methodTemps = new HashMap<>();
 		this.symbolTable = symbolTable;
 		this.memoryFootprint = new HashMap<>();
 	}
@@ -124,7 +122,7 @@ public class IntermediateVisitor implements
 	@Override
 	public List<Fragment<TreeStm>> visit(DeclMain d) throws RuntimeException {
 
-		Frame frame = this.machineSpecifics.newFrame(new Label(mangle(d.className, "main")), 1);
+		Frame frame = this.machineSpecifics.newFrame(new Label("main"), 1);
 
 		TreeStm body = d.mainBody.accept(new IntermediateVisitorExpStm(Collections.<String, TreeExpTEMP>emptyMap(), machineSpecifics, classContext, methodContext, memoryFootprint, symbolTable));
 
@@ -139,11 +137,13 @@ public class IntermediateVisitor implements
 
 		methodContext = m;
 
-		Frame frame = this.machineSpecifics.newFrame(new Label(mangle(this.classContext.className, m.methodName)), m.parameters.size());
+		Frame frame = this.machineSpecifics.newFrame(new Label(mangle(this.classContext.className, m.methodName)), m.parameters.size() + 1);
 
-		methodTemps.clear();
-		for (int i = 0; i < m.parameters.size(); i++) {
-			methodTemps.put(m.parameters.get(i).id, (TreeExpTEMP) frame.getParameter(i));
+		Map<String, TreeExpTEMP> methodTemps = new HashMap<>();
+		
+		methodTemps.put("this", (TreeExpTEMP) frame.getParameter(0));
+		for (int i = 1; i < m.parameters.size()+1; i++) {
+			methodTemps.put(m.parameters.get(i-1).id, (TreeExpTEMP) frame.getParameter(i));
 		}
 		for (DeclVar var : m.localVars) {
 			methodTemps.put(var.name, new TreeExpTEMP(new Temp()));
@@ -177,8 +177,6 @@ public class IntermediateVisitor implements
 		ExpVisitor<TreeExp, RuntimeException>,
 		StmVisitor<TreeStm, RuntimeException> {
 
-		private final static TreeExpTEMP thisTemp = new TreeExpTEMP(new Temp());
-
 		private final Program symbolTable;
 		private final DeclClass classContext;
 		private final DeclMeth methodContext;
@@ -209,7 +207,7 @@ public class IntermediateVisitor implements
 
 		@Override
 		public TreeExp visit(ExpThis e) throws RuntimeException {
-			return thisTemp;
+			return temps.get("this");
 		}
 
 		@Override
