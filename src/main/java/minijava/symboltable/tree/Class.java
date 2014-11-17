@@ -1,8 +1,12 @@
 package minijava.symboltable.tree;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import minijava.ast.rules.DeclMeth;
+import minijava.ast.rules.DeclVar;
 
 public class Class implements Node {
 	public final String name;

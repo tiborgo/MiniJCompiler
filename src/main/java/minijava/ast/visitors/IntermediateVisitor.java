@@ -8,8 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.experimental.max.MaxHistory;
-
 import minijava.ast.rules.DeclClass;
 import minijava.ast.rules.DeclMain;
 import minijava.ast.rules.DeclMeth;
@@ -36,11 +34,7 @@ import minijava.ast.rules.StmList;
 import minijava.ast.rules.StmPrintChar;
 import minijava.ast.rules.StmPrintlnInt;
 import minijava.ast.rules.StmWhile;
-import minijava.ast.rules.Ty;
-import minijava.ast.rules.TyArr;
-import minijava.ast.rules.TyBool;
 import minijava.ast.rules.TyClass;
-import minijava.ast.rules.TyInt;
 import minijava.backend.MachineSpecifics;
 import minijava.intermediate.Fragment;
 import minijava.intermediate.FragmentProc;
@@ -64,29 +58,34 @@ import minijava.intermediate.tree.TreeStmJUMP;
 import minijava.intermediate.tree.TreeStmLABEL;
 import minijava.intermediate.tree.TreeStmMOVE;
 import minijava.intermediate.tree.TreeStmSEQ;
+import minijava.symboltable.tree.Method;
+import minijava.symboltable.tree.Class;
+import minijava.symboltable.tree.Program;
 
 public class IntermediateVisitor implements
 	PrgVisitor<List<Fragment<TreeStm>>, RuntimeException>, 
 	DeclVisitor<List<Fragment<TreeStm>>, RuntimeException> {
 
-	private String contextClassName;
+	private DeclClass classContext;
+	private DeclMeth methodContext;
 	private final MachineSpecifics  machineSpecifics;
 	private final Map<String, TreeExpTEMP> classTemps;
 	private final Map<String, TreeExpTEMP> methodTemps;
-	private final Map<String, Integer> memoryFootprintByClass;
-
-	public IntermediateVisitor(MachineSpecifics machineSpecifics) {
+	private Map<String, Integer> memoryFootprint;
+	private final Program symbolTable;
+	
+	public IntermediateVisitor(MachineSpecifics machineSpecifics, Program symbolTable) {
 		this.machineSpecifics = machineSpecifics;
 		classTemps = new HashMap<>();
 		methodTemps = new HashMap<>();
-		memoryFootprintByClass = new HashMap<>();
+		this.symbolTable = symbolTable;
 	}
-	
+
 	@Override
 	public List<Fragment<TreeStm>> visit(Prg p) throws RuntimeException {
 		
 		for(DeclClass clazz : p.classes) {
-			memoryFootprintByClass.put(clazz.className, getMemoryFootprint(clazz));
+			memoryFootprint.put(clazz.className, clazz.fields.size() * machineSpecifics.getWordSize() + 4);
 		}
 
 		// TODO: add main class
@@ -100,13 +99,9 @@ public class IntermediateVisitor implements
 		return classes;
 	}
 
-	private int getMemoryFootprint(DeclClass clazz) {
-		return clazz.fields.size() * machineSpecifics.getWordSize();
-	}
-
 	@Override
 	public List<Fragment<TreeStm>> visit(DeclClass c) throws RuntimeException {
-		this.contextClassName = c.className;
+		classContext = c;
 
 		// Fields
 		classTemps.clear();
@@ -120,7 +115,7 @@ public class IntermediateVisitor implements
 			methods.addAll(method.accept(this));
 		}
 
-		this.contextClassName = null;
+		classContext = null;
 		
 		return methods;
 	}
@@ -130,7 +125,7 @@ public class IntermediateVisitor implements
 		
 		Frame frame = this.machineSpecifics.newFrame(new Label(mangle(d.className, "main")), 1);
 		
-		TreeStm body = d.mainBody.accept(new IntermediateVisitorExpStm(Collections.<String, TreeExpTEMP>emptyMap(), machineSpecifics, memoryFootprintByClass));
+		TreeStm body = d.mainBody.accept(new IntermediateVisitorExpStm(Collections.<String, TreeExpTEMP>emptyMap(), machineSpecifics, classContext, methodContext, symbolTable));
 		
 		TreeStm method = frame.makeProc(body, new TreeExpCONST(0));
 		Fragment<TreeStm> frag = new FragmentProc<>(frame, method);
@@ -140,7 +135,10 @@ public class IntermediateVisitor implements
 
 	@Override
 	public List<Fragment<TreeStm>> visit(DeclMeth m) throws RuntimeException {
-		Frame frame = this.machineSpecifics.newFrame(new Label(mangle(this.contextClassName, m.methodName)), m.parameters.size());
+		
+		methodContext = m;
+		
+		Frame frame = this.machineSpecifics.newFrame(new Label(mangle(this.classContext.className, m.methodName)), m.parameters.size());
 
 		methodTemps.clear();
 		for (int i = 0; i < m.parameters.size(); i++) {
@@ -153,12 +151,14 @@ public class IntermediateVisitor implements
 		Map<String, TreeExpTEMP> methodAndClassTemps = new HashMap<>();
 		methodAndClassTemps.putAll(classTemps);
 		methodAndClassTemps.putAll(methodTemps);
-		TreeStm body = m.body.accept(new IntermediateVisitorExpStm(methodAndClassTemps, machineSpecifics, memoryFootprintByClass));
-		TreeExp returnExp = m.returnExp.accept(new IntermediateVisitorExpStm(methodAndClassTemps, machineSpecifics, memoryFootprintByClass));
+		TreeStm body = m.body.accept(new IntermediateVisitorExpStm(methodAndClassTemps, machineSpecifics, classContext, methodContext, symbolTable));
+		TreeExp returnExp = m.returnExp.accept(new IntermediateVisitorExpStm(methodAndClassTemps, machineSpecifics, classContext, methodContext, symbolTable));
 		
 		TreeStm method = frame.makeProc(body, returnExp);
 		
 		Fragment<TreeStm> frag = new FragmentProc<>(frame, method);
+		
+		methodContext = null;
 		
 		return Arrays.asList(frag);
 	}
@@ -176,16 +176,21 @@ public class IntermediateVisitor implements
 		ExpVisitor<TreeExp, RuntimeException>,
 		StmVisitor<TreeStm, RuntimeException> {
 		
-	
-		private final Map<String, Integer> memoryFootprintByClass;
+		private final Program symbolTable;
+		private final DeclClass classContext;
+		private final DeclMeth methodContext;
+		private final Map<String, Integer> memoryFootprint;
 		private final Map<String, TreeExpTEMP> temps;
 		private final MachineSpecifics  machineSpecifics;
 		
 		public IntermediateVisitorExpStm(Map<String, TreeExpTEMP> temps, MachineSpecifics machineSpecifics,
-		                                 Map<String, Integer> memoryFootprintByClass) {
+				DeclClass classContext, DeclMeth methodContext, Map<String, Integer> memoryFootprint, Program symbolTable) {
 			this.temps = temps;
 			this.machineSpecifics = machineSpecifics;
-			this.memoryFootprintByClass = new HashMap<>(memoryFootprintByClass);
+			this.classContext = classContext;
+			this.methodContext = methodContext;
+			this.memoryFootprint = memoryFootprint;
+			this.symbolTable = symbolTable;
 		}
 	
 		@Override
@@ -225,7 +230,7 @@ public class IntermediateVisitor implements
 	
 		@Override
 		public TreeExp visit(ExpNew e) throws RuntimeException {
-			int classMemoryFootprint = memoryFootprintByClass.get(e.className);
+			int classMemoryFootprint = memoryFootprint.get(e.className);
 
 			// Allocate space according to the size of the class
 			TreeExp classMemoryFootprintExp = new TreeExpCONST(classMemoryFootprint);
@@ -347,8 +352,9 @@ public class IntermediateVisitor implements
 			 * +e.obj.prettyPrint()+"\""); }
 			 */
 			TreeExp object = e.obj.accept(this);
-			// TODO Retrieve class name
-			String className = "";
+			Class clazz = symbolTable.classes.get(classContext.className);
+			Method method = clazz.methods.get(methodContext.methodName);
+			String className = ((TyClass) e.obj.accept(new TypeCheckVisitor.TypeCheckVisitorExpTyStm(symbolTable, clazz, method))).c;
 			String methodName = e.method;
 			// FIXME: Retrieve function label with the respective mangled name
 			TreeExp function = new TreeExpNAME(new Label(mangle(className,
