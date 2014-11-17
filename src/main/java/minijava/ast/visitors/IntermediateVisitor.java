@@ -177,23 +177,24 @@ public class IntermediateVisitor implements
 		ExpVisitor<TreeExp, RuntimeException>,
 		StmVisitor<TreeStm, RuntimeException> {
 
+		private final static TreeExpTEMP thisTemp = new TreeExpTEMP(new Temp());
+
 		private final Program symbolTable;
 		private final DeclClass classContext;
 		private final DeclMeth methodContext;
 		private final Map<String, Integer> memoryFootprint;
 		private final Map<String, TreeExpTEMP> temps;
 		private final MachineSpecifics  machineSpecifics;
-		private final TreeExpTEMP thisTemp;
 
 		public IntermediateVisitorExpStm(Map<String, TreeExpTEMP> temps, MachineSpecifics machineSpecifics,
-				DeclClass classContext, DeclMeth methodContext, Map<String, Integer> memoryFootprint, Program symbolTable) {
+				DeclClass classContext, DeclMeth methodContext, Map<String, Integer> memoryFootprint,
+				Program symbolTable) {
 			this.temps = temps;
 			this.machineSpecifics = machineSpecifics;
 			this.classContext = classContext;
 			this.methodContext = methodContext;
 			this.memoryFootprint = memoryFootprint;
 			this.symbolTable = symbolTable;
-			thisTemp = new TreeExpTEMP(new Temp());
 		}
 
 		@Override
