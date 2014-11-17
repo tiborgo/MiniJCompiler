@@ -5,3 +5,4 @@ bin/
 .classpath
 .settings/
 src/generated-sources
+a.out
