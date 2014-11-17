@@ -63,7 +63,7 @@ import minijava.symboltable.tree.Class;
 import minijava.symboltable.tree.Program;
 
 public class IntermediateVisitor implements
-	PrgVisitor<List<Fragment<TreeStm>>, RuntimeException>, 
+	PrgVisitor<List<Fragment<TreeStm>>, RuntimeException>,
 	DeclVisitor<List<Fragment<TreeStm>>, RuntimeException> {
 
 	private DeclClass classContext;
@@ -73,7 +73,7 @@ public class IntermediateVisitor implements
 	private final Map<String, TreeExpTEMP> methodTemps;
 	private Map<String, Integer> memoryFootprint;
 	private final Program symbolTable;
-	
+
 	public IntermediateVisitor(MachineSpecifics machineSpecifics, Program symbolTable) {
 		this.machineSpecifics = machineSpecifics;
 		classTemps = new HashMap<>();
@@ -84,7 +84,7 @@ public class IntermediateVisitor implements
 
 	@Override
 	public List<Fragment<TreeStm>> visit(Prg p) throws RuntimeException {
-		
+
 		for(DeclClass clazz : p.classes) {
 			memoryFootprint.put(clazz.className, clazz.fields.size() * machineSpecifics.getWordSize() + 4);
 		}
@@ -94,9 +94,9 @@ public class IntermediateVisitor implements
 		for(DeclClass clazz : p.classes) {
 			classes.addAll(clazz.accept(this));
 		}
-		
+
 		classes.addAll(p.mainClass.accept(this));
-		
+
 		return classes;
 	}
 
@@ -117,17 +117,17 @@ public class IntermediateVisitor implements
 		}
 
 		classContext = null;
-		
+
 		return methods;
 	}
 
 	@Override
 	public List<Fragment<TreeStm>> visit(DeclMain d) throws RuntimeException {
-		
+
 		Frame frame = this.machineSpecifics.newFrame(new Label(mangle(d.className, "main")), 1);
-		
+
 		TreeStm body = d.mainBody.accept(new IntermediateVisitorExpStm(Collections.<String, TreeExpTEMP>emptyMap(), machineSpecifics, classContext, methodContext, memoryFootprint, symbolTable));
-		
+
 		TreeStm method = frame.makeProc(body, new TreeExpCONST(0));
 		Fragment<TreeStm> frag = new FragmentProc<>(frame, method);
 
@@ -136,9 +136,9 @@ public class IntermediateVisitor implements
 
 	@Override
 	public List<Fragment<TreeStm>> visit(DeclMeth m) throws RuntimeException {
-		
+
 		methodContext = m;
-		
+
 		Frame frame = this.machineSpecifics.newFrame(new Label(mangle(this.classContext.className, m.methodName)), m.parameters.size());
 
 		methodTemps.clear();
@@ -154,21 +154,21 @@ public class IntermediateVisitor implements
 		methodAndClassTemps.putAll(methodTemps);
 		TreeStm body = m.body.accept(new IntermediateVisitorExpStm(methodAndClassTemps, machineSpecifics, classContext, methodContext, memoryFootprint, symbolTable));
 		TreeExp returnExp = m.returnExp.accept(new IntermediateVisitorExpStm(methodAndClassTemps, machineSpecifics, classContext, methodContext, memoryFootprint, symbolTable));
-		
+
 		TreeStm method = frame.makeProc(body, returnExp);
-		
+
 		Fragment<TreeStm> frag = new FragmentProc<>(frame, method);
-		
+
 		methodContext = null;
-		
+
 		return Arrays.asList(frag);
 	}
-	
+
 	@Override
 	public List<Fragment<TreeStm>> visit(DeclVar d) throws RuntimeException {
 		throw new UnsupportedOperationException("Cannot generate fragment for var declaration");
 	}
-	
+
 	private static String mangle(String className, String methodName) {
 		return className + "$" + methodName;
 	}
@@ -176,14 +176,15 @@ public class IntermediateVisitor implements
 	static public class IntermediateVisitorExpStm implements
 		ExpVisitor<TreeExp, RuntimeException>,
 		StmVisitor<TreeStm, RuntimeException> {
-		
+
 		private final Program symbolTable;
 		private final DeclClass classContext;
 		private final DeclMeth methodContext;
 		private final Map<String, Integer> memoryFootprint;
 		private final Map<String, TreeExpTEMP> temps;
 		private final MachineSpecifics  machineSpecifics;
-		
+		private final TreeExpTEMP thisTemp;
+
 		public IntermediateVisitorExpStm(Map<String, TreeExpTEMP> temps, MachineSpecifics machineSpecifics,
 				DeclClass classContext, DeclMeth methodContext, Map<String, Integer> memoryFootprint, Program symbolTable) {
 			this.temps = temps;
@@ -192,24 +193,24 @@ public class IntermediateVisitor implements
 			this.methodContext = methodContext;
 			this.memoryFootprint = memoryFootprint;
 			this.symbolTable = symbolTable;
+			thisTemp = new TreeExpTEMP(new Temp());
 		}
-	
+
 		@Override
 		public TreeExp visit(ExpTrue e) throws RuntimeException {
 			return new TreeExpCONST(1);
 		}
-	
+
 		@Override
 		public TreeExp visit(ExpFalse e) throws RuntimeException {
 			return new TreeExpCONST(0);
 		}
-	
+
 		@Override
 		public TreeExp visit(ExpThis e) throws RuntimeException {
-			// TODO Auto-generated method stub
-			return null;
+			return thisTemp;
 		}
-	
+
 		@Override
 		public TreeExp visit(ExpNewIntArray e) throws RuntimeException {
 			TreeExp arraySize = new TreeExpOP(
@@ -228,7 +229,7 @@ public class IntermediateVisitor implements
 					new TreeExpTEMP(arrayMemoryLocation)
 			);
 		}
-	
+
 		@Override
 		public TreeExp visit(ExpNew e) throws RuntimeException {
 			int classMemoryFootprint = memoryFootprint.get(e.className);
@@ -238,7 +239,7 @@ public class IntermediateVisitor implements
 			return new TreeExpCALL(new TreeExpNAME(new Label("L_halloc")),
 					Collections.singletonList(classMemoryFootprintExp));
 		}
-	
+
 		@Override
 		public TreeExp visit(ExpNeg e) throws RuntimeException {
 			TreeExp negatedExpression = e.body.accept(this);
@@ -271,7 +272,7 @@ public class IntermediateVisitor implements
 			}
 			throw new IllegalArgumentException("Unable to negate expression \"" + expression.toString() + "\"");
 		}
-	
+
 		@Override
 		public TreeExp visit(ExpBinOp e) throws RuntimeException {
 			Op operator = null;
@@ -324,7 +325,7 @@ public class IntermediateVisitor implements
 			return new TreeExpOP(operator, e.left.accept(this),
 					e.right.accept(this));
 		}
-	
+
 		@Override
 		public TreeExp visit(ExpArrayGet e) throws RuntimeException {
 			TreeExp array = e.array.accept(this);
@@ -337,13 +338,13 @@ public class IntermediateVisitor implements
 			);
 			return new TreeExpMEM(memoryLocation);
 		}
-	
+
 		@Override
 		public TreeExp visit(ExpArrayLength e) throws RuntimeException {
 			TreeExp array = e.array.accept(this);
 			return new TreeExpMEM(array);
 		}
-	
+
 		@Override
 		public TreeExp visit(ExpInvoke e) throws RuntimeException {
 			/*
@@ -360,24 +361,25 @@ public class IntermediateVisitor implements
 			// FIXME: Retrieve function label with the respective mangled name
 			TreeExp function = new TreeExpNAME(new Label(mangle(className,
 					methodName)));
-			List<TreeExp> arguments = new ArrayList<>(e.args.size());
+			List<TreeExp> arguments = new ArrayList<>(e.args.size() + 1);
+			arguments.add(object);
 			for (Exp exp : e.args) {
 				TreeExp iRExpression = exp.accept(this);
 				arguments.add(iRExpression);
 			}
 			return new TreeExpCALL(function, arguments);
 		}
-	
+
 		@Override
 		public TreeExp visit(ExpIntConst e) throws RuntimeException {
 			return new TreeExpCONST(e.value);
 		}
-	
+
 		@Override
 		public TreeExp visit(ExpId e) throws RuntimeException {
 			return temps.get(e.id);
 		}
-	
+
 		@Override
 		public TreeStm visit(StmList s) throws RuntimeException {
 			List<TreeStm> statementList = new ArrayList<>(s.stms.size());
@@ -386,14 +388,14 @@ public class IntermediateVisitor implements
 			}
 			return TreeStm.fromList(statementList);
 		}
-	
+
 		@Override
 		public TreeStm visit(StmIf s) throws RuntimeException {
-	
+
 			Label trueLabel  = new Label();
 			Label falseLabel = new Label();
 			Label afterLabel = new Label();
-	
+
 			return TreeStm.fromArray(new TreeStm[]{
 						new TreeStmCJUMP(Rel.EQ,
 								s.cond.accept(this),
@@ -408,16 +410,16 @@ public class IntermediateVisitor implements
 						new TreeStmLABEL(afterLabel)
 				});
 		}
-	
+
 		@Override
 		public TreeStm visit(StmWhile s) throws RuntimeException {
-	
+
 			Label beforeLabel = new Label();
 			Label bodyLabel   = new Label();
 			Label afterLabel  = new Label();
-	
-	
-	
+
+
+
 			return TreeStm.fromArray(new TreeStm[]{
 				new TreeStmLABEL(beforeLabel),
 				new TreeStmCJUMP(Rel.EQ,
@@ -431,12 +433,12 @@ public class IntermediateVisitor implements
 				new TreeStmLABEL(afterLabel)
 		});
 		}
-	
+
 		@Override
 		public TreeStm visit(StmPrintlnInt s) throws RuntimeException {
-	
+
 			Label printlnIntLabel = new Label("L_println_int");
-	
+
 			return new TreeStmEXP(
 					new TreeExpCALL(
 							new TreeExpNAME(printlnIntLabel),
@@ -444,12 +446,12 @@ public class IntermediateVisitor implements
 							)
 					);
 		}
-	
+
 		@Override
 		public TreeStm visit(StmPrintChar s) throws RuntimeException {
-	
+
 			Label printCharLabel = new Label("L_print_char");
-	
+
 			return new TreeStmEXP(
 					new TreeExpCALL(
 							new TreeExpNAME(printCharLabel),
@@ -457,12 +459,12 @@ public class IntermediateVisitor implements
 							)
 					);
 		}
-	
+
 		@Override
 		public TreeStm visit(StmAssign s) throws RuntimeException {
-	
+
 			TreeExpTEMP dest = this.temps.get(s.id);
-	
+
 			if (dest != null) {
 				return new TreeStmMOVE(dest, s.rhs.accept(this));
 			}
@@ -471,30 +473,30 @@ public class IntermediateVisitor implements
 				return null;
 			}
 		}
-	
+
 		@Override
 		public TreeStm visit(StmArrayAssign s) throws RuntimeException {
-	
+
 			TreeExpTEMP array = this.temps.get(s.id);
 			//TreeExp arrayExp = new TreeExpTEMP(array);
-	
+
 			TreeExp indexExp = s.index.accept(this);
 			TreeExp assignExp = s.rhs.accept(this);
-	
+
 			Temp indexTemp = new Temp();
 			TreeExpTEMP indexTempExp = new TreeExpTEMP(indexTemp);
-	
+
 			return TreeStm.fromArray(new TreeStm[]{
 				// Calculate address of array item
 				new TreeStmMOVE(indexTempExp, indexExp),
 				new TreeStmMOVE(indexTempExp, new TreeExpOP(Op.PLUS, indexTempExp, new TreeExpCONST(1))),
 				new TreeStmMOVE(indexTempExp, new TreeExpOP(Op.MUL, indexTempExp, new TreeExpCONST(this.machineSpecifics.getWordSize()))),
 				new TreeStmMOVE(indexTempExp, new TreeExpOP(Op.PLUS, indexTempExp, array)),
-	
+
 				// Assign array item value
 				new TreeStmMOVE(new TreeExpMEM(indexTempExp), assignExp)
 			});
-	
+
 		}
 	}
 }
