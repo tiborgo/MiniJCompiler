@@ -57,7 +57,7 @@ public class MiniJavaCompiler implements Frontend {
 			}
 			
 			MachineSpecifics machineSpecifics = new DummyMachineSpecifics();
-			IntermediateVisitor intermediateVisitor = new IntermediateVisitor(machineSpecifics);
+			IntermediateVisitor intermediateVisitor = new IntermediateVisitor(machineSpecifics, symbolTable);
 			List<Fragment<TreeStm>> procFragements = program.accept(intermediateVisitor);
 			
 			String intermediateOutput = IntermediateToCmm.stmFragmentsToCmm(procFragements);
