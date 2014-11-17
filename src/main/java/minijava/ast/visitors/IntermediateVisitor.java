@@ -125,7 +125,7 @@ public class IntermediateVisitor implements
 		
 		Frame frame = this.machineSpecifics.newFrame(new Label(mangle(d.className, "main")), 1);
 		
-		TreeStm body = d.mainBody.accept(new IntermediateVisitorExpStm(Collections.<String, TreeExpTEMP>emptyMap(), machineSpecifics, classContext, methodContext, symbolTable));
+		TreeStm body = d.mainBody.accept(new IntermediateVisitorExpStm(Collections.<String, TreeExpTEMP>emptyMap(), machineSpecifics, classContext, methodContext, memoryFootprint, symbolTable));
 		
 		TreeStm method = frame.makeProc(body, new TreeExpCONST(0));
 		Fragment<TreeStm> frag = new FragmentProc<>(frame, method);
@@ -151,8 +151,8 @@ public class IntermediateVisitor implements
 		Map<String, TreeExpTEMP> methodAndClassTemps = new HashMap<>();
 		methodAndClassTemps.putAll(classTemps);
 		methodAndClassTemps.putAll(methodTemps);
-		TreeStm body = m.body.accept(new IntermediateVisitorExpStm(methodAndClassTemps, machineSpecifics, classContext, methodContext, symbolTable));
-		TreeExp returnExp = m.returnExp.accept(new IntermediateVisitorExpStm(methodAndClassTemps, machineSpecifics, classContext, methodContext, symbolTable));
+		TreeStm body = m.body.accept(new IntermediateVisitorExpStm(methodAndClassTemps, machineSpecifics, classContext, methodContext, memoryFootprint, symbolTable));
+		TreeExp returnExp = m.returnExp.accept(new IntermediateVisitorExpStm(methodAndClassTemps, machineSpecifics, classContext, methodContext, memoryFootprint, symbolTable));
 		
 		TreeStm method = frame.makeProc(body, returnExp);
 		
