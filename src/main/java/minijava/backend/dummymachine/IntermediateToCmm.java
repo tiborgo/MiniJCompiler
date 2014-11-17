@@ -12,6 +12,8 @@ import minijava.intermediate.Temp;
 import minijava.intermediate.tree.*;
 
 public class IntermediateToCmm {
+	
+	private final static String valueType = "int64_t";
 
   public static String stmFragmentsToCmm(List<Fragment<TreeStm>> frags) {
     List<Fragment<List<TreeStm>>> frag1 = new LinkedList<>();
@@ -35,7 +37,7 @@ public class IntermediateToCmm {
 
     declarations.append("#include <stdint.h>\n");
     declarations.append("#include \"runtime.h\"\n");
-    declarations.append("#define MEM(x) *((int32_t*)(x))\n\n");
+    declarations.append("#define MEM(x) *((" + valueType + "*)(x))\n\n");
 
     for (Fragment<List<TreeStm>> f : frags) {
       f.accept(new FragmentToCmm());
@@ -59,10 +61,10 @@ public class IntermediateToCmm {
 
       // function prototype
       StringBuilder prototype = new StringBuilder();
-      prototype.append("int32_t ").append(frame.getName()).append("(");
+      prototype.append(valueType + " ").append(frame.getName()).append("(");
       String sep = "";
       for (Temp t : frame.params) {
-        prototype.append(sep).append("int32_t ").append(t);
+        prototype.append(sep).append(valueType + " ").append(t);
         sep = ", ";
       }
       prototype.append(")");
@@ -88,7 +90,7 @@ public class IntermediateToCmm {
           decls += sep + t;
           sep = ", ";
         }
-        emit("int32_t " + decls + ";");
+        emit(valueType + " " + decls + ";");
       }
 
       // function body
@@ -121,7 +123,7 @@ public class IntermediateToCmm {
   
   private static Temp emitVarDecl(String v) {
     Temp t = new Temp();
-    emit("int32_t " + t + " = " + v + ";");
+    emit(valueType + " " + t + " = " + v + ";");
     return t;
   }
 
@@ -148,7 +150,7 @@ public class IntermediateToCmm {
 
     @Override
     public String visit(TreeExpNAME expNAME) {
-      return "(int32_t)" + expNAME.label.toString();
+      return "(" + valueType + ")" + expNAME.label.toString();
     }
 
     @Override
@@ -201,14 +203,14 @@ public class IntermediateToCmm {
       String sep = "";
       for (TreeExp arg : expCALL.args) {
         call += sep + genVarDecl(arg);
-        argTypes += sep + "int32_t";
+        argTypes += sep + valueType;
         sep = ", ";
     }
       if (expCALL.func instanceof TreeExpNAME) {
         call = ((TreeExpNAME) expCALL.func).label + "(" + call + ")";
       } else {
-        call = "((int32_t (*) (" + argTypes + "))(" + gen(expCALL.func) + "))(" + call + ")";
-      }
+        call = "((" + valueType + " (*) (" + argTypes + "))(" + gen(expCALL.func) + "))(" + call + ")";
+      } 
       Temp r = emitVarDecl(call);
       return r.toString();
     }

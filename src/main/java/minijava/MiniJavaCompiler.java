@@ -46,7 +46,7 @@ public class MiniJavaCompiler implements Frontend {
 
 		MiniJavaCompiler compiler = new MiniJavaCompiler();
 		try {
-			Prg program = compiler.getAbstractSyntaxTree("src/test/resources/minijava-examples/working/ArrSum.java");
+			Prg program = compiler.getAbstractSyntaxTree("src/test/resources/minijava-examples/working/MiniExample.java");
 			PrettyPrintVisitor prettyPrintVisitor = new PrettyPrintVisitor("");
 			String output = program.accept(prettyPrintVisitor);
 			System.out.print(output);
@@ -59,8 +59,10 @@ public class MiniJavaCompiler implements Frontend {
 			TypeCheckVisitor typeCheckVisitor = new TypeCheckVisitor(symbolTable);
 			if (program.accept(typeCheckVisitor)) {
 				System.out.println("No Type Errors");
+				System.out.flush();
 			} else {
 				System.err.println("Type errors");
+				System.err.flush();
 			}
 			
 			System.out.println("-------------------------");
@@ -94,6 +96,7 @@ public class MiniJavaCompiler implements Frontend {
 			String line;
 			while ((line = bufferedStderr.readLine()) != null) {
 				System.err.println(line);
+				System.err.flush();
 			}
 			bufferedStderr.close();
 			stderr.close();
@@ -103,6 +106,7 @@ public class MiniJavaCompiler implements Frontend {
 				System.out.println("Successful GCC compilation");
 			} else {
 				System.err.println("GCC compilation failed");
+				System.err.flush();
 			}
 			
 			System.out.println("-------------------------");
@@ -124,6 +128,7 @@ public class MiniJavaCompiler implements Frontend {
 					break;
 				case 139:
 					System.err.println("Segmentation Fault");
+					System.err.flush();
 					break;
 				default:
 					System.err.println("Exit Code: " + outCall.exitValue());
@@ -132,6 +137,7 @@ public class MiniJavaCompiler implements Frontend {
 					while ((line = bufferedStderr.readLine()) != null) {
 						System.err.println(line);
 					}
+					System.err.flush();
 					bufferedStderr.close();
 					stderr.close();
 				}

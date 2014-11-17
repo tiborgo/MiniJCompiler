@@ -6,31 +6,31 @@
 #include <stdlib.h>
 #include <inttypes.h>
 
-int32_t Lmain(int32_t);
+int64_t Lmain(int64_t);
 
 // Allocate <size> bytes of memory space and initialise it with zeroes
-int32_t L_halloc(int32_t size) {
-  return (int32_t)calloc(size, 1);
+int64_t L_halloc(int64_t size) {
+  return (int64_t)calloc(size, 1);
 }
 
 // Print an integer to the standard output
-int32_t L_println_int(int32_t n)
+int64_t L_println_int(int64_t n)
 {
-  printf("%" PRId32 "\n",n);
+  printf("%" PRId64 "\n",n);
   return 0;
 }
 
 // Print character to the standard output
-int32_t L_print_char(int32_t n)
+int64_t L_print_char(int64_t n)
 {
-  printf("%c",n);
+  printf("%lld",n);
   return 0;
 }
 
 // Abort the execution with an error code
-int32_t L_raise(int32_t rc)
+int64_t L_raise(int64_t rc)
 {
-  fprintf(stderr, "Program terminated with error code %" PRId32 ,rc);
+  fprintf(stderr, "Program terminated with error code %" PRId64 ,rc);
   exit(rc);
   return 0;
 }
