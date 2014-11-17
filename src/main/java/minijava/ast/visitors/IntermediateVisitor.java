@@ -79,6 +79,7 @@ public class IntermediateVisitor implements
 		classTemps = new HashMap<>();
 		methodTemps = new HashMap<>();
 		this.symbolTable = symbolTable;
+		this.memoryFootprint = new HashMap<>();
 	}
 
 	@Override
@@ -352,8 +353,8 @@ public class IntermediateVisitor implements
 			 * +e.obj.prettyPrint()+"\""); }
 			 */
 			TreeExp object = e.obj.accept(this);
-			Class clazz = symbolTable.classes.get(classContext.className);
-			Method method = clazz.methods.get(methodContext.methodName);
+			Class clazz = (classContext != null) ? symbolTable.classes.get(classContext.className) : null;
+			Method method = (classContext != null && methodContext != null) ? clazz.methods.get(methodContext.methodName) : null;
 			String className = ((TyClass) e.obj.accept(new TypeCheckVisitor.TypeCheckVisitorExpTyStm(symbolTable, clazz, method))).c;
 			String methodName = e.method;
 			// FIXME: Retrieve function label with the respective mangled name
