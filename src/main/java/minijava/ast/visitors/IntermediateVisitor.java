@@ -246,6 +246,8 @@ public class IntermediateVisitor implements
 			TreeExp classMemoryFootprintExp = new TreeExpCONST(classMemoryFootprint);
 			return new TreeExpCALL(new TreeExpNAME(new Label("_halloc")),
 					Collections.singletonList(classMemoryFootprintExp));
+			
+			// TODO: set class ID
 		}
 
 		@Override

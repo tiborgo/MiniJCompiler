@@ -1,6 +1,8 @@
 package minijava.intermediate.tree;
 
 import minijava.intermediate.Label;
+import minijava.intermediate.visitors.TreeStmVisitor;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,7 +25,7 @@ public class TreeStmJUMP extends TreeStm {
   }
 
   @Override
-  public <A> A accept(TreeStmVisitor<A> visitor) {
+  public <A, T extends Throwable> A accept(TreeStmVisitor<A, T> visitor) throws T {
     return visitor.visit(this);
   }
 
