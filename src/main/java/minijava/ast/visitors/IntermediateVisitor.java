@@ -39,7 +39,6 @@ import minijava.ast.rules.TyArr;
 import minijava.ast.rules.TyClass;
 import minijava.ast.rules.TyInt;
 import minijava.backend.MachineSpecifics;
-import minijava.intermediate.Fragment;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.Frame;
 import minijava.intermediate.Label;
@@ -137,6 +136,53 @@ public class IntermediateVisitor implements
 
 		return mainClass.accept(this);
 	}
+	
+	private List<TreeStm> makeBaseBlocks(List<TreeStm> stms) {
+		
+		List<TreeStm> result = new LinkedList<>();
+		
+		if (!(stms.get(0) instanceof TreeStmLABEL)) {
+			result.add(new TreeStmLABEL(new Label()));
+		}
+		
+		for (int i = 1; i < stms.size(); i++) {
+			
+			result.add(stms.get(i-1));
+			
+			if (stms.get(i) instanceof TreeStmLABEL &&
+					!(stms.get(i-1) instanceof TreeStmJUMP ||
+							stms.get(i-1) instanceof TreeStmCJUMP)) {
+				
+				result.add(TreeStmJUMP.jumpToLabel(((TreeStmLABEL)stms.get(i)).label));
+			}
+			else if (!(stms.get(i) instanceof TreeStmLABEL) &&
+					(stms.get(i-1) instanceof TreeStmJUMP ||
+							stms.get(i-1) instanceof TreeStmCJUMP)) {
+				// Dead code -> skip
+				do {
+					i++;
+				}
+				while(i < stms.size() && !(stms.get(i) instanceof TreeStmLABEL));
+			}
+		}
+		
+		result.add(stms.get(stms.size()-1));
+		
+		if (!((stms.get(stms.size()-1) instanceof TreeStmJUMP) ||
+				(stms.get(stms.size()-1) instanceof TreeStmCJUMP))) {
+			
+			Label endLabel = new Label();
+			result.add(TreeStmJUMP.jumpToLabel(endLabel));
+			result.add(new TreeStmLABEL(endLabel));
+		}
+		
+		return result;
+	}
+	
+	private List<TreeStm> trace(List<TreeStm> stms) {
+		// TODO: implement
+		return null;
+	}
 
 	@Override
 	public List<FragmentProc<List<TreeStm>>> visit(DeclMeth m) throws RuntimeException {
@@ -175,6 +221,8 @@ public class IntermediateVisitor implements
 
 		FragmentProc<TreeStm> frag = new FragmentProc<>(frame, method);
 		FragmentProc<List<TreeStm>> canonFrag = (FragmentProc<List<TreeStm>>) frag.accept(new Canon());
+		
+		canonFrag = new FragmentProc<List<TreeStm>>(canonFrag.frame, makeBaseBlocks(canonFrag.body));
 
 		methodContext = null;
 
