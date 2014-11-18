@@ -44,6 +44,7 @@ import minijava.intermediate.FragmentProc;
 import minijava.intermediate.Frame;
 import minijava.intermediate.Label;
 import minijava.intermediate.Temp;
+import minijava.intermediate.canon.Canon;
 import minijava.intermediate.tree.TreeExp;
 import minijava.intermediate.tree.TreeExpCALL;
 import minijava.intermediate.tree.TreeExpCONST;
@@ -66,8 +67,8 @@ import minijava.symboltable.tree.Method;
 import minijava.symboltable.tree.Program;
 
 public class IntermediateVisitor implements
-	PrgVisitor<List<Fragment<TreeStm>>, RuntimeException>,
-	DeclVisitor<List<Fragment<TreeStm>>, RuntimeException> {
+	PrgVisitor<List<FragmentProc<List<TreeStm>>>, RuntimeException>,
+	DeclVisitor<List<FragmentProc<List<TreeStm>>>, RuntimeException> {
 	
 	private DeclClass classContext;
 	private DeclMeth methodContext;
@@ -84,13 +85,13 @@ public class IntermediateVisitor implements
 	}
 
 	@Override
-	public List<Fragment<TreeStm>> visit(Prg p) throws RuntimeException {
+	public List<FragmentProc<List<TreeStm>>> visit(Prg p) throws RuntimeException {
 
 		for(DeclClass clazz : p.classes) {
 			memoryFootprint.put(clazz.className, clazz.fields.size() * machineSpecifics.getWordSize() + 4);
 		}
 
-		List<Fragment<TreeStm>> classes = new LinkedList<>();
+		List<FragmentProc<List<TreeStm>>> classes = new LinkedList<>();
 		for(DeclClass clazz : p.classes) {
 			classes.addAll(clazz.accept(this));
 		}
@@ -101,11 +102,11 @@ public class IntermediateVisitor implements
 	}
 
 	@Override
-	public List<Fragment<TreeStm>> visit(DeclClass c) throws RuntimeException {
+	public List<FragmentProc<List<TreeStm>>> visit(DeclClass c) throws RuntimeException {
 		classContext = c;
 
 		// Methods
-		List<Fragment<TreeStm>> methods = new LinkedList<>();
+		List<FragmentProc<List<TreeStm>>> methods = new LinkedList<>();
 		for(DeclMeth method : c.methods) {
 			methods.addAll(method.accept(this));
 		}
@@ -116,7 +117,7 @@ public class IntermediateVisitor implements
 	}
 
 	@Override
-	public List<Fragment<TreeStm>> visit(DeclMain d) throws RuntimeException {
+	public List<FragmentProc<List<TreeStm>>> visit(DeclMain d) throws RuntimeException {
 
 		DeclMeth mainMethod = new DeclMeth(
 			new TyInt(),
@@ -138,7 +139,7 @@ public class IntermediateVisitor implements
 	}
 
 	@Override
-	public List<Fragment<TreeStm>> visit(DeclMeth m) throws RuntimeException {
+	public List<FragmentProc<List<TreeStm>>> visit(DeclMeth m) throws RuntimeException {
 
 		methodContext = m;
 
@@ -172,15 +173,16 @@ public class IntermediateVisitor implements
 
 		TreeStm method = frame.makeProc(body, returnExp);
 
-		Fragment<TreeStm> frag = new FragmentProc<>(frame, method);
+		FragmentProc<TreeStm> frag = new FragmentProc<>(frame, method);
+		FragmentProc<List<TreeStm>> canonFrag = (FragmentProc<List<TreeStm>>) frag.accept(new Canon());
 
 		methodContext = null;
 
-		return Arrays.asList(frag);
+		return Arrays.asList(canonFrag);
 	}
 
 	@Override
-	public List<Fragment<TreeStm>> visit(DeclVar d) throws RuntimeException {
+	public List<FragmentProc<List<TreeStm>>> visit(DeclVar d) throws RuntimeException {
 		throw new UnsupportedOperationException("Cannot generate fragment for var declaration");
 	}
 

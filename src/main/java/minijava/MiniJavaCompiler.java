@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.LinkedList;
 import java.util.List;
 
 import minijava.antlr.visitors.ASTVisitor;
@@ -17,8 +18,9 @@ import minijava.backend.MachineSpecifics;
 import minijava.backend.dummymachine.DummyMachineSpecifics;
 import minijava.backend.dummymachine.IntermediateToCmm;
 import minijava.intermediate.Fragment;
+import minijava.intermediate.FragmentProc;
 import minijava.intermediate.tree.TreeStm;
-import minijava.intermediate.visitors.CanonicalizeVisitor;
+import minijava.intermediate.tree.TreeStmSEQ;
 import minijava.symboltable.tree.Program;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
@@ -70,9 +72,17 @@ public class MiniJavaCompiler implements Frontend {
 			
 			MachineSpecifics machineSpecifics = new DummyMachineSpecifics();
 			IntermediateVisitor intermediateVisitor = new IntermediateVisitor(machineSpecifics, symbolTable);
-			List<Fragment<TreeStm>> procFragements = program.accept(intermediateVisitor);
+			List<FragmentProc<List<TreeStm>>> procFragements = program.accept(intermediateVisitor);
 			
-			String intermediateOutput = IntermediateToCmm.stmFragmentsToCmm(procFragements);
+			List<Fragment<TreeStm>> tempProcFragements = new LinkedList<>();
+			for (FragmentProc<List<TreeStm>> frag : procFragements) {
+				tempProcFragements.add(new FragmentProc<TreeStm>(
+					frag.frame,
+				 	TreeStmSEQ.fromList(frag.body))
+				 );
+			}
+			
+			String intermediateOutput = IntermediateToCmm.stmFragmentsToCmm(tempProcFragements);
 			System.out.println(intermediateOutput);
 			
 			System.out.println("-------------------------");
