@@ -29,10 +29,4 @@ public class Class implements Node {
 			this.methods.put(method.name, method);
 		}
 	}
-	
-	public Class(String name) {
-		this.name = name;
-		this.fields = new HashMap<>();
-		this.methods = new HashMap<>();
-	}
 }
