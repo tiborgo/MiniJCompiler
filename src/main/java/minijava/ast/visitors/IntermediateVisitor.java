@@ -58,8 +58,8 @@ import minijava.intermediate.tree.TreeStmJUMP;
 import minijava.intermediate.tree.TreeStmLABEL;
 import minijava.intermediate.tree.TreeStmMOVE;
 import minijava.intermediate.tree.TreeStmSEQ;
-import minijava.symboltable.tree.Method;
 import minijava.symboltable.tree.Class;
+import minijava.symboltable.tree.Method;
 import minijava.symboltable.tree.Program;
 
 public class IntermediateVisitor implements
@@ -87,7 +87,6 @@ public class IntermediateVisitor implements
 			memoryFootprint.put(clazz.className, clazz.fields.size() * machineSpecifics.getWordSize() + 4);
 		}
 
-		// TODO: add main class
 		List<Fragment<TreeStm>> classes = new LinkedList<>();
 		for(DeclClass clazz : p.classes) {
 			classes.addAll(clazz.accept(this));
@@ -142,7 +141,7 @@ public class IntermediateVisitor implements
 			methodTemps.put(m.parameters.get(i-1).id, frame.getParameter(i));
 		}
 		for (DeclVar var : m.localVars) {
-			methodTemps.put(var.name, new TreeExpTEMP(new Temp()));
+			methodTemps.put(var.name, frame.addLocal(Frame.Location.ANYWHERE));
 		}
 		
 		// Fields
@@ -339,13 +338,18 @@ public class IntermediateVisitor implements
 		public TreeExp visit(ExpArrayGet e) throws RuntimeException {
 			TreeExp array = e.array.accept(this);
 			TreeExp index = e.index.accept(this);
-			TreeExp arrayOffset = new TreeExpOP(Op.MUL, index, new TreeExpCONST(4));
-			TreeExp memoryLocation = new TreeExpOP(
+					
+			return new TreeExpMEM(
+				new TreeExpOP(
 					Op.PLUS,
-					new TreeExpOP(Op.PLUS, array, arrayOffset),
-					new TreeExpCONST(1)
+					new TreeExpOP(
+						Op.MUL,
+						new TreeExpOP(Op.PLUS, index, new TreeExpCONST(1)),
+						new TreeExpCONST(machineSpecifics.getWordSize())
+					),
+					array
+				)
 			);
-			return new TreeExpMEM(memoryLocation);
 		}
 
 		@Override
@@ -356,18 +360,13 @@ public class IntermediateVisitor implements
 
 		@Override
 		public TreeExp visit(ExpInvoke e) throws RuntimeException {
-			/*
-			 * TreeExp object = e.obj.accept(this); if (!(object instanceof
-			 * TreeExpCONST)) { throw new
-			 * RuntimeException("Unable to invoke method on object \""
-			 * +e.obj.prettyPrint()+"\""); }
-			 */
+			
 			TreeExp object = e.obj.accept(this);
 			Class clazz = (classContext != null) ? symbolTable.classes.get(classContext.className) : null;
 			Method method = (classContext != null && methodContext != null) ? clazz.methods.get(methodContext.methodName) : null;
 			String className = ((TyClass) e.obj.accept(new TypeCheckVisitor.TypeCheckVisitorExpTyStm(symbolTable, clazz, method))).c;
 			String methodName = e.method;
-			// FIXME: Retrieve function label with the respective mangled name
+
 			TreeExp function = new TreeExpNAME(new Label(mangle(className,
 					methodName)));
 			List<TreeExp> arguments = new ArrayList<>(e.args.size() + 1);
@@ -473,39 +472,56 @@ public class IntermediateVisitor implements
 		public TreeStm visit(StmAssign s) throws RuntimeException {
 
 			TreeExp dest = this.temps.get(s.id);
+			TreeExp assignValue = s.rhs.accept(this);
 
-			if (dest != null) {
-				return new TreeStmMOVE(dest, s.rhs.accept(this));
-			}
-			else {
-				// TODO: error
-				return null;
-			}
+			return new TreeStmMOVE(dest, assignValue);
 		}
 
 		@Override
 		public TreeStm visit(StmArrayAssign s) throws RuntimeException {
-
+			
 			TreeExp array = this.temps.get(s.id);
-			//TreeExp arrayExp = new TreeExpTEMP(array);
+			TreeExp index = s.index.accept(this);
+			TreeExp assignValue = s.rhs.accept(this);
+			
+			Label raiseLabel = new Label();
+			Label assignLabel = new Label();
+			
+			TreeStm boundsCheckStm = new TreeStmCJUMP(
+					Rel.GE,
+					index,
+					new TreeExpMEM(array),
+					raiseLabel,
+					assignLabel);
+			
+			TreeStm raiseStm = new TreeStmEXP( 
+				TreeExpCALL.call1("_raise", new TreeExpCONST(1))
+			);
+			
+			TreeStm assignStm =  new TreeStmMOVE(
+				new TreeExpMEM(
+					new TreeExpOP(
+						Op.PLUS,
+						new TreeExpOP(
+							Op.MUL,
+							new TreeExpOP(
+								Op.PLUS,
+								index,
+								new TreeExpCONST(1)
+							),
+							new TreeExpCONST(this.machineSpecifics.getWordSize())
+						),
+						array)
+					),
+				assignValue);
 
-			TreeExp indexExp = s.index.accept(this);
-			TreeExp assignExp = s.rhs.accept(this);
-
-			Temp indexTemp = new Temp();
-			TreeExpTEMP indexTempExp = new TreeExpTEMP(indexTemp);
-
-			return TreeStm.fromArray(new TreeStm[]{
-				// Calculate address of array item
-				new TreeStmMOVE(indexTempExp, indexExp),
-				new TreeStmMOVE(indexTempExp, new TreeExpOP(Op.PLUS, indexTempExp, new TreeExpCONST(1))),
-				new TreeStmMOVE(indexTempExp, new TreeExpOP(Op.MUL, indexTempExp, new TreeExpCONST(this.machineSpecifics.getWordSize()))),
-				new TreeStmMOVE(indexTempExp, new TreeExpOP(Op.PLUS, indexTempExp, array)),
-
-				// Assign array item value
-				new TreeStmMOVE(new TreeExpMEM(indexTempExp), assignExp)
-			});
-
+			return TreeStmSEQ.fromArray(
+				boundsCheckStm,
+				new TreeStmLABEL(raiseLabel),
+				raiseStm,
+				new TreeStmLABEL(assignLabel),
+				assignStm
+			);
 		}
 	}
 }

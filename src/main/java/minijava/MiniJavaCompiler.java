@@ -78,7 +78,7 @@ public class MiniJavaCompiler implements Frontend {
 			
 			Runtime runtime = Runtime.getRuntime();
 			// -xc specifies the input language as C and is required for GCC to read from stdin
-			Process gccCall = runtime.exec("gcc -Wno-int-to-pointer-cast -xc runtime.c -");
+			Process gccCall = runtime.exec("gcc -m64 -xc runtime.c -");
 			// Write C code to stdin of C Compiler
 			OutputStream stdin = gccCall.getOutputStream();
 			stdin.write(intermediateOutput.getBytes());
