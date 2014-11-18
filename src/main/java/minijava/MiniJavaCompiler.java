@@ -18,6 +18,7 @@ import minijava.backend.dummymachine.DummyMachineSpecifics;
 import minijava.backend.dummymachine.IntermediateToCmm;
 import minijava.intermediate.Fragment;
 import minijava.intermediate.tree.TreeStm;
+import minijava.intermediate.visitors.CanonicalizeVisitor;
 import minijava.symboltable.tree.Program;
 
 import org.antlr.v4.runtime.ANTLRFileStream;

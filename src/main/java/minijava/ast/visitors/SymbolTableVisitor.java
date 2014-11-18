@@ -1,5 +1,7 @@
 package minijava.ast.visitors;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 
 import minijava.ast.rules.DeclClass;
@@ -8,9 +10,11 @@ import minijava.ast.rules.DeclMeth;
 import minijava.ast.rules.DeclVar;
 import minijava.ast.rules.Parameter;
 import minijava.ast.rules.Prg;
+import minijava.ast.rules.TyArr;
+import minijava.ast.rules.TyInt;
 import minijava.symboltable.tree.Class;
-import minijava.symboltable.tree.Node;
 import minijava.symboltable.tree.Method;
+import minijava.symboltable.tree.Node;
 import minijava.symboltable.tree.Program;
 import minijava.symboltable.tree.Variable;
 
@@ -67,7 +71,16 @@ public class SymbolTableVisitor implements
 
 	@Override
 	public Class visit(DeclMain d) throws RuntimeException {
-		return new Class(d.className);
+		return new Class(
+			"",
+			Collections.<Variable>emptyList(),
+			Arrays.asList(new Method(
+				"main",
+				new TyInt(),
+				Arrays.asList(new Variable(d.mainArg, new TyArr(new TyInt()))),
+				Collections.<Variable>emptyList()
+			))
+		);
 	}
 
 	@Override

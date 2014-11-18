@@ -25,6 +25,7 @@ import minijava.ast.rules.ExpNew;
 import minijava.ast.rules.ExpNewIntArray;
 import minijava.ast.rules.ExpThis;
 import minijava.ast.rules.ExpTrue;
+import minijava.ast.rules.Parameter;
 import minijava.ast.rules.Prg;
 import minijava.ast.rules.Stm;
 import minijava.ast.rules.StmArrayAssign;
@@ -34,7 +35,9 @@ import minijava.ast.rules.StmList;
 import minijava.ast.rules.StmPrintChar;
 import minijava.ast.rules.StmPrintlnInt;
 import minijava.ast.rules.StmWhile;
+import minijava.ast.rules.TyArr;
 import minijava.ast.rules.TyClass;
+import minijava.ast.rules.TyInt;
 import minijava.backend.MachineSpecifics;
 import minijava.intermediate.Fragment;
 import minijava.intermediate.FragmentProc;
@@ -115,14 +118,23 @@ public class IntermediateVisitor implements
 	@Override
 	public List<Fragment<TreeStm>> visit(DeclMain d) throws RuntimeException {
 
-		Frame frame = this.machineSpecifics.newFrame(new Label("main"), 1);
+		DeclMeth mainMethod = new DeclMeth(
+			new TyInt(),
+			"main",
+			Arrays.asList(new Parameter(d.mainArg, new TyArr(new TyInt()))),
+			Collections.<DeclVar>emptyList(),
+			d.mainBody,
+			new ExpIntConst(0)
+		);
+		
+		DeclClass mainClass = new DeclClass(
+			"",
+			null,
+			Collections.<DeclVar>emptyList(),
+			Arrays.asList(mainMethod)
+		);
 
-		TreeStm body = d.mainBody.accept(new IntermediateVisitorExpStm(Collections.<String, TreeExp>emptyMap(), machineSpecifics, classContext, methodContext, memoryFootprint, symbolTable));
-
-		TreeStm method = frame.makeProc(body, new TreeExpCONST(0));
-		Fragment<TreeStm> frag = new FragmentProc<>(frame, method);
-
-		return Arrays.asList(frag);
+		return mainClass.accept(this);
 	}
 
 	@Override
@@ -130,7 +142,7 @@ public class IntermediateVisitor implements
 
 		methodContext = m;
 
-		Frame frame = this.machineSpecifics.newFrame(new Label(mangle(this.classContext.className, m.methodName)), m.parameters.size() + 1);
+		Frame frame = this.machineSpecifics.newFrame(new Label(mangle(classContext.className, m.methodName)), m.parameters.size() + 1);
 
 		Map<String, TreeExp> methodTemps = new HashMap<>();
 		
@@ -173,7 +185,7 @@ public class IntermediateVisitor implements
 	}
 
 	private static String mangle(String className, String methodName) {
-		return className + "$" + methodName;
+		return (className != "") ? className + "$" + methodName : methodName;
 	}
 
 	static public class IntermediateVisitorExpStm implements
@@ -364,8 +376,8 @@ public class IntermediateVisitor implements
 		public TreeExp visit(ExpInvoke e) throws RuntimeException {
 			
 			TreeExp object = e.obj.accept(this);
-			Class clazz = (classContext != null) ? symbolTable.classes.get(classContext.className) : null;
-			Method method = (classContext != null && methodContext != null) ? clazz.methods.get(methodContext.methodName) : null;
+			Class clazz = symbolTable.classes.get(classContext.className);
+			Method method = clazz.methods.get(methodContext.methodName);
 			String className = ((TyClass) e.obj.accept(new TypeCheckVisitor.TypeCheckVisitorExpTyStm(symbolTable, clazz, method))).c;
 			String methodName = e.method;
 
