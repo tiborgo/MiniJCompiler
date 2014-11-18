@@ -1,6 +1,7 @@
 package minijava.intermediate.tree;
 
 import minijava.intermediate.Label;
+import minijava.intermediate.visitors.TreeExpVisitor;
 
 public class TreeExpNAME extends TreeExp {
 
@@ -14,7 +15,7 @@ public class TreeExpNAME extends TreeExp {
   }
 
   @Override
-  public <A> A accept(TreeExpVisitor<A> visitor) {
+  public <A, T extends Throwable> A accept(TreeExpVisitor<A, T> visitor) throws T {
     return visitor.visit(this);
   }
 

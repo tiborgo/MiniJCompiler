@@ -1,15 +1,32 @@
 package minijava.backend.dummymachine;
 
-import java.util.List;
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Collections;
+
 import minijava.intermediate.Fragment;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.FragmentVisitor;
 import minijava.intermediate.Temp;
-import minijava.intermediate.tree.*;
+import minijava.intermediate.tree.TreeExp;
+import minijava.intermediate.tree.TreeExpCALL;
+import minijava.intermediate.tree.TreeExpCONST;
+import minijava.intermediate.tree.TreeExpESEQ;
+import minijava.intermediate.tree.TreeExpMEM;
+import minijava.intermediate.tree.TreeExpNAME;
+import minijava.intermediate.tree.TreeExpOP;
+import minijava.intermediate.tree.TreeExpTEMP;
+import minijava.intermediate.tree.TreeStm;
+import minijava.intermediate.tree.TreeStmCJUMP;
+import minijava.intermediate.tree.TreeStmEXP;
+import minijava.intermediate.tree.TreeStmJUMP;
+import minijava.intermediate.tree.TreeStmLABEL;
+import minijava.intermediate.tree.TreeStmMOVE;
+import minijava.intermediate.tree.TreeStmSEQ;
+import minijava.intermediate.visitors.TreeExpVisitor;
+import minijava.intermediate.visitors.TreeStmVisitor;
 
 public class IntermediateToCmm {
 	
@@ -127,7 +144,7 @@ public class IntermediateToCmm {
     return t;
   }
 
-  private static class TreeExpToCmm implements TreeExpVisitor<String> {
+  private static class TreeExpToCmm implements TreeExpVisitor<String, RuntimeException> {
 
     private String gen(TreeExp e) {
       return e.accept(this);
@@ -183,8 +200,9 @@ public class IntermediateToCmm {
           return ">>";
         case XOR:
           return "^";
+        default:
+          throw new UnsupportedOperationException("Operator " + op + " not supported in C--");
       }
-      throw new UnsupportedOperationException("Operator " + op + " not supported in C--");
     }
 
     @Override
@@ -222,7 +240,7 @@ public class IntermediateToCmm {
     }
   }
 
-  private static class TreeStmToCmm implements TreeStmVisitor<Void> {
+  private static class TreeStmToCmm implements TreeStmVisitor<Void, RuntimeException> {
 
     private String gen(TreeExp e) {
       return e.accept(new TreeExpToCmm());
@@ -288,8 +306,9 @@ public class IntermediateToCmm {
           return "<=";
         case GE:
           return ">=";
+        default:
+          throw new UnsupportedOperationException("CJUMP relation " + rel + " not supported in C--");
       }
-      throw new UnsupportedOperationException("CJUMP relation " + rel + " not supported in C--");
     }
 
     @Override
@@ -324,7 +343,7 @@ public class IntermediateToCmm {
     }
   }
 
-  static class TempsInTreeExp implements TreeExpVisitor<Set<Temp>> {
+  static class TempsInTreeExp implements TreeExpVisitor<Set<Temp>, RuntimeException> {
 
     private Set<Temp> temps(TreeExp e) {
       return e.accept(this);
@@ -380,7 +399,7 @@ public class IntermediateToCmm {
     }
   }
 
-  static class TempsInTreeStm implements TreeStmVisitor<Set<Temp>> {
+  static class TempsInTreeStm implements TreeStmVisitor<Set<Temp>, RuntimeException> {
 
     private Set<Temp> temps(TreeExp e) {
       return e.accept(new TempsInTreeExp());

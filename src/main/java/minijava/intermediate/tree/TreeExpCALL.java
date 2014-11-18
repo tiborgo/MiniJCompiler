@@ -1,6 +1,8 @@
 package minijava.intermediate.tree;
 
 import minijava.intermediate.Label;
+import minijava.intermediate.visitors.TreeExpVisitor;
+
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,7 +21,7 @@ public class TreeExpCALL extends TreeExp {
   }
 
   @Override
-  public <A> A accept(TreeExpVisitor<A> visitor) {
+  public <A, T extends Throwable> A accept(TreeExpVisitor<A, T> visitor) throws T {
     return visitor.visit(this);
   }
 

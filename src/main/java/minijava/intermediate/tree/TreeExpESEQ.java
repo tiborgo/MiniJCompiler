@@ -1,5 +1,7 @@
 package minijava.intermediate.tree;
 
+import minijava.intermediate.visitors.TreeExpVisitor;
+
 public class TreeExpESEQ extends TreeExp {
   public final TreeStm stm;
   public final TreeExp res;
@@ -13,7 +15,7 @@ public class TreeExpESEQ extends TreeExp {
   }
 
   @Override
-  public <A> A accept(TreeExpVisitor<A> visitor) {
+  public <A, T extends Throwable> A accept(TreeExpVisitor<A, T> visitor) throws T {
     return visitor.visit(this);
   }
 

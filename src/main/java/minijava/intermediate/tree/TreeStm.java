@@ -1,11 +1,13 @@
 package minijava.intermediate.tree;
 
 import java.util.List;
+
 import minijava.intermediate.Label;
+import minijava.intermediate.visitors.TreeStmVisitor;
 
 public abstract class TreeStm {
 
-  public abstract <A> A accept(TreeStmVisitor<A> visitor);
+  public abstract <A, T extends Throwable> A accept(TreeStmVisitor<A, T> visitor)  throws T;
 
   // construct single TreeStm from a sequence of TreeStms
   public static TreeStm fromArray(TreeStm... stms) {
