@@ -13,13 +13,24 @@ import minijava.intermediate.tree.TreeStmLABEL;
 
 public class Generator {
 	
-	public final Label endLabel;
-
-	public Generator() {
-		this.endLabel = new Label();
+	public static class BaseBlockContainer {
+		
+		public final Map<Label, BaseBlock> baseBlocks;
+		public final Label startLabel;
+		public final Label endLabel;
+		
+		private BaseBlockContainer(Map<Label, BaseBlock> baseBlocks, Label startLabel, Label endLabel) {
+			this.baseBlocks = baseBlocks;
+			this.startLabel = startLabel;
+			this.endLabel = endLabel;
+		}
 	}
 	
-	public Map<Label, BaseBlock> generate(List<TreeStm> stms) {
+	private Generator() {
+		
+	}
+
+	public static BaseBlockContainer generate(List<TreeStm> stms) {
 		
 		Map<Label, BaseBlock> baseBlocks = new HashMap<>();
 		
@@ -27,12 +38,15 @@ public class Generator {
 		Label currentBaseBlockLabel;
 		int i = 1;
 		
+		Label startLabel;
 		if (!(stms.get(0) instanceof TreeStmLABEL)) {
-			currentBaseBlockLabel = new Label();
+			startLabel = new Label();
+			currentBaseBlockLabel = startLabel;
 			currentBaseBlock.add(new TreeStmLABEL(currentBaseBlockLabel));
 		}
 		else {
-			currentBaseBlockLabel = ((TreeStmLABEL)stms.get(0)).label;
+			startLabel = ((TreeStmLABEL)stms.get(0)).label;
+			currentBaseBlockLabel = startLabel;
 			currentBaseBlock.add(stms.get(0));
 			i++;
 		}
@@ -84,6 +98,7 @@ public class Generator {
 		
 		currentBaseBlock.add(stms.get(stms.size()-1));
 		
+		Label endLabel = new Label();
 		if (!((stms.get(stms.size()-1) instanceof TreeStmJUMP) ||
 				(stms.get(stms.size()-1) instanceof TreeStmCJUMP))) {
 
@@ -99,6 +114,6 @@ public class Generator {
 			)
 		);
 		
-		return baseBlocks;
+		return new BaseBlockContainer(baseBlocks, startLabel, endLabel);
 	}
 }
