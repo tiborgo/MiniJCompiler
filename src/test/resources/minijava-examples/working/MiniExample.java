@@ -14,12 +14,18 @@ class Main {
     }
 }
 
+/*class Test {
+	public int test() {
+		return 1;
+	}
+}*/
+
 class Test3 {
 	public int test() {
 		int[] a;
 		a = new int[10];
 		a[9] = 5;
-		return a.length;
+		return a[9];
 	}
 }
 
