@@ -64,6 +64,7 @@ import minijava.intermediate.tree.TreeStmSEQ;
 import minijava.symboltable.tree.Class;
 import minijava.symboltable.tree.Method;
 import minijava.symboltable.tree.Program;
+import minijava.util.Pair;
 
 public class IntermediateVisitor implements
 	PrgVisitor<List<FragmentProc<List<TreeStm>>>, RuntimeException>,
@@ -137,51 +138,94 @@ public class IntermediateVisitor implements
 		return mainClass.accept(this);
 	}
 	
-	private List<TreeStm> makeBaseBlocks(List<TreeStm> stms) {
+	private Pair<Map<Label, List<TreeStm>>, Label> makeBaseBlocks(List<TreeStm> stms) {
 		
-		List<TreeStm> result = new LinkedList<>();
+		Map<Label, List<TreeStm>> baseBlocks = new HashMap<>();
+		
+		List<TreeStm> currentBaseBlock = new LinkedList<>();
+		Label currentBaseBlockLabel;
+		int i = 1;
 		
 		if (!(stms.get(0) instanceof TreeStmLABEL)) {
-			result.add(new TreeStmLABEL(new Label()));
+			currentBaseBlockLabel = new Label();
+			currentBaseBlock.add(new TreeStmLABEL(currentBaseBlockLabel));
+		}
+		else {
+			currentBaseBlockLabel = ((TreeStmLABEL)stms.get(0)).label;
+			currentBaseBlock.add(stms.get(0));
+			i++;
 		}
 		
-		for (int i = 1; i < stms.size(); i++) {
+		for (; i < stms.size(); i++) {
 			
-			result.add(stms.get(i-1));
-			
-			if (stms.get(i) instanceof TreeStmLABEL &&
-					!(stms.get(i-1) instanceof TreeStmJUMP ||
-							stms.get(i-1) instanceof TreeStmCJUMP)) {
+			while (i < stms.size() && !(stms.get(i-1) instanceof TreeStmLABEL)) {
 				
-				result.add(TreeStmJUMP.jumpToLabel(((TreeStmLABEL)stms.get(i)).label));
-			}
-			else if (!(stms.get(i) instanceof TreeStmLABEL) &&
-					(stms.get(i-1) instanceof TreeStmJUMP ||
+				currentBaseBlock.add(stms.get(i-1));
+				
+				// new base block
+				if (stms.get(i) instanceof TreeStmLABEL) {
+					
+					if (!(stms.get(i-1) instanceof TreeStmJUMP || 
 							stms.get(i-1) instanceof TreeStmCJUMP)) {
-				// Dead code -> skip
-				do {
-					i++;
+						
+						currentBaseBlock.add(TreeStmJUMP.jumpToLabel(((TreeStmLABEL)stms.get(i)).label));
+					}
 				}
-				while(i < stms.size() && !(stms.get(i) instanceof TreeStmLABEL));
+				else if (!(stms.get(i) instanceof TreeStmLABEL) &&
+						(stms.get(i-1) instanceof TreeStmJUMP ||
+								stms.get(i-1) instanceof TreeStmCJUMP)) {
+					// Dead code -> skip
+					do {
+						i++;
+					}
+					while(i < stms.size() && !(stms.get(i) instanceof TreeStmLABEL));
+				}
+				
+				i++;
 			}
+			
+			if (i == stms.size()) {
+				break;
+			}
+			
+			baseBlocks.put(currentBaseBlockLabel, currentBaseBlock);
+			currentBaseBlock = new LinkedList<>();
+			currentBaseBlockLabel = ((TreeStmLABEL)stms.get(i-1)).label;
+			currentBaseBlock.add(stms.get(i-1));
 		}
 		
-		result.add(stms.get(stms.size()-1));
+		currentBaseBlock.add(stms.get(stms.size()-1));
 		
+		Label endLabel = null;
 		if (!((stms.get(stms.size()-1) instanceof TreeStmJUMP) ||
 				(stms.get(stms.size()-1) instanceof TreeStmCJUMP))) {
+
+			endLabel = new Label();
+			currentBaseBlock.add(TreeStmJUMP.jumpToLabel(endLabel));
+			baseBlocks.put(currentBaseBlockLabel, currentBaseBlock);
 			
-			Label endLabel = new Label();
-			result.add(TreeStmJUMP.jumpToLabel(endLabel));
-			result.add(new TreeStmLABEL(endLabel));
+			currentBaseBlock = new LinkedList<>();
+			currentBaseBlock.add(new TreeStmLABEL(endLabel));
+			currentBaseBlockLabel = endLabel;
 		}
 		
-		return result;
+		baseBlocks.put(currentBaseBlockLabel, currentBaseBlock);
+		
+		return new Pair<>(baseBlocks, endLabel);
 	}
 	
-	private List<TreeStm> trace(List<TreeStm> stms) {
-		// TODO: implement
-		return null;
+	private List<TreeStm> trace(Pair<Map<Label, List<TreeStm>>, Label> baseBlocks) {
+		
+		List<TreeStm> result = new LinkedList<>();
+		for (Label label : baseBlocks.fst.keySet()) {
+			if (!label.equals(baseBlocks.snd)) {
+				result.addAll(baseBlocks.fst.get(label));
+			}
+		}
+		
+		result.addAll(baseBlocks.fst.get(baseBlocks.snd));
+		
+		return result;
 	}
 
 	@Override
@@ -222,7 +266,7 @@ public class IntermediateVisitor implements
 		FragmentProc<TreeStm> frag = new FragmentProc<>(frame, method);
 		FragmentProc<List<TreeStm>> canonFrag = (FragmentProc<List<TreeStm>>) frag.accept(new Canon());
 		
-		canonFrag = new FragmentProc<List<TreeStm>>(canonFrag.frame, makeBaseBlocks(canonFrag.body));
+		canonFrag = new FragmentProc<List<TreeStm>>(canonFrag.frame, trace(makeBaseBlocks(canonFrag.body)));
 
 		methodContext = null;
 
