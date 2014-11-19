@@ -25,7 +25,7 @@ class Test3 {
 		int[] a;
 		a = new int[10];
 		a[9] = 5;
-		return a[9];
+		return a.length;
 	}
 }
 

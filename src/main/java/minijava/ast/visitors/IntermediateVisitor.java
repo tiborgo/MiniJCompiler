@@ -38,6 +38,10 @@ import minijava.ast.rules.StmWhile;
 import minijava.ast.rules.TyArr;
 import minijava.ast.rules.TyClass;
 import minijava.ast.rules.TyInt;
+import minijava.ast.visitors.baseblocks.BaseBlock;
+import minijava.ast.visitors.baseblocks.Generator;
+import minijava.ast.visitors.baseblocks.ToTreeStmConverter;
+import minijava.ast.visitors.baseblocks.Tracer;
 import minijava.backend.MachineSpecifics;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.Frame;
@@ -64,7 +68,6 @@ import minijava.intermediate.tree.TreeStmSEQ;
 import minijava.symboltable.tree.Class;
 import minijava.symboltable.tree.Method;
 import minijava.symboltable.tree.Program;
-import minijava.util.Pair;
 
 public class IntermediateVisitor implements
 	PrgVisitor<List<FragmentProc<List<TreeStm>>>, RuntimeException>,
@@ -137,96 +140,6 @@ public class IntermediateVisitor implements
 
 		return mainClass.accept(this);
 	}
-	
-	private Pair<Map<Label, List<TreeStm>>, Label> makeBaseBlocks(List<TreeStm> stms) {
-		
-		Map<Label, List<TreeStm>> baseBlocks = new HashMap<>();
-		
-		List<TreeStm> currentBaseBlock = new LinkedList<>();
-		Label currentBaseBlockLabel;
-		int i = 1;
-		
-		if (!(stms.get(0) instanceof TreeStmLABEL)) {
-			currentBaseBlockLabel = new Label();
-			currentBaseBlock.add(new TreeStmLABEL(currentBaseBlockLabel));
-		}
-		else {
-			currentBaseBlockLabel = ((TreeStmLABEL)stms.get(0)).label;
-			currentBaseBlock.add(stms.get(0));
-			i++;
-		}
-		
-		for (; i < stms.size(); i++) {
-			
-			while (i < stms.size() && !(stms.get(i-1) instanceof TreeStmLABEL)) {
-				
-				currentBaseBlock.add(stms.get(i-1));
-				
-				// new base block
-				if (stms.get(i) instanceof TreeStmLABEL) {
-					
-					if (!(stms.get(i-1) instanceof TreeStmJUMP || 
-							stms.get(i-1) instanceof TreeStmCJUMP)) {
-						
-						currentBaseBlock.add(TreeStmJUMP.jumpToLabel(((TreeStmLABEL)stms.get(i)).label));
-					}
-				}
-				else if (!(stms.get(i) instanceof TreeStmLABEL) &&
-						(stms.get(i-1) instanceof TreeStmJUMP ||
-								stms.get(i-1) instanceof TreeStmCJUMP)) {
-					// Dead code -> skip
-					do {
-						i++;
-					}
-					while(i < stms.size() && !(stms.get(i) instanceof TreeStmLABEL));
-				}
-				
-				i++;
-			}
-			
-			if (i == stms.size()) {
-				break;
-			}
-			
-			baseBlocks.put(currentBaseBlockLabel, currentBaseBlock);
-			currentBaseBlock = new LinkedList<>();
-			currentBaseBlockLabel = ((TreeStmLABEL)stms.get(i-1)).label;
-			currentBaseBlock.add(stms.get(i-1));
-		}
-		
-		currentBaseBlock.add(stms.get(stms.size()-1));
-		
-		Label endLabel = null;
-		if (!((stms.get(stms.size()-1) instanceof TreeStmJUMP) ||
-				(stms.get(stms.size()-1) instanceof TreeStmCJUMP))) {
-
-			endLabel = new Label();
-			currentBaseBlock.add(TreeStmJUMP.jumpToLabel(endLabel));
-			baseBlocks.put(currentBaseBlockLabel, currentBaseBlock);
-			
-			currentBaseBlock = new LinkedList<>();
-			currentBaseBlock.add(new TreeStmLABEL(endLabel));
-			currentBaseBlockLabel = endLabel;
-		}
-		
-		baseBlocks.put(currentBaseBlockLabel, currentBaseBlock);
-		
-		return new Pair<>(baseBlocks, endLabel);
-	}
-	
-	private List<TreeStm> trace(Pair<Map<Label, List<TreeStm>>, Label> baseBlocks) {
-		
-		List<TreeStm> result = new LinkedList<>();
-		for (Label label : baseBlocks.fst.keySet()) {
-			if (!label.equals(baseBlocks.snd)) {
-				result.addAll(baseBlocks.fst.get(label));
-			}
-		}
-		
-		result.addAll(baseBlocks.fst.get(baseBlocks.snd));
-		
-		return result;
-	}
 
 	@Override
 	public List<FragmentProc<List<TreeStm>>> visit(DeclMeth m) throws RuntimeException {
@@ -266,7 +179,14 @@ public class IntermediateVisitor implements
 		FragmentProc<TreeStm> frag = new FragmentProc<>(frame, method);
 		FragmentProc<List<TreeStm>> canonFrag = (FragmentProc<List<TreeStm>>) frag.accept(new Canon());
 		
-		canonFrag = new FragmentProc<List<TreeStm>>(canonFrag.frame, trace(makeBaseBlocks(canonFrag.body)));
+		Generator generator = new Generator();
+		Map<Label, BaseBlock> baseBlocks = generator.generate(canonFrag.body);
+		Tracer tracer = new Tracer();
+		List<BaseBlock> tracedBaseBlocks = tracer.trace(baseBlocks);
+		ToTreeStmConverter converter = new ToTreeStmConverter(generator.endLabel);
+		List<TreeStm> tracedBody = converter.convert(tracedBaseBlocks);
+		
+		canonFrag = new FragmentProc<List<TreeStm>>(canonFrag.frame, tracedBody);
 
 		methodContext = null;
 
@@ -447,6 +367,8 @@ public class IntermediateVisitor implements
 			TreeExp array = e.array.accept(this);
 			TreeExp index = e.index.accept(this);
 					
+			// TODO: check array bounds
+			
 			return new TreeExpMEM(
 				new TreeExpOP(
 					Op.PLUS,
