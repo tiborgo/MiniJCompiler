@@ -42,6 +42,7 @@ import minijava.ast.visitors.baseblocks.BaseBlock;
 import minijava.ast.visitors.baseblocks.Generator;
 import minijava.ast.visitors.baseblocks.ToTreeStmConverter;
 import minijava.ast.visitors.baseblocks.Tracer;
+import minijava.ast.visitors.baseblocks.Generator.BaseBlockContainer;
 import minijava.backend.MachineSpecifics;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.Frame;
@@ -179,12 +180,9 @@ public class IntermediateVisitor implements
 		FragmentProc<TreeStm> frag = new FragmentProc<>(frame, method);
 		FragmentProc<List<TreeStm>> canonFrag = (FragmentProc<List<TreeStm>>) frag.accept(new Canon());
 		
-		Generator generator = new Generator();
-		Map<Label, BaseBlock> baseBlocks = generator.generate(canonFrag.body);
-		Tracer tracer = new Tracer();
-		List<BaseBlock> tracedBaseBlocks = tracer.trace(baseBlocks);
-		ToTreeStmConverter converter = new ToTreeStmConverter(generator.endLabel);
-		List<TreeStm> tracedBody = converter.convert(tracedBaseBlocks);
+		BaseBlockContainer baseBlocks = Generator.generate(canonFrag.body);
+		List<BaseBlock> tracedBaseBlocks = Tracer.trace(baseBlocks.baseBlocks);
+		List<TreeStm> tracedBody = ToTreeStmConverter.convert(tracedBaseBlocks, baseBlocks.startLabel, baseBlocks.endLabel);
 		
 		canonFrag = new FragmentProc<List<TreeStm>>(canonFrag.frame, tracedBody);
 

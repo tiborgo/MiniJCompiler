@@ -8,9 +8,20 @@ import minijava.intermediate.Label;
 
 public class Tracer {
 
-	public List<BaseBlock> trace(Map<Label, BaseBlock> baseBlocks) {
+	private Tracer() {
 		
-		List<BaseBlock> result = new LinkedList<>();
+	}
+	
+	public static List<BaseBlock> trace(Map<Label, BaseBlock> baseBlocks) {
+		
+		LinkedList<BaseBlock> result = new LinkedList<>();
+		LinkedList<Label> untracedBlockKeys = new LinkedList<>(baseBlocks.keySet());
+		
+		/*while (untracedBlockKeys.size() > 0) {
+			result.
+		}
+		
+		List<BaseBlock> result = new LinkedList<>();*/
 		for (Label label : baseBlocks.keySet()) {
 			result.add(baseBlocks.get(label));
 		}
