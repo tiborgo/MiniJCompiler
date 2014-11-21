@@ -181,7 +181,7 @@ public class IntermediateVisitor implements
 		FragmentProc<List<TreeStm>> canonFrag = (FragmentProc<List<TreeStm>>) frag.accept(new Canon());
 		
 		BaseBlockContainer baseBlocks = Generator.generate(canonFrag.body);
-		List<BaseBlock> tracedBaseBlocks = Tracer.trace(baseBlocks.baseBlocks);
+		List<BaseBlock> tracedBaseBlocks = Tracer.trace(baseBlocks.baseBlocks, baseBlocks.startLabel);
 		List<TreeStm> tracedBody = ToTreeStmConverter.convert(tracedBaseBlocks, baseBlocks.startLabel, baseBlocks.endLabel);
 		
 		canonFrag = new FragmentProc<List<TreeStm>>(canonFrag.frame, tracedBody);

@@ -85,11 +85,7 @@ public class Generator {
 			
 			baseBlocks.put(
 				currentBaseBlockLabel,
-				new BaseBlock(
-					currentBaseBlockLabel,
-					currentBaseBlock.get(currentBaseBlock.size()-1),
-					currentBaseBlock
-				)
+				new BaseBlock(currentBaseBlock)
 			);
 			currentBaseBlock = new LinkedList<>();
 			currentBaseBlockLabel = ((TreeStmLABEL)stms.get(i-1)).label;
@@ -107,11 +103,7 @@ public class Generator {
 		
 		baseBlocks.put(
 			currentBaseBlockLabel,
-			new BaseBlock(
-				currentBaseBlockLabel,
-				currentBaseBlock.get(currentBaseBlock.size()-1),
-				currentBaseBlock
-			)
+			new BaseBlock(currentBaseBlock)
 		);
 		
 		return new BaseBlockContainer(baseBlocks, startLabel, endLabel);

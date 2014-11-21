@@ -24,7 +24,12 @@ class Test3 {
 	public int test() {
 		int[] a;
 		a = new int[10];
-		a[9] = 5;
+		if (5 < 3) {
+			a[9] = 5;
+		}
+		else {
+			a[9] = 3;
+		}
 		return a.length;
 	}
 }
