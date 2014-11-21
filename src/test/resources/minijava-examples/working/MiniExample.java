@@ -24,13 +24,13 @@ class Test3 {
 	public int test() {
 		int[] a;
 		a = new int[10];
-		if (5 < 3) {
+		if (5 < a[0]) {
 			a[9] = 5;
 		}
 		else {
 			a[9] = 3;
 		}
-		return a.length;
+		return a[9];
 	}
 }
 
