@@ -69,7 +69,7 @@ public class Tracer {
 			if (jump.dest instanceof TreeExpNAME) {
 				optimalNextBaseBlock = baseBlocks.get(((TreeExpNAME)jump.dest).label);
 			} else {
-				throw new UnsupportedOperationException("Only calls to labels are implemented!");
+				throw new UnsupportedOperationException("Only jumps to labels are implemented!");
 			}
 		}
 		
