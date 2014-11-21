@@ -328,6 +328,7 @@ public class IntermediateVisitor implements
 					operator = Op.DIV;
 					break;
 				case AND:
+					// FIXME: Op.AND does not equal &&
 					operator = Op.AND;
 					break;
 				case LT:
@@ -338,6 +339,7 @@ public class IntermediateVisitor implements
 							new TreeExpCONST(7)
 					);
 					return smallerThan;*/
+					// TODO: optimise (slide 148)
 					Temp result = new Temp();
 					Label jumpPointTrue = new Label();
 					Label jumpPointFalse = new Label();
