@@ -30,7 +30,7 @@ public class Generator {
 		
 	}
 
-	public static BaseBlockContainer generate(List<TreeStm> stms) {
+	public static BaseBlockContainer generate(List<TreeStm> stms, Label endLabel) {
 		
 		Map<Label, BaseBlock> baseBlocks = new HashMap<>();
 		
@@ -93,8 +93,7 @@ public class Generator {
 		}
 		
 		currentBaseBlock.add(stms.get(stms.size()-1));
-		
-		Label endLabel = new Label();
+
 		if (!((stms.get(stms.size()-1) instanceof TreeStmJUMP) ||
 				(stms.get(stms.size()-1) instanceof TreeStmCJUMP))) {
 
