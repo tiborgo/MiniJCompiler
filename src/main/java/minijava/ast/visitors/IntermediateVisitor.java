@@ -169,18 +169,19 @@ public class IntermediateVisitor implements
 			classTemps.put(classContext.fields.get(i).name, new TreeExpMEM(new TreeExpOP(Op.PLUS, thisExp, new TreeExpCONST(offset))));
 		}
 
+		Label returnLabel = new Label();
 		Map<String, TreeExp> methodAndClassTemps = new HashMap<>();
 		methodAndClassTemps.putAll(classTemps);
 		methodAndClassTemps.putAll(methodTemps);
-		TreeStm body = m.body.accept(new IntermediateVisitorExpStm(methodAndClassTemps, machineSpecifics, classContext, methodContext, memoryFootprint, symbolTable));
-		TreeExp returnExp = m.returnExp.accept(new IntermediateVisitorExpStm(methodAndClassTemps, machineSpecifics, classContext, methodContext, memoryFootprint, symbolTable));
+		TreeStm body = m.body.accept(new IntermediateVisitorExpStm(methodAndClassTemps, machineSpecifics, classContext, methodContext, memoryFootprint, symbolTable, returnLabel));
+		TreeExp returnExp = m.returnExp.accept(new IntermediateVisitorExpStm(methodAndClassTemps, machineSpecifics, classContext, methodContext, memoryFootprint, symbolTable, returnLabel));
 
 		TreeStm method = frame.makeProc(body, returnExp);
 
 		FragmentProc<TreeStm> frag = new FragmentProc<>(frame, method);
 		FragmentProc<List<TreeStm>> canonFrag = (FragmentProc<List<TreeStm>>) frag.accept(new Canon());
 		
-		BaseBlockContainer baseBlocks = Generator.generate(canonFrag.body);
+		BaseBlockContainer baseBlocks = Generator.generate(canonFrag.body, returnLabel);
 		List<BaseBlock> tracedBaseBlocks = Tracer.trace(baseBlocks.baseBlocks, baseBlocks.startLabel);
 		List<TreeStm> tracedBody = ToTreeStmConverter.convert(tracedBaseBlocks, baseBlocks.startLabel, baseBlocks.endLabel);
 		
@@ -210,19 +211,22 @@ public class IntermediateVisitor implements
 		private final Map<String, Integer> memoryFootprint;
 		private final Map<String, TreeExp> temps;
 		private final MachineSpecifics  machineSpecifics;
+		private final Label returnLabel;
 
 		public IntermediateVisitorExpStm(Map<String, TreeExp> temps,
 				MachineSpecifics machineSpecifics,
 				DeclClass classContext,
 				DeclMeth methodContext,
 				Map<String, Integer> memoryFootprint,
-				Program symbolTable) {
+				Program symbolTable,
+				Label returnLabel) {
 			this.temps = temps;
 			this.machineSpecifics = machineSpecifics;
 			this.classContext = classContext;
 			this.methodContext = methodContext;
 			this.memoryFootprint = memoryFootprint;
 			this.symbolTable = symbolTable;
+			this.returnLabel = returnLabel;
 		}
 
 		@Override
@@ -522,8 +526,11 @@ public class IntermediateVisitor implements
 					raiseLabel,
 					assignLabel);
 			
-			TreeStm raiseStm = new TreeStmEXP( 
-				TreeExpCALL.call1("_raise", new TreeExpCONST(1))
+			TreeStm raiseStm = TreeStmSEQ.fromArray(
+				new TreeStmEXP( 
+					TreeExpCALL.call1("_raise", new TreeExpCONST(1))
+				),
+				TreeStmJUMP.jumpToLabel(returnLabel)
 			);
 			
 			TreeStm assignStm =  new TreeStmMOVE(
