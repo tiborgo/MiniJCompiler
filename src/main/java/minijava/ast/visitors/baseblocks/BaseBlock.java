@@ -17,8 +17,8 @@ public class BaseBlock {
 		
 		if (body.size() < 2 &&
 				!(body.get(0) instanceof TreeStmLABEL) &&
-				!(body.get(this.body.size()-1) instanceof TreeStmCJUMP ||
-						body.get(this.body.size()-1) instanceof TreeStmJUMP)) {
+				!(body.get(body.size()-1) instanceof TreeStmCJUMP ||
+						body.get(body.size()-1) instanceof TreeStmJUMP)) {
 			throw new IllegalArgumentException("Base block's body has to start with label and end with jump");
 		}
 		
