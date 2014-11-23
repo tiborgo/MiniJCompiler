@@ -21,8 +21,9 @@ import minijava.MiniJavaCompiler;
 import minijava.ast.rules.Prg;
 import minijava.backend.dummymachine.DummyMachineSpecifics;
 import minijava.backend.dummymachine.IntermediateToCmm;
-import minijava.intermediate.Fragment;
+import minijava.intermediate.FragmentProc;
 import minijava.intermediate.tree.TreeStm;
+import minijava.symboltable.tree.Program;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -41,7 +42,7 @@ public class IntermediateVisitorTest {
 
 	@Before
 	public void setUp() {
-		visitor = new IntermediateVisitor(new DummyMachineSpecifics());
+		visitor = null;
 	}
 
 	@Test
@@ -51,8 +52,10 @@ public class IntermediateVisitorTest {
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 				System.out.println("Testing creation translation to intermediate language for file \""+file.toString()+"\"");
 				Prg ast = miniJavaFrontend.getAbstractSyntaxTree(file.toString());
-				List<Fragment<TreeStm>> fragmentList = ast.accept(visitor);
-				String cCode = IntermediateToCmm.stmFragmentsToCmm(fragmentList);
+				Program symbolTable = ast.accept(new SymbolTableVisitor());
+				visitor = new IntermediateVisitor(new DummyMachineSpecifics(), symbolTable);
+				List<FragmentProc<List<TreeStm>>> fragmentList = ast.accept(visitor);
+				String cCode = IntermediateToCmm.stmListFragmentsToCmm(fragmentList);
 				Runtime runtime = Runtime.getRuntime();
 				// -xc specifies the input language as C and is required for GCC to read from stdin
 				Process gccCall = runtime.exec("gcc -o /dev/null -xc -");
