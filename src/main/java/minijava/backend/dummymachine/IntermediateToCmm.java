@@ -32,7 +32,7 @@ public class IntermediateToCmm {
 	
 	private final static String valueType = "int64_t";
 
-  public static String stmFragmentsToCmm(List<Fragment<TreeStm>> frags) {
+  public static String stmFragmentsToCmm(List<? extends Fragment<TreeStm>> frags) {
     List<Fragment<List<TreeStm>>> frag1 = new LinkedList<>();
     for (Fragment<TreeStm> frag : frags) {
       frag1.add(frag.accept(new FragmentVisitor<TreeStm, Fragment<List<TreeStm>>>() {
@@ -48,7 +48,7 @@ public class IntermediateToCmm {
     return stmListFragmentsToCmm(frag1);
   }
 
-  public static String stmListFragmentsToCmm(List<Fragment<List<TreeStm>>> frags) {
+  public static String stmListFragmentsToCmm(List<? extends Fragment<List<TreeStm>>> frags) {
     declarations = new StringBuilder();
     code = new StringBuilder();
 
