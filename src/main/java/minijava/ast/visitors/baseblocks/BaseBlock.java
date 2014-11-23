@@ -8,11 +8,18 @@ import minijava.intermediate.tree.TreeStmCJUMP;
 import minijava.intermediate.tree.TreeStmJUMP;
 import minijava.intermediate.tree.TreeStmLABEL;
 
+/**
+ * Represents a snippet of low-level code that is used for the serialization of the call graph.
+ * @see minijava.ast.visitors.baseblocks.Tracer
+ */
 public class BaseBlock {
+	/** Entry point of the code block. */
 	public final Label         label;
-	public final TreeStm       jump;
+	/** Statements to be executed. */
 	public final List<TreeStm> body;
-	
+	/** Jump statement when exiting the block. */
+	public final TreeStm       jump;
+
 	public BaseBlock(List<TreeStm> body) {
 		
 		if (body.size() < 2 &&
