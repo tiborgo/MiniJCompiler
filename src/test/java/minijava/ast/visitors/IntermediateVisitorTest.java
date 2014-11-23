@@ -1,6 +1,7 @@
 package minijava.ast.visitors;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -31,6 +32,7 @@ import org.junit.Test;
 public class IntermediateVisitorTest {
 	private static final Path EXAMPLE_PROGRAM_PATH_BASE = Paths.get("src/test/resources/minijava-examples");
 	private static final Path EXAMPLE_PROGRAM_PATH_WORKING = EXAMPLE_PROGRAM_PATH_BASE.resolve("working");
+	private static final File RUNTIME_DIRECTORY = new File("src/main/resources/minijava/runtime").getAbsoluteFile();
 
 	private static IntermediateVisitor visitor;
 	private static Frontend miniJavaFrontend;
@@ -56,9 +58,10 @@ public class IntermediateVisitorTest {
 				visitor = new IntermediateVisitor(new DummyMachineSpecifics(), symbolTable);
 				List<FragmentProc<List<TreeStm>>> fragmentList = ast.accept(visitor);
 				String cCode = IntermediateToCmm.stmListFragmentsToCmm(fragmentList);
-				Runtime runtime = Runtime.getRuntime();
 				// -xc specifies the input language as C and is required for GCC to read from stdin
-				Process gccCall = runtime.exec("gcc -o /dev/null -xc -");
+				ProcessBuilder processBuilder = new ProcessBuilder("gcc", "-o", "/dev/null", "-xc", "runtime.c", "-");
+				processBuilder.directory(RUNTIME_DIRECTORY);
+				Process gccCall = processBuilder.start();
 				// Write C code to stdin of C Compiler
 				OutputStream stdin = gccCall.getOutputStream();
 				stdin.write(cCode.getBytes());
