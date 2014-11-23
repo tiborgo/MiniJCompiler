@@ -22,11 +22,14 @@ public class BaseBlock {
 
 	public BaseBlock(List<TreeStm> body) {
 		
-		if (body.size() < 2 ||
-				!(body.get(0) instanceof TreeStmLABEL) ||
-				!(body.get(body.size()-1) instanceof TreeStmCJUMP ||
-						body.get(body.size()-1) instanceof TreeStmJUMP)) {
-			throw new IllegalArgumentException("Base block's body has to start with label and end with jump");
+		if (body.size() < 2) {
+			throw new IllegalArgumentException("A BaseBlock must consist of at least two statements.");
+		}
+		if (!(body.get(0) instanceof TreeStmLABEL)) {
+			throw new IllegalArgumentException("A BaseBlock must start with a label.");
+		}
+		if (!(body.get(body.size()-1) instanceof TreeStmCJUMP || body.get(body.size()-1) instanceof TreeStmJUMP)) {
+			throw new IllegalArgumentException("A BaseBlock must wnd with a jump or conditional jump.");
 		}
 		
 		this.body = body;
