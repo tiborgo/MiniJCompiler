@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -22,7 +24,6 @@ import minijava.intermediate.FragmentProc;
 import minijava.intermediate.tree.TreeStm;
 import minijava.intermediate.tree.TreeStmSEQ;
 import minijava.symboltable.tree.Program;
-
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -30,6 +31,7 @@ import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 public class MiniJavaCompiler implements Frontend {
+	private static final Path RUNTIME_DIRECTORY = Paths.get("src/main/resources/minijava/runtime");
 
 	@Override
 	public Prg getAbstractSyntaxTree(String filePath) throws IOException {
@@ -89,7 +91,9 @@ public class MiniJavaCompiler implements Frontend {
 			
 			Runtime runtime = Runtime.getRuntime();
 			// -xc specifies the input language as C and is required for GCC to read from stdin
-			Process gccCall = runtime.exec("gcc -m64 -xc runtime.c -");
+			ProcessBuilder processBuilder = new ProcessBuilder("gcc", "-m64", "-xc", "runtime.c", "-");
+			processBuilder.directory(RUNTIME_DIRECTORY.toFile());
+			Process gccCall = processBuilder.start();
 			// Write C code to stdin of C Compiler
 			OutputStream stdin = gccCall.getOutputStream();
 			stdin.write(intermediateOutput.getBytes());
@@ -122,7 +126,7 @@ public class MiniJavaCompiler implements Frontend {
 			
 			System.out.println("-------------------------");
 			
-			Process outCall = runtime.exec("./a.out");
+			Process outCall = runtime.exec(RUNTIME_DIRECTORY.resolve("a.out").toString());
 			
 			try {
 				outCall.waitFor();
