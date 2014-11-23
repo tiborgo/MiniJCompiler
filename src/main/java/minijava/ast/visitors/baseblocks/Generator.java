@@ -12,7 +12,10 @@ import minijava.intermediate.tree.TreeStmJUMP;
 import minijava.intermediate.tree.TreeStmLABEL;
 
 public class Generator {
-	
+
+	/**
+	 * Class that groups a number of code blocks while providing a common entry and a common exit point.
+	 */
 	public static class BaseBlockContainer {
 		
 		public final Map<Label, BaseBlock> baseBlocks;
@@ -30,6 +33,14 @@ public class Generator {
 		
 	}
 
+	// TODO: Make Generator a singleton instead of using static methods
+	/**
+	 * Creates {@code BaseBlock}s from the specified list of statements and returns them as a {@code BaseBlockContainer}
+	 * with the specified exit point.
+	 * @param stms Canonicalized list of statements.
+	 * @param endLabel Common exit point.
+	 * @return Object containing base blocks that were constructed from the statement list.
+	 */
 	public static BaseBlockContainer generate(List<TreeStm> stms, Label endLabel) {
 		
 		Map<Label, BaseBlock> baseBlocks = new HashMap<>();
