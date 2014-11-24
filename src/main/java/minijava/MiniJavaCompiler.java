@@ -22,6 +22,7 @@ import minijava.ast.visitors.baseblocks.BaseBlock;
 import minijava.ast.visitors.baseblocks.Generator;
 import minijava.ast.visitors.baseblocks.ToTreeStmConverter;
 import minijava.ast.visitors.baseblocks.Tracer;
+import minijava.backend.Assem;
 import minijava.backend.MachineSpecifics;
 import minijava.backend.dummymachine.DummyMachineSpecifics;
 import minijava.backend.dummymachine.IntermediateToCmm;
@@ -30,6 +31,7 @@ import minijava.intermediate.FragmentProc;
 import minijava.intermediate.canon.Canon;
 import minijava.intermediate.tree.TreeStm;
 import minijava.intermediate.tree.TreeStmSEQ;
+import minijava.intermediate.visitors.AssemblerVisitor;
 import minijava.symboltable.tree.Program;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
@@ -113,6 +115,11 @@ public class MiniJavaCompiler implements Frontend {
 				
 				intermediateOutput = IntermediateToCmm.stmFragmentsToCmm(tempProcFragements);
 				System.out.println(intermediateOutput);
+				
+				for (FragmentProc<List<TreeStm>> fragment : fragmentsCanonicalized) {
+					AssemblerVisitor assemblerVisitor = new AssemblerVisitor();
+					FragmentProc<List<Assem>> assemFragement = fragment.accept(assemblerVisitor);
+				}
 			}
 			catch (Exception e) {
 				intermediateOutput = IntermediateToCmm.stmFragmentsToCmm(procFragements);
