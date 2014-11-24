@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -57,6 +58,12 @@ public class MiniJavaCompiler implements Frontend {
 		// SymbolTable table = new SymbolTable();
 
 		MiniJavaCompiler compiler = new MiniJavaCompiler();
+		Path compilerOutputFile = null;
+		try {
+			compilerOutputFile = Files.createTempFile("miniJavaCompiler", "CC.out");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		try {
 			Prg program = compiler.getAbstractSyntaxTree("src/test/resources/minijava-examples/working/MiniExample.java");
 			PrettyPrintVisitor prettyPrintVisitor = new PrettyPrintVisitor("");
@@ -106,10 +113,10 @@ public class MiniJavaCompiler implements Frontend {
 			System.out.println(intermediateOutput);
 			
 			System.out.println("-------------------------");
-			
+
 			Runtime runtime = Runtime.getRuntime();
 			// -xc specifies the input language as C and is required for GCC to read from stdin
-			ProcessBuilder processBuilder = new ProcessBuilder("gcc", "-m64", "-xc", "runtime.c", "-");
+			ProcessBuilder processBuilder = new ProcessBuilder("gcc", "-o", compilerOutputFile.toString(), "-m64", "-xc", "runtime.c", "-");
 			processBuilder.directory(RUNTIME_DIRECTORY.toFile());
 			Process gccCall = processBuilder.start();
 			// Write C code to stdin of C Compiler
@@ -144,7 +151,7 @@ public class MiniJavaCompiler implements Frontend {
 			
 			System.out.println("-------------------------");
 			
-			Process outCall = runtime.exec(RUNTIME_DIRECTORY.resolve("a.out").toString());
+			Process outCall = runtime.exec(compilerOutputFile.toString());
 			
 			try {
 				outCall.waitFor();
@@ -185,6 +192,12 @@ public class MiniJavaCompiler implements Frontend {
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 			System.out.println(e.getMessage());
+		} finally {
+			try {
+				Files.delete(compilerOutputFile);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }
