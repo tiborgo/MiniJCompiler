@@ -1,5 +1,6 @@
 package minijava.ast.visitors.baseblocks;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import minijava.intermediate.Label;
@@ -32,7 +33,7 @@ public class BaseBlock {
 			throw new IllegalArgumentException("A BaseBlock must wnd with a jump or conditional jump.");
 		}
 		
-		this.body = body;
+		this.body = new ArrayList<>(body);
 		this.label = ((TreeStmLABEL)body.get(0)).label;
 		this.jump = body.get(body.size()-1);
 	}
