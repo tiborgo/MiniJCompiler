@@ -26,6 +26,6 @@ public class GeneratorTest {
 		// Jump to start
 		statements.add(new TreeStmJUMP(new TreeExpNAME(methodLabel), Collections.singletonList(methodLabel)));
 		Generator.BaseBlockContainer baseBlockContainer = Generator.generate(statements);
-		assertEquals(1, baseBlockContainer.baseBlocks.size());
+		assertEquals(2, baseBlockContainer.baseBlocks.size());
 	}
 }
