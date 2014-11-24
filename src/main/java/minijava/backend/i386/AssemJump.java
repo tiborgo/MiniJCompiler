@@ -10,14 +10,14 @@ import minijava.intermediate.Temp;
 import minijava.util.Function;
 import minijava.util.Pair;
 
-final class AssemJump implements Assem {
+public final class AssemJump implements Assem {
 
-  enum Kind {
+  public enum Kind {
 
     JMP, J, CALL
   }
 
-  enum Cond {
+  public enum Cond {
 
     E, NE, L, LE, G, GE, Z
   }
@@ -26,19 +26,19 @@ final class AssemJump implements Assem {
   private final Operand dest;
   private final Cond cond;
 
-  AssemJump(Kind kind, Label label) {
+  public AssemJump(Kind kind, Label label) {
     this(kind, label, null, null);
   }
 
-  AssemJump(Kind kind, Operand dest) {
+  public AssemJump(Kind kind, Operand dest) {
     this(kind, null, dest, null);
   }
 
-  AssemJump(Kind kind, Label label, Cond cond) {
+  public AssemJump(Kind kind, Label label, Cond cond) {
     this(kind, label, null, cond);
   }
 
-  AssemJump(Kind kind, Label label, Operand dest, Cond cond) {
+  public AssemJump(Kind kind, Label label, Operand dest, Cond cond) {
     assert (kind != Kind.J || cond != null) : "J needs condition argument";
     assert (kind == Kind.CALL || label != null) : "J and JMP need label as destination";
     assert (dest == null || dest instanceof Operand.Reg) : "dynamic destination of CALL must be Reg";
