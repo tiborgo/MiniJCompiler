@@ -94,6 +94,10 @@ public class Generator {
 				break;
 			}
 			
+			if (currentBaseBlock.size() == 1) {
+				currentBaseBlock.add(TreeStmJUMP.jumpToLabel(((TreeStmLABEL)stms.get(i-1)).label));
+			}
+			
 			baseBlocks.put(
 				currentBaseBlockLabel,
 				new BaseBlock(currentBaseBlock)
