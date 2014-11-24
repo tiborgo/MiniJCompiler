@@ -6,7 +6,7 @@ import java.util.List;
 import minijava.intermediate.Temp;
 import minijava.util.Function;
 
-abstract class Operand {
+public abstract class Operand {
 
   final static class Imm extends Operand {
 
