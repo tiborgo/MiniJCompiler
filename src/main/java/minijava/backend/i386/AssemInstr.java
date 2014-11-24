@@ -10,15 +10,15 @@ import minijava.intermediate.Temp;
 import minijava.util.Function;
 import minijava.util.Pair;
 
-final class AssemInstr implements Assem {
+public final class AssemInstr implements Assem {
 
-  enum Kind {
+  public static enum Kind {
 
     RET, LEAVE, NOP
   }
   private final Kind kind;
 
-  AssemInstr(Kind kind) {
+  public AssemInstr(Kind kind) {
     this.kind = kind;
   }
 
