@@ -295,8 +295,25 @@ public class IntermediateVisitor implements
 			} else if (expression instanceof TreeExpTEMP) {
 				TreeExpTEMP temp = (TreeExpTEMP) expression;
 				return new TreeExpOP(Op.MINUS, temp, new TreeExpCONST(1));
+			} else if (expression instanceof TreeExpOP) {
+				return negateOperator((TreeExpOP) expression);
 			}
 			throw new IllegalArgumentException("Unable to negate expression \"" + expression.toString() + "\"");
+		}
+
+		private TreeExpOP negateOperator(TreeExpOP operation) {
+			Op negatedOperator = null;
+			switch (operation.op) {
+				case AND:
+					negatedOperator = Op.OR;
+					break;
+				case OR:
+					negatedOperator = Op.AND;
+					break;
+				default:
+					throw new IllegalArgumentException("Cannot negate operator "+operation.op);
+			}
+			return new TreeExpOP(negatedOperator, operation.left, operation.right);
 		}
 
 		@Override
