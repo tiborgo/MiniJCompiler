@@ -1,14 +1,11 @@
 package minijava.backend.i386;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 import minijava.intermediate.Temp;
 import minijava.util.Function;
 
 public abstract class Operand {
 
-  final static class Imm extends Operand {
+  public final static class Imm extends Operand {
 
     public final int imm;
 
@@ -23,7 +20,7 @@ public abstract class Operand {
     }
   }
 
-  final static class Reg extends Operand {
+  public final static class Reg extends Operand {
 
     public Temp reg;
 
@@ -38,7 +35,7 @@ public abstract class Operand {
     }
   }
 
-  final static class Mem extends Operand {
+  public final static class Mem extends Operand {
 
     public final Temp base;  // maybe null
     public final Integer scale; // null or 1, 2, 4 or 8;
