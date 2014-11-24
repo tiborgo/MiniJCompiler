@@ -27,11 +27,11 @@ import minijava.backend.dummymachine.DummyMachineSpecifics;
 import minijava.backend.dummymachine.IntermediateToCmm;
 import minijava.intermediate.Fragment;
 import minijava.intermediate.FragmentProc;
-import minijava.intermediate.Label;
 import minijava.intermediate.canon.Canon;
 import minijava.intermediate.tree.TreeStm;
 import minijava.intermediate.tree.TreeStmSEQ;
 import minijava.symboltable.tree.Program;
+
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -93,8 +93,7 @@ public class MiniJavaCompiler implements Frontend {
 			List<FragmentProc<List<TreeStm>>> fragmentsCanonicalized = new ArrayList<>(procFragements.size());
 			for (FragmentProc<TreeStm> fragment : procFragements) {
 				FragmentProc<List<TreeStm>> canonFrag = (FragmentProc<List<TreeStm>>) fragment.accept(new Canon());
-				Label returnLabel = new Label();
-				Generator.BaseBlockContainer baseBlocks = Generator.generate(canonFrag.body, returnLabel);
+				Generator.BaseBlockContainer baseBlocks = Generator.generate(canonFrag.body);
 				List<BaseBlock> tracedBaseBlocks = Tracer.trace(baseBlocks.baseBlocks, baseBlocks.startLabel);
 				List<TreeStm> tracedBody = ToTreeStmConverter.convert(tracedBaseBlocks, baseBlocks.startLabel, baseBlocks.endLabel);
 

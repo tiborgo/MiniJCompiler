@@ -533,10 +533,14 @@ public class IntermediateVisitor implements
 					raiseLabel,
 					assignLabel);
 
-			// raise exits the process, so there is no need to jump to the regular exit point
-			TreeStm raiseStm = new TreeStmEXP(
+			// jump explicitly to label so that base block generator produces efficient base blocks
+			TreeStm raiseStm = TreeStmSEQ.fromArray(
+				new TreeStmEXP( 
 					TreeExpCALL.call1("_raise", new TreeExpCONST(1))
+				),
+				TreeStmJUMP.jumpToLabel(raiseLabel)
 			);
+
 			
 			TreeStm assignStm =  new TreeStmMOVE(
 				new TreeExpMEM(

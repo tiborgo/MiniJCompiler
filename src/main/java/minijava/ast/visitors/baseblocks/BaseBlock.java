@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import minijava.intermediate.Label;
+import minijava.intermediate.tree.TreeExpNAME;
 import minijava.intermediate.tree.TreeStm;
 import minijava.intermediate.tree.TreeStmCJUMP;
 import minijava.intermediate.tree.TreeStmJUMP;
@@ -37,4 +38,14 @@ public class BaseBlock {
 		this.label = ((TreeStmLABEL)body.get(0)).label;
 		this.jump = body.get(body.size()-1);
 	}
+	
+	@Override
+	public String toString() {
+		return "{" + label + ",...," +
+				((jump instanceof TreeStmJUMP) ?
+						"(JUMP, " + ((TreeExpNAME)((TreeStmJUMP)jump).dest).label + ")" :
+							"(CJUMP,..., " + ((TreeStmCJUMP)jump).ltrue + ", " + ((TreeStmCJUMP)jump).lfalse + ")") +
+				"}";
+	}
+	
 }
