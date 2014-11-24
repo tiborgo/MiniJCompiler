@@ -72,7 +72,7 @@ import minijava.symboltable.tree.Program;
 
 public class IntermediateVisitor implements
 	PrgVisitor<List<FragmentProc<List<TreeStm>>>, RuntimeException>,
-	DeclVisitor<List<FragmentProc<List<TreeStm>>>, RuntimeException> {
+	DeclVisitor<List<FragmentProc<TreeStm>>, RuntimeException> {
 	
 	private DeclClass classContext;
 	private DeclMeth methodContext;
@@ -95,22 +95,34 @@ public class IntermediateVisitor implements
 			memoryFootprint.put(clazz.className, clazz.fields.size() * machineSpecifics.getWordSize() + 4);
 		}
 
-		List<FragmentProc<List<TreeStm>>> classes = new LinkedList<>();
+		List<FragmentProc<TreeStm>> classes = new LinkedList<>();
 		for(DeclClass clazz : p.classes) {
 			classes.addAll(clazz.accept(this));
 		}
 
 		classes.addAll(p.mainClass.accept(this));
 
-		return classes;
+		List<FragmentProc<List<TreeStm>>> classesCanonicalized = new ArrayList<>(classes.size());
+		for (FragmentProc<TreeStm> fragment : classes) {
+			FragmentProc<List<TreeStm>> canonFrag = (FragmentProc<List<TreeStm>>) fragment.accept(new Canon());
+			Label returnLabel = new Label();
+			BaseBlockContainer baseBlocks = Generator.generate(canonFrag.body, returnLabel);
+			List<BaseBlock> tracedBaseBlocks = Tracer.trace(baseBlocks.baseBlocks, baseBlocks.startLabel);
+			List<TreeStm> tracedBody = ToTreeStmConverter.convert(tracedBaseBlocks, baseBlocks.startLabel, baseBlocks.endLabel);
+
+			classesCanonicalized.add(new FragmentProc<List<TreeStm>>(canonFrag.frame, tracedBody));
+		}
+
+
+		return classesCanonicalized;
 	}
 
 	@Override
-	public List<FragmentProc<List<TreeStm>>> visit(DeclClass c) throws RuntimeException {
+	public List<FragmentProc<TreeStm>> visit(DeclClass c) throws RuntimeException {
 		classContext = c;
 
 		// Methods
-		List<FragmentProc<List<TreeStm>>> methods = new LinkedList<>();
+		List<FragmentProc<TreeStm>> methods = new LinkedList<>();
 		for(DeclMeth method : c.methods) {
 			methods.addAll(method.accept(this));
 		}
@@ -121,7 +133,7 @@ public class IntermediateVisitor implements
 	}
 
 	@Override
-	public List<FragmentProc<List<TreeStm>>> visit(DeclMain d) throws RuntimeException {
+	public List<FragmentProc<TreeStm>> visit(DeclMain d) throws RuntimeException {
 
 		DeclMeth mainMethod = new DeclMeth(
 			new TyInt(),
@@ -143,7 +155,7 @@ public class IntermediateVisitor implements
 	}
 
 	@Override
-	public List<FragmentProc<List<TreeStm>>> visit(DeclMeth m) throws RuntimeException {
+	public List<FragmentProc<TreeStm>> visit(DeclMeth m) throws RuntimeException {
 
 		methodContext = m;
 
@@ -178,22 +190,14 @@ public class IntermediateVisitor implements
 		TreeStm method = frame.makeProc(body, returnExp);
 
 		FragmentProc<TreeStm> frag = new FragmentProc<>(frame, method);
-		FragmentProc<List<TreeStm>> canonFrag = (FragmentProc<List<TreeStm>>) frag.accept(new Canon());
-
-		Label returnLabel = new Label();
-		BaseBlockContainer baseBlocks = Generator.generate(canonFrag.body, returnLabel);
-		List<BaseBlock> tracedBaseBlocks = Tracer.trace(baseBlocks.baseBlocks, baseBlocks.startLabel);
-		List<TreeStm> tracedBody = ToTreeStmConverter.convert(tracedBaseBlocks, baseBlocks.startLabel, baseBlocks.endLabel);
-		
-		canonFrag = new FragmentProc<List<TreeStm>>(canonFrag.frame, tracedBody);
 
 		methodContext = null;
 
-		return Arrays.asList(canonFrag);
+		return Arrays.asList(frag);
 	}
 
 	@Override
-	public List<FragmentProc<List<TreeStm>>> visit(DeclVar d) throws RuntimeException {
+	public List<FragmentProc<TreeStm>> visit(DeclVar d) throws RuntimeException {
 		throw new UnsupportedOperationException("Cannot generate fragment for var declaration");
 	}
 
@@ -525,7 +529,7 @@ public class IntermediateVisitor implements
 					raiseLabel,
 					assignLabel);
 
-			// raise stops the process, so no need to jump to the regular exit point
+			// raise exits the process, so there is no need to jump to the regular exit point
 			TreeStm raiseStm = new TreeStmEXP(
 					TreeExpCALL.call1("_raise", new TreeExpCONST(1))
 			);
