@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -16,11 +17,17 @@ import minijava.ast.visitors.IntermediateVisitor;
 import minijava.ast.visitors.PrettyPrintVisitor;
 import minijava.ast.visitors.SymbolTableVisitor;
 import minijava.ast.visitors.TypeCheckVisitor;
+import minijava.ast.visitors.baseblocks.BaseBlock;
+import minijava.ast.visitors.baseblocks.Generator;
+import minijava.ast.visitors.baseblocks.ToTreeStmConverter;
+import minijava.ast.visitors.baseblocks.Tracer;
 import minijava.backend.MachineSpecifics;
 import minijava.backend.dummymachine.DummyMachineSpecifics;
 import minijava.backend.dummymachine.IntermediateToCmm;
 import minijava.intermediate.Fragment;
 import minijava.intermediate.FragmentProc;
+import minijava.intermediate.Label;
+import minijava.intermediate.canon.Canon;
 import minijava.intermediate.tree.TreeStm;
 import minijava.intermediate.tree.TreeStmSEQ;
 import minijava.symboltable.tree.Program;
@@ -74,10 +81,21 @@ public class MiniJavaCompiler implements Frontend {
 			
 			MachineSpecifics machineSpecifics = new DummyMachineSpecifics();
 			IntermediateVisitor intermediateVisitor = new IntermediateVisitor(machineSpecifics, symbolTable);
-			List<FragmentProc<List<TreeStm>>> procFragements = program.accept(intermediateVisitor);
-			
+			List<FragmentProc<TreeStm>> procFragements = program.accept(intermediateVisitor);
+
+			List<FragmentProc<List<TreeStm>>> fragmentsCanonicalized = new ArrayList<>(procFragements.size());
+			for (FragmentProc<TreeStm> fragment : procFragements) {
+				FragmentProc<List<TreeStm>> canonFrag = (FragmentProc<List<TreeStm>>) fragment.accept(new Canon());
+				Label returnLabel = new Label();
+				Generator.BaseBlockContainer baseBlocks = Generator.generate(canonFrag.body, returnLabel);
+				List<BaseBlock> tracedBaseBlocks = Tracer.trace(baseBlocks.baseBlocks, baseBlocks.startLabel);
+				List<TreeStm> tracedBody = ToTreeStmConverter.convert(tracedBaseBlocks, baseBlocks.startLabel, baseBlocks.endLabel);
+
+				fragmentsCanonicalized.add(new FragmentProc<List<TreeStm>>(canonFrag.frame, tracedBody));
+			}
+
 			List<Fragment<TreeStm>> tempProcFragements = new LinkedList<>();
-			for (FragmentProc<List<TreeStm>> frag : procFragements) {
+			for (FragmentProc<List<TreeStm>> frag : fragmentsCanonicalized) {
 				tempProcFragements.add(new FragmentProc<TreeStm>(
 					frag.frame,
 				 	TreeStmSEQ.fromList(frag.body))
