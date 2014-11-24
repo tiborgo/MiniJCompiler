@@ -62,4 +62,17 @@ public abstract class Operand {
   }
 
   public abstract Operand rename(Function<Temp, Temp> sigma);
+
+  public static class Label extends Operand {
+	  public final minijava.intermediate.Label label;
+
+	 public Label(minijava.intermediate.Label label) {
+		this.label = label;
+	}
+
+	  @Override
+	public Operand rename(Function<Temp, Temp> sigma) {
+		return this;
+	}
+  }
 }
