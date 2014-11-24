@@ -22,16 +22,14 @@ import minijava.ast.visitors.baseblocks.BaseBlock;
 import minijava.ast.visitors.baseblocks.Generator;
 import minijava.ast.visitors.baseblocks.ToTreeStmConverter;
 import minijava.ast.visitors.baseblocks.Tracer;
-import minijava.backend.Assem;
 import minijava.backend.MachineSpecifics;
-import minijava.backend.dummymachine.DummyMachineSpecifics;
 import minijava.backend.dummymachine.IntermediateToCmm;
+import minijava.backend.i386.I386MachineSpecifics;
 import minijava.intermediate.Fragment;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.canon.Canon;
 import minijava.intermediate.tree.TreeStm;
 import minijava.intermediate.tree.TreeStmSEQ;
-import minijava.intermediate.visitors.AssemblerVisitor;
 import minijava.symboltable.tree.Program;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
@@ -88,7 +86,7 @@ public class MiniJavaCompiler implements Frontend {
 			
 			System.out.println("-------------------------");
 			
-			MachineSpecifics machineSpecifics = new DummyMachineSpecifics();
+			MachineSpecifics machineSpecifics = new I386MachineSpecifics();//new DummyMachineSpecifics();
 			IntermediateVisitor intermediateVisitor = new IntermediateVisitor(machineSpecifics, symbolTable);
 			List<FragmentProc<TreeStm>> procFragements = program.accept(intermediateVisitor);
 
@@ -117,8 +115,7 @@ public class MiniJavaCompiler implements Frontend {
 				System.out.println(intermediateOutput);
 				
 				for (FragmentProc<List<TreeStm>> fragment : fragmentsCanonicalized) {
-					AssemblerVisitor assemblerVisitor = new AssemblerVisitor();
-					FragmentProc<List<Assem>> assemFragement = fragment.accept(assemblerVisitor);
+					machineSpecifics.codeGen(fragment);
 				}
 			}
 			catch (Exception e) {

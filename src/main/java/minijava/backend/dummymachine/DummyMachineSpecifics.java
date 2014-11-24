@@ -23,7 +23,7 @@ public class DummyMachineSpecifics implements MachineSpecifics {
 
 	@Override
 	public int getWordSize() {
-		return 8;
+		return 4;
 	}
 
 	@Override
