@@ -76,11 +76,11 @@ public class Tracer {
 		return new Pair<>(reference, optimalNextBaseBlock);
 	}
 	
-	public static List<BaseBlock> trace(Map<Label, BaseBlock> baseBlocks, Label startLabel) {
+	public static List<BaseBlock> trace(Generator.BaseBlockContainer baseBlocks) {
 		
 		List<BaseBlock> result = new LinkedList<>();
-		Map<Label, BaseBlock> untracedBaseBlocks = new HashMap<>(baseBlocks);
-		BaseBlock reference = untracedBaseBlocks.get(startLabel);
+		Map<Label, BaseBlock> untracedBaseBlocks = new HashMap<>(baseBlocks.baseBlocks);
+		BaseBlock reference = untracedBaseBlocks.get(baseBlocks.startLabel);
 		
 		while (untracedBaseBlocks.size() > 0) {
 			

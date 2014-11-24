@@ -66,7 +66,7 @@ public class IntermediateVisitorTest {
 				}
 				String cCode = IntermediateToCmm.stmListFragmentsToCmm(fragmentListCanonicalized);
 				// -xc specifies the input language as C and is required for GCC to read from stdin
-				ProcessBuilder processBuilder = new ProcessBuilder("gcc", "-o", "/dev/null", "-xc", "runtime.c", "-");
+				ProcessBuilder processBuilder = new ProcessBuilder("gcc", "-o", "/dev/null", "-xc", "-m32", "runtime_32.c", "-");
 				processBuilder.directory(RUNTIME_DIRECTORY);
 				Process gccCall = processBuilder.start();
 				// Write C code to stdin of C Compiler
