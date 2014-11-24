@@ -41,7 +41,7 @@ public class Generator {
 	 * @param endLabel Common exit point.
 	 * @return Object containing base blocks that were constructed from the statement list.
 	 */
-	public static BaseBlockContainer generate(List<TreeStm> stms, Label endLabel) {
+	public static BaseBlockContainer generate(List<TreeStm> stms) {
 		
 		Map<Label, BaseBlock> baseBlocks = new HashMap<>();
 		
@@ -105,6 +105,7 @@ public class Generator {
 		
 		currentBaseBlock.add(stms.get(stms.size()-1));
 
+		Label endLabel = new Label();
 		if (!((stms.get(stms.size()-1) instanceof TreeStmJUMP) ||
 				(stms.get(stms.size()-1) instanceof TreeStmCJUMP))) {
 
