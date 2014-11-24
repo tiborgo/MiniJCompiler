@@ -94,7 +94,7 @@ public class MiniJavaCompiler implements Frontend {
 			for (FragmentProc<TreeStm> fragment : procFragements) {
 				FragmentProc<List<TreeStm>> canonFrag = (FragmentProc<List<TreeStm>>) fragment.accept(new Canon());
 				Generator.BaseBlockContainer baseBlocks = Generator.generate(canonFrag.body);
-				List<BaseBlock> tracedBaseBlocks = Tracer.trace(baseBlocks.baseBlocks, baseBlocks.startLabel);
+				List<BaseBlock> tracedBaseBlocks = Tracer.trace(baseBlocks);
 				List<TreeStm> tracedBody = ToTreeStmConverter.convert(tracedBaseBlocks, baseBlocks.startLabel, baseBlocks.endLabel);
 
 				fragmentsCanonicalized.add(new FragmentProc<List<TreeStm>>(canonFrag.frame, tracedBody));
@@ -115,7 +115,7 @@ public class MiniJavaCompiler implements Frontend {
 
 			Runtime runtime = Runtime.getRuntime();
 			// -xc specifies the input language as C and is required for GCC to read from stdin
-			ProcessBuilder processBuilder = new ProcessBuilder("gcc", "-o", compilerOutputFile.toString(), "-m64", "-xc", "runtime.c", "-");
+			ProcessBuilder processBuilder = new ProcessBuilder("gcc", "-o", compilerOutputFile.toString(), "-m32", "-xc", "runtime_32.c", "-");
 			processBuilder.directory(RUNTIME_DIRECTORY.toFile());
 			Process gccCall = processBuilder.start();
 			// Write C code to stdin of C Compiler

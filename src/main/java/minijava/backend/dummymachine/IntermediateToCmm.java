@@ -30,7 +30,7 @@ import minijava.intermediate.visitors.TreeStmVisitor;
 
 public class IntermediateToCmm {
 	
-	private final static String valueType = "int64_t";
+	private final static String valueType = "int32_t";
 
   public static String stmFragmentsToCmm(List<? extends Fragment<TreeStm>> frags) {
     List<Fragment<List<TreeStm>>> frag1 = new LinkedList<>();
@@ -53,7 +53,7 @@ public class IntermediateToCmm {
     code = new StringBuilder();
 
     declarations.append("#include <stdint.h>\n");
-    declarations.append("#include \"runtime.h\"\n");
+    declarations.append("#include \"runtime_32.h\"\n");
     declarations.append("#define MEM(x) *((" + valueType + "*)(x))\n\n");
 
     for (Fragment<List<TreeStm>> f : frags) {
