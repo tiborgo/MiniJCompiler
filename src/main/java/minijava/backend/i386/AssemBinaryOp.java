@@ -9,9 +9,9 @@ import minijava.intermediate.Temp;
 import minijava.util.Function;
 import minijava.util.Pair;
 
-final class AssemBinaryOp implements Assem {
+public final class AssemBinaryOp implements Assem {
 
-  enum Kind {
+  public static enum Kind {
 
     MOV, ADD, SUB, SHL, SHR, SAL, SAR, AND, OR, XOR, TEST, CMP, LEA
   }
@@ -19,7 +19,7 @@ final class AssemBinaryOp implements Assem {
   private final Operand dst;
   private final Kind kind;
 
-  AssemBinaryOp(Kind kind, Operand dst, Operand src) {
+  public AssemBinaryOp(Kind kind, Operand dst, Operand src) {
     assert (kind != null && src != null && dst != null);
     assert (!((src instanceof Operand.Mem) && (dst instanceof Operand.Mem)));
     assert (kind != Kind.LEA || ((src instanceof Operand.Mem) && (dst instanceof Operand.Reg)));
