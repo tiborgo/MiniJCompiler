@@ -73,12 +73,15 @@ public class ToTreeStmConverter {
 			
 			if (remainingBaseBlocks.size() > 1 &&
 					labels.snd == null &&
-					jumpsCount.get(labels.fst) == 1 &&
 					labels.fst.equals(remainingBaseBlocks.get(1).label)) {
 				
 				result.addAll(remainingBaseBlocks.get(0).body.subList(0, remainingBaseBlocks.get(0).body.size()-1));
-				result.addAll(remainingBaseBlocks.get(1).body.subList(1, remainingBaseBlocks.get(1).body.size()));
-				remainingBaseBlocks.remove(0);
+				
+				if (jumpsCount.get(labels.fst) == 1) {
+					result.addAll(remainingBaseBlocks.get(1).body.subList(1, remainingBaseBlocks.get(1).body.size()));
+					remainingBaseBlocks.remove(0);
+				}
+				
 				remainingBaseBlocks.remove(0);
 			}
 			else {

@@ -65,7 +65,7 @@ public class MiniJavaCompiler implements Frontend {
 			e.printStackTrace();
 		}
 		try {
-			Prg program = compiler.getAbstractSyntaxTree("src/test/resources/minijava-examples/working/MiniExample.java");
+			Prg program = compiler.getAbstractSyntaxTree("src/test/resources/minijava-examples/working/BinarySearch.java");
 			PrettyPrintVisitor prettyPrintVisitor = new PrettyPrintVisitor("");
 			String output = program.accept(prettyPrintVisitor);
 			System.out.print(output);
@@ -90,26 +90,36 @@ public class MiniJavaCompiler implements Frontend {
 			IntermediateVisitor intermediateVisitor = new IntermediateVisitor(machineSpecifics, symbolTable);
 			List<FragmentProc<TreeStm>> procFragements = program.accept(intermediateVisitor);
 
-			List<FragmentProc<List<TreeStm>>> fragmentsCanonicalized = new ArrayList<>(procFragements.size());
-			for (FragmentProc<TreeStm> fragment : procFragements) {
-				FragmentProc<List<TreeStm>> canonFrag = (FragmentProc<List<TreeStm>>) fragment.accept(new Canon());
-				Generator.BaseBlockContainer baseBlocks = Generator.generate(canonFrag.body);
-				List<BaseBlock> tracedBaseBlocks = Tracer.trace(baseBlocks);
-				List<TreeStm> tracedBody = ToTreeStmConverter.convert(tracedBaseBlocks, baseBlocks.startLabel, baseBlocks.endLabel);
-
-				fragmentsCanonicalized.add(new FragmentProc<List<TreeStm>>(canonFrag.frame, tracedBody));
-			}
-
-			List<Fragment<TreeStm>> tempProcFragements = new LinkedList<>();
-			for (FragmentProc<List<TreeStm>> frag : fragmentsCanonicalized) {
-				tempProcFragements.add(new FragmentProc<TreeStm>(
-					frag.frame,
-				 	TreeStmSEQ.fromList(frag.body))
-				 );
-			}
+			String intermediateOutput;
 			
-			String intermediateOutput = IntermediateToCmm.stmFragmentsToCmm(tempProcFragements);
-			System.out.println(intermediateOutput);
+			try {
+				List<FragmentProc<List<TreeStm>>> fragmentsCanonicalized = new ArrayList<>(procFragements.size());
+				for (FragmentProc<TreeStm> fragment : procFragements) {
+					FragmentProc<List<TreeStm>> canonFrag = (FragmentProc<List<TreeStm>>) fragment.accept(new Canon());
+					Generator.BaseBlockContainer baseBlocks = Generator.generate(canonFrag.body);
+					List<BaseBlock> tracedBaseBlocks = Tracer.trace(baseBlocks);
+					List<TreeStm> tracedBody = ToTreeStmConverter.convert(tracedBaseBlocks, baseBlocks.startLabel, baseBlocks.endLabel);
+	
+					fragmentsCanonicalized.add(new FragmentProc<List<TreeStm>>(canonFrag.frame, tracedBody));
+				}
+	
+				List<Fragment<TreeStm>> tempProcFragements = new LinkedList<>();
+				for (FragmentProc<List<TreeStm>> frag : fragmentsCanonicalized) {
+					tempProcFragements.add(new FragmentProc<TreeStm>(
+						frag.frame,
+					 	TreeStmSEQ.fromList(frag.body))
+					 );
+				}
+				
+				intermediateOutput = IntermediateToCmm.stmFragmentsToCmm(tempProcFragements);
+				System.out.println(intermediateOutput);
+			}
+			catch (Exception e) {
+				intermediateOutput = IntermediateToCmm.stmFragmentsToCmm(procFragements);
+				System.err.println(intermediateOutput);
+				e.printStackTrace();
+				
+			}
 			
 			System.out.println("-------------------------");
 
