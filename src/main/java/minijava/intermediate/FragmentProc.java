@@ -1,8 +1,8 @@
 package minijava.intermediate;
 
 /**
- * Represents a
- * @param <A>
+ * Represents a piece of code that stores statements and their respective frame.
+ * @param <A> Type of statements that is stored.
  */
 public class FragmentProc<A> extends Fragment<A> {
 
