@@ -8,11 +8,11 @@ import minijava.intermediate.Temp;
 import minijava.util.Function;
 import minijava.util.Pair;
 
-final class AssemLabel implements Assem {
+public final class AssemLabel implements Assem {
 
   private final Label label;
 
-  AssemLabel(Label label) {
+  public AssemLabel(Label label) {
     this.label = label;
   }
 
