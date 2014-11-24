@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.fail;
@@ -23,6 +24,7 @@ import minijava.ast.rules.Prg;
 import minijava.backend.dummymachine.DummyMachineSpecifics;
 import minijava.backend.dummymachine.IntermediateToCmm;
 import minijava.intermediate.FragmentProc;
+import minijava.intermediate.canon.Canon;
 import minijava.intermediate.tree.TreeStm;
 import minijava.symboltable.tree.Program;
 import org.junit.Before;
@@ -56,8 +58,13 @@ public class IntermediateVisitorTest {
 				Prg ast = miniJavaFrontend.getAbstractSyntaxTree(file.toString());
 				Program symbolTable = ast.accept(new SymbolTableVisitor());
 				visitor = new IntermediateVisitor(new DummyMachineSpecifics(), symbolTable);
-				List<FragmentProc<List<TreeStm>>> fragmentList = ast.accept(visitor);
-				String cCode = IntermediateToCmm.stmListFragmentsToCmm(fragmentList);
+				List<FragmentProc<TreeStm>> fragmentList = ast.accept(visitor);
+				// TODO: Remove canonicalization step from test
+				List<FragmentProc<List<TreeStm>>> fragmentListCanonicalized = new ArrayList<>(fragmentList.size());
+				for (FragmentProc<TreeStm> fragment : fragmentList) {
+					fragmentListCanonicalized.add((FragmentProc<List<TreeStm>>) fragment.accept(new Canon()));
+				}
+				String cCode = IntermediateToCmm.stmListFragmentsToCmm(fragmentListCanonicalized);
 				// -xc specifies the input language as C and is required for GCC to read from stdin
 				ProcessBuilder processBuilder = new ProcessBuilder("gcc", "-o", "/dev/null", "-xc", "runtime.c", "-");
 				processBuilder.directory(RUNTIME_DIRECTORY);

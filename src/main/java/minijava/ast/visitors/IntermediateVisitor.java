@@ -38,17 +38,11 @@ import minijava.ast.rules.StmWhile;
 import minijava.ast.rules.TyArr;
 import minijava.ast.rules.TyClass;
 import minijava.ast.rules.TyInt;
-import minijava.ast.visitors.baseblocks.BaseBlock;
-import minijava.ast.visitors.baseblocks.Generator;
-import minijava.ast.visitors.baseblocks.ToTreeStmConverter;
-import minijava.ast.visitors.baseblocks.Tracer;
-import minijava.ast.visitors.baseblocks.Generator.BaseBlockContainer;
 import minijava.backend.MachineSpecifics;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.Frame;
 import minijava.intermediate.Label;
 import minijava.intermediate.Temp;
-import minijava.intermediate.canon.Canon;
 import minijava.intermediate.tree.TreeExp;
 import minijava.intermediate.tree.TreeExpCALL;
 import minijava.intermediate.tree.TreeExpCONST;
@@ -71,7 +65,7 @@ import minijava.symboltable.tree.Method;
 import minijava.symboltable.tree.Program;
 
 public class IntermediateVisitor implements
-	PrgVisitor<List<FragmentProc<List<TreeStm>>>, RuntimeException>,
+	PrgVisitor<List<FragmentProc<TreeStm>>, RuntimeException>,
 	DeclVisitor<List<FragmentProc<TreeStm>>, RuntimeException> {
 	
 	private DeclClass classContext;
@@ -89,7 +83,7 @@ public class IntermediateVisitor implements
 	}
 
 	@Override
-	public List<FragmentProc<List<TreeStm>>> visit(Prg p) throws RuntimeException {
+	public List<FragmentProc<TreeStm>> visit(Prg p) throws RuntimeException {
 
 		for(DeclClass clazz : p.classes) {
 			memoryFootprint.put(clazz.className, clazz.fields.size() * machineSpecifics.getWordSize() + 4);
@@ -101,20 +95,7 @@ public class IntermediateVisitor implements
 		}
 
 		classes.addAll(p.mainClass.accept(this));
-
-		List<FragmentProc<List<TreeStm>>> classesCanonicalized = new ArrayList<>(classes.size());
-		for (FragmentProc<TreeStm> fragment : classes) {
-			FragmentProc<List<TreeStm>> canonFrag = (FragmentProc<List<TreeStm>>) fragment.accept(new Canon());
-			Label returnLabel = new Label();
-			BaseBlockContainer baseBlocks = Generator.generate(canonFrag.body, returnLabel);
-			List<BaseBlock> tracedBaseBlocks = Tracer.trace(baseBlocks.baseBlocks, baseBlocks.startLabel);
-			List<TreeStm> tracedBody = ToTreeStmConverter.convert(tracedBaseBlocks, baseBlocks.startLabel, baseBlocks.endLabel);
-
-			classesCanonicalized.add(new FragmentProc<List<TreeStm>>(canonFrag.frame, tracedBody));
-		}
-
-
-		return classesCanonicalized;
+		return classes;
 	}
 
 	@Override
