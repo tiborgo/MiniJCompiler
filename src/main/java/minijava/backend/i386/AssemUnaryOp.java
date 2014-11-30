@@ -1,25 +1,23 @@
 package minijava.backend.i386;
 
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
+
 import minijava.backend.Assem;
-import minijava.backend.i386.Operand.Reg;
-import minijava.intermediate.Temp;
 import minijava.intermediate.Label;
+import minijava.intermediate.Temp;
 import minijava.util.Function;
 import minijava.util.Pair;
 
-final class AssemUnaryOp implements Assem {
+public final class AssemUnaryOp implements Assem {
 
-  enum Kind {
+  public static enum Kind {
 
     PUSH, POP, NEG, NOT, INC, DEC, IMUL, IDIV, ENTER
   }
   private final Operand op;
   private final Kind kind;
 
-  AssemUnaryOp(Kind kind, Operand op) {
+  public AssemUnaryOp(Kind kind, Operand op) {
     assert ((kind == Kind.POP || kind == Kind.NEG || kind == Kind.NEG
             || kind == Kind.INC || kind == Kind.DEC || kind == Kind.IDIV)
             ? !(op instanceof Operand.Imm) : true);
