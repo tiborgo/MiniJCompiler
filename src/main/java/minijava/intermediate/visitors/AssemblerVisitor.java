@@ -9,6 +9,7 @@ import minijava.backend.i386.AssemBinaryOp;
 import minijava.backend.i386.AssemBinaryOp.Kind;
 import minijava.backend.i386.AssemJump;
 import minijava.backend.i386.AssemLabel;
+import minijava.backend.i386.AssemUnaryOp;
 import minijava.backend.i386.Operand;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.FragmentVisitor;
@@ -49,13 +50,16 @@ public class AssemblerVisitor implements
 	public Operand visit(TreeExpCALL e) throws RuntimeException {
 		// Push arguments on stack
 		for (TreeExp arg : e.args) {
-			// TODO: Return instructions that evaluate the arguments
-			arg.accept(this);
+			// FIXME: Calculate correct address on stack
+			Operand dst = new Operand.Mem(null, 1, null, 0);
+			Operand src = arg.accept(this);
+			instructions.add(new AssemBinaryOp(Kind.MOV, dst, src));
 		}
-		// TODO: Save Caller-Save registers
-		AssemJump callInstruction = new AssemJump(AssemJump.Kind.CALL, e.func.accept(this));
-		// TODO: Return call instruction
-		return null;
+		// TODO: Save Caller-Save registers?
+		Operand result = e.func.accept(this);
+		AssemJump callInstruction = new AssemJump(AssemJump.Kind.CALL, result);
+		emit(callInstruction);
+		return result;
 	}
 
 	@Override
@@ -83,42 +87,72 @@ public class AssemblerVisitor implements
 	public Operand visit(TreeExpOP e) throws RuntimeException {
 		Operand o1 = e.left.accept(this);
 		Operand o2 = e.right.accept(this);
-		AssemBinaryOp.Kind operator = null;
+		AssemUnaryOp.Kind operatorUnary = null;
+		AssemBinaryOp.Kind operatorBinary = null;
 		switch (e.op) {
+			// Unary operators
+			case MUL:
+				operatorUnary = AssemUnaryOp.Kind.IMUL;
+				break;
+			case DIV:
+				operatorUnary = AssemUnaryOp.Kind.IDIV;
+				break;
+			// Binary operators
 			case PLUS:
-				operator = AssemBinaryOp.Kind.ADD;
+				operatorBinary = AssemBinaryOp.Kind.ADD;
 				break;
 			case MINUS:
-				operator = AssemBinaryOp.Kind.SUB;
+				operatorBinary = AssemBinaryOp.Kind.SUB;
 				break;
-			case MUL:
-				// TODO: Multiplication uses the unary operation imul
-			case DIV:
-				// TODO: Multiplication uses the unary operation idiv
 			case AND:
-				operator = AssemBinaryOp.Kind.AND;
+				operatorBinary = AssemBinaryOp.Kind.AND;
 				break;
 			case OR:
-				operator = AssemBinaryOp.Kind.OR;
+				operatorBinary = AssemBinaryOp.Kind.OR;
 				break;
 			case LSHIFT:
-				operator = AssemBinaryOp.Kind.SHL;
+				operatorBinary = AssemBinaryOp.Kind.SHL;
 				break;
 			case RSHIFT:
-				operator = AssemBinaryOp.Kind.SHR;
+				operatorBinary = AssemBinaryOp.Kind.SHR;
 				break;
 			case ARSHIFT:
-				operator = AssemBinaryOp.Kind.SAR;
+				operatorBinary = AssemBinaryOp.Kind.SAR;
 				break;
 			case XOR:
-				operator = AssemBinaryOp.Kind.XOR;
+				operatorBinary = AssemBinaryOp.Kind.XOR;
 				break;
 			default:
 				throw new UnsupportedOperationException(
 						"Unsupported operator \""+ e.op + "\"");
 		}
-		AssemBinaryOp binaryOperation = new AssemBinaryOp(operator, o1, o2);
-		// TODO: Add binary operation to the list of assembler instructions
+
+		// Unary instructions
+		if (operatorUnary != AssemUnaryOp.Kind.IDIV) {
+			// FIXME: Set destination to proper EAX register
+			Operand eax = new Operand.Reg(null);
+			AssemBinaryOp moveToEAX = new AssemBinaryOp(Kind.MOV, eax, o1);
+			emit(moveToEAX);
+			// TODO: Save register EDX?
+			AssemUnaryOp division = new AssemUnaryOp(operatorUnary, o2);
+			emit(division);
+			return eax;
+		} else if (operatorUnary != AssemUnaryOp.Kind.IMUL) {
+			// FIXME: Set destination to proper EAX register
+			Operand eax = new Operand.Reg(null);
+			AssemBinaryOp moveToEAX = new AssemBinaryOp(Kind.MOV, eax, o1);
+			emit(moveToEAX);
+			// TODO: Save register EDX?
+			AssemUnaryOp division = new AssemUnaryOp(operatorUnary, o2);
+			emit(division);
+			return eax;
+		} else if (operatorUnary != null) {
+			throw new UnsupportedOperationException("Unsupported operator \"" + operatorUnary + "\"");
+		}
+
+		// Binary instructions
+		AssemBinaryOp binaryOperation = new AssemBinaryOp(operatorBinary, o1, o2);
+		emit(binaryOperation);
 		return o1;
 	}
 
