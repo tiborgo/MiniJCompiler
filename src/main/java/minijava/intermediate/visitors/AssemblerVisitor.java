@@ -1,6 +1,7 @@
 package minijava.intermediate.visitors;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import minijava.backend.Assem;
@@ -32,6 +33,11 @@ public class AssemblerVisitor implements
 	TreeStmVisitor<List<Assem>, RuntimeException>,
  	TreeExpVisitor<Operand, RuntimeException> {
 
+	private final List<Assem> instructions;
+
+	public AssemblerVisitor(List<Assem> instructions) {
+		this.instructions = new LinkedList<>(instructions);
+	}
 
 	@Override
 	public FragmentProc<List<Assem>> visit(FragmentProc<List<TreeStm>> fragProc) {
@@ -200,4 +206,7 @@ public class AssemblerVisitor implements
 		return Arrays.<Assem>asList(label);
 	}
 
+	protected void emit(Assem instruction) {
+		this.instructions.add(instruction);
+	}
 }
