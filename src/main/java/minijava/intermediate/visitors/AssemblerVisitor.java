@@ -11,6 +11,7 @@ import minijava.backend.i386.AssemLabel;
 import minijava.backend.i386.Operand;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.FragmentVisitor;
+import minijava.intermediate.tree.TreeExp;
 import minijava.intermediate.tree.TreeExpCALL;
 import minijava.intermediate.tree.TreeExpCONST;
 import minijava.intermediate.tree.TreeExpESEQ;
@@ -40,7 +41,14 @@ public class AssemblerVisitor implements
 
 	@Override
 	public Operand visit(TreeExpCALL e) throws RuntimeException {
-		// TODO Auto-generated method stub
+		// Push arguments on stack
+		for (TreeExp arg : e.args) {
+			// TODO: Return instructions that evaluate the arguments
+			arg.accept(this);
+		}
+		// TODO: Save Caller-Save registers
+		AssemJump callInstruction = new AssemJump(AssemJump.Kind.CALL, e.func.accept(this));
+		// TODO: Return call instruction
 		return null;
 	}
 
@@ -110,8 +118,7 @@ public class AssemblerVisitor implements
 
 	@Override
 	public Operand visit(TreeExpTEMP e) throws RuntimeException {
-		// TODO Auto-generated method stub
-		return null;
+		return new Operand.Reg(e.temp);
 	}
 
 	@Override
