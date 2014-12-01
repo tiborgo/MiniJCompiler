@@ -5,7 +5,6 @@ import java.util.List;
 
 import minijava.backend.Assem;
 import minijava.backend.MachineSpecifics;
-import minijava.backend.i386.AssemInstr.Kind;
 import minijava.intermediate.Fragment;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.Frame;
@@ -15,6 +14,15 @@ import minijava.intermediate.tree.TreeStm;
 import minijava.intermediate.visitors.AssemblerVisitor;
 
 public class I386MachineSpecifics implements MachineSpecifics {
+	private final Operand eax;
+	private final Operand ebp;
+	private final Operand esp;
+
+	public I386MachineSpecifics() {
+		eax = new Operand.Reg(new Temp());
+		ebp = new Operand.Reg(new Temp());
+		esp = new Operand.Reg(new Temp());
+	}
 
 	@Override
 	public int getWordSize() {
@@ -62,10 +70,6 @@ public class I386MachineSpecifics implements MachineSpecifics {
 			List<Assem> procedureWithEntryExitCode = new LinkedList<>();
 
 			// Safe caller-safe registers
-			// FIXME: Use real ebp
-			Operand ebp = new Operand.Reg(new Temp());
-			// FIXME: Use real esp
-			Operand esp = new Operand.Reg(new Temp());
 			Assem saveFramePointer = new AssemUnaryOp(AssemUnaryOp.Kind.PUSH, ebp);
 			procedureWithEntryExitCode.add(saveFramePointer);
 			Assem moveFramePointer = new AssemBinaryOp(AssemBinaryOp.Kind.MOV, ebp, esp);
