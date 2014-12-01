@@ -31,17 +31,19 @@ import minijava.intermediate.tree.TreeStmSEQ;
 
 public class AssemblerVisitor implements
 	FragmentVisitor<List<TreeStm>, FragmentProc<List<Assem>>> {
-	private final Operand eax;
+	private final Operand.Reg eax;
+	private final Operand.Reg ebp;
 
-	public AssemblerVisitor(Operand eax) {
+	public AssemblerVisitor(Operand.Reg eax, Operand.Reg ebp) {
 		this.eax = eax;
+		this.ebp = ebp;
 	}
 
 	@Override
 	public FragmentProc<List<Assem>> visit(FragmentProc<List<TreeStm>> fragProc) {
 		List<Assem> instructions = new LinkedList<>();
 		for (TreeStm statement : fragProc.body) {
-			StatementExpressionVisitor visitor = new StatementExpressionVisitor(eax);
+			StatementExpressionVisitor visitor = new StatementExpressionVisitor(eax, ebp);
 			statement.accept(visitor);
 			instructions.addAll(visitor.getInstructions());
 		}
@@ -53,19 +55,21 @@ public class AssemblerVisitor implements
 	TreeStmVisitor<Void, RuntimeException>,
  	TreeExpVisitor<Operand, RuntimeException> {
 		private final List<Assem> instructions;
-		private final Operand eax;
+		private final Operand.Reg eax;
+		private final Operand.Reg ebp;
 
-		public StatementExpressionVisitor(Operand eax) {
+		public StatementExpressionVisitor(Operand.Reg eax, Operand.Reg ebp) {
 			this.instructions = new LinkedList<>();
 			this.eax = eax;
+			this.ebp = ebp;
 		}
 
 		@Override
 		public Operand visit(TreeExpCALL e) throws RuntimeException {
 			// Push arguments on stack
 			for (TreeExp arg : e.args) {
-				// FIXME: Calculate correct address on stack
-				Operand dst = new Operand.Mem(null, 1, null, 0);
+				// TODO: Calculate address according to word size
+				Operand dst = new Operand.Mem(ebp.reg, null, null, 4*e.args.indexOf(arg));
 				Operand src = arg.accept(this);
 				instructions.add(new AssemBinaryOp(Kind.MOV, dst, src));
 			}
