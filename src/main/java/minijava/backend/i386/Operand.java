@@ -4,6 +4,9 @@ import minijava.intermediate.Temp;
 import minijava.util.Function;
 
 public abstract class Operand {
+	
+	// TODO: make generic
+	public abstract String accept(I386PrintAssemblyVisitor visitor);
 
 	public final static class Imm extends Operand {
 
@@ -17,6 +20,11 @@ public abstract class Operand {
 		@Override
 		public Operand rename(Function<Temp, Temp> sigma) {
 			return this;
+		}
+
+		@Override
+		public String accept(I386PrintAssemblyVisitor visitor) {
+			return visitor.visit(this);
 		}
 	}
 
@@ -32,6 +40,11 @@ public abstract class Operand {
 		@Override
 		public Operand rename(Function<Temp, Temp> sigma) {
 			return new Reg(sigma.apply(reg));
+		}
+		
+		@Override
+		public String accept(I386PrintAssemblyVisitor visitor) {
+			return visitor.visit(this);
 		}
 	}
 
@@ -59,6 +72,11 @@ public abstract class Operand {
 			return new Mem(base != null ? sigma.apply(base) : null, scale,
 					index != null ? sigma.apply(index) : null, displacement);
 		}
+		
+		@Override
+		public String accept(I386PrintAssemblyVisitor visitor) {
+			return visitor.visit(this);
+		}
 	}
 
 	public abstract Operand rename(Function<Temp, Temp> sigma);
@@ -73,6 +91,11 @@ public abstract class Operand {
 		@Override
 		public Operand rename(Function<Temp, Temp> sigma) {
 			return this;
+		}
+		
+		@Override
+		public String accept(I386PrintAssemblyVisitor visitor) {
+			return visitor.visit(this);
 		}
 	}
 }
