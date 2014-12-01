@@ -1,17 +1,11 @@
 package minijava.backend.i386;
 
-import minijava.backend.Assem;
 import minijava.backend.AssemVisitor;
 
 public class I386PrintAssemblyVisitor implements
 		AssemVisitor<String, RuntimeException> {
 
 	@Override
-	public String visit(Assem assem) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	public String visit(AssemBinaryOp assem) {
 		
 		StringBuilder operation = new StringBuilder()
@@ -24,10 +18,12 @@ public class I386PrintAssemblyVisitor implements
 		return operation.toString();
 	}
 	
+	@Override
 	public String visit(AssemInstr assem) {
 		return assem.kind.name();
 	}
 	
+	@Override
 	public String visit(AssemJump assem) {
 		
 		StringBuilder operation = new StringBuilder()
@@ -43,6 +39,7 @@ public class I386PrintAssemblyVisitor implements
 		return operation.toString();
 	}
 	
+	@Override
 	public String visit(AssemUnaryOp assem) {
 		StringBuilder operation = new StringBuilder()
 			.append(assem.kind.name())
@@ -52,6 +49,11 @@ public class I386PrintAssemblyVisitor implements
 		return operation.toString();
 	}
 	
+	@Override
+	public String visit(AssemLabel assem) {
+		return assem.label.toString();
+	}
+	
 	//-----
 	
 	public String visit(Operand.Imm op) {
@@ -59,7 +61,7 @@ public class I386PrintAssemblyVisitor implements
 	}
 	
 	public String visit(Operand.Reg op) {
-		return op.reg.toString();
+		return "%" + op.reg.toString();
 	}
 	
 	public String visit(Operand.Mem op) {
@@ -67,9 +69,13 @@ public class I386PrintAssemblyVisitor implements
 		StringBuilder operation = new StringBuilder()
 			.append(op.base.toString())
 			.append("*")
-			.append(op.scale)
-			.append("+")
-			.append(op.index);
+			.append(op.scale);
+		
+		if (op.index != null) {
+			operation
+				.append("+")
+				.append(op.index);
+		}	
 		
 		return operation.toString();
 	}
