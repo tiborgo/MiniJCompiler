@@ -65,7 +65,7 @@ public class MiniJavaCompiler implements Frontend {
 			e.printStackTrace();
 		}
 		try {
-			Prg program = compiler.getAbstractSyntaxTree("src/test/resources/minijava-examples/working/BinarySearch.java");
+			Prg program = compiler.getAbstractSyntaxTree("src/test/resources/minijava-examples/working/MiniExample.java");
 			PrettyPrintVisitor prettyPrintVisitor = new PrettyPrintVisitor("");
 			String output = program.accept(prettyPrintVisitor);
 			System.out.print(output);
@@ -102,7 +102,7 @@ public class MiniJavaCompiler implements Frontend {
 	
 					fragmentsCanonicalized.add(new FragmentProc<List<TreeStm>>(canonFrag.frame, tracedBody));
 				}
-	
+				
 				List<Fragment<TreeStm>> tempProcFragements = new LinkedList<>();
 				for (FragmentProc<List<TreeStm>> frag : fragmentsCanonicalized) {
 					tempProcFragements.add(new FragmentProc<TreeStm>(

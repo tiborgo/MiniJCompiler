@@ -10,7 +10,9 @@ class Main {
     	else {
     		System.out.println(2);
     	}*/
+    	//System.out.print((char)100);
     	System.out.println((new Test3()).test());
+    	
     }
 }
 
