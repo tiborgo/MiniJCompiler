@@ -71,8 +71,7 @@ public class I386MachineSpecifics implements MachineSpecifics {
 			stringBuilder.append(moveStackPointer.accept(new I386PrintAssemblyVisitor())).append("\n");
 			// Print body
 			for (Assem assem : ((FragmentProc<List<Assem>>)frag).body) {
-				stringBuilder.append(new I386PrintAssemblyVisitor().visit(assem));
-				// TODO: Add newline
+				stringBuilder.append(new I386PrintAssemblyVisitor().visit(assem)).append("\n");
 			}
 			// TODO: restore caller safe registers
 		}
