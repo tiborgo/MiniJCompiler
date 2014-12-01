@@ -75,7 +75,9 @@ public class I386MachineSpecifics implements MachineSpecifics {
 
 			procedureWithEntryExitCode.addAll(procedure.body);
 
-			// TODO: restore caller safe registers
+			// Restore caller-safe registers
+			Assem leave = new AssemInstr(AssemInstr.Kind.LEAVE);
+			procedureWithEntryExitCode.add(leave);
 
 			// Print instructions
 			for (Assem assem : procedureWithEntryExitCode) {
