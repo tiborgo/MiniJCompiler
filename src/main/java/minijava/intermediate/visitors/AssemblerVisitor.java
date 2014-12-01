@@ -36,8 +36,8 @@ public class AssemblerVisitor implements
 
 	private final List<Assem> instructions;
 
-	public AssemblerVisitor(List<Assem> instructions) {
-		this.instructions = new LinkedList<>(instructions);
+	public AssemblerVisitor() {
+		this.instructions = new LinkedList<>();
 	}
 
 	@Override
