@@ -1,6 +1,7 @@
 package minijava.backend;
 
 import java.util.List;
+
 import minijava.intermediate.Label;
 import minijava.intermediate.Temp;
 import minijava.util.Function;
@@ -22,4 +23,6 @@ public interface Assem {
   public Label isLabel();
 
   public Assem rename(Function<Temp, Temp> sigma);
+  
+  public <A, T extends Throwable> A accept(AssemVisitor<A, T> visitor) throws T;
 }

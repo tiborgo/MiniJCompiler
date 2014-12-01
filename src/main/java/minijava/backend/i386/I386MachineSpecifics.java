@@ -33,8 +33,7 @@ public class I386MachineSpecifics implements MachineSpecifics {
 
 	@Override
 	public Frame newFrame(Label name, int paramCount) {
-		// TODO Auto-generated method stub
-		return null;
+		return new I386Frame(name, paramCount);
 	}
 
 	@Override
@@ -52,8 +51,16 @@ public class I386MachineSpecifics implements MachineSpecifics {
 
 	@Override
 	public String printAssembly(List<Fragment<List<Assem>>> frags) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		StringBuilder stringBuilder = new StringBuilder();
+		
+		for (Fragment<List<Assem>> frag : frags) {
+			// TODO: safe caller safe registers 
+			for (Assem assem : ((FragmentProc<List<Assem>>)frag).body) {
+				stringBuilder.append(new I386PrintAssemblyVisitor().visit(assem));
+			}
+			// TODO: restore caller safe registers
+		}
+		return stringBuilder.toString();
 	}
-
 }
