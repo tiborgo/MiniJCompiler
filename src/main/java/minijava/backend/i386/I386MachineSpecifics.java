@@ -4,6 +4,7 @@ import java.util.List;
 
 import minijava.backend.Assem;
 import minijava.backend.MachineSpecifics;
+import minijava.backend.i386.AssemInstr.Kind;
 import minijava.intermediate.Fragment;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.Frame;
@@ -51,13 +52,27 @@ public class I386MachineSpecifics implements MachineSpecifics {
 
 	@Override
 	public String printAssembly(List<Fragment<List<Assem>>> frags) {
-		
+
 		StringBuilder stringBuilder = new StringBuilder();
-		
+
 		for (Fragment<List<Assem>> frag : frags) {
-			// TODO: safe caller safe registers 
+			// TODO: Treat FragmentProc as special case
+			FragmentProc<List<Assem>> procedure = (FragmentProc<List<Assem>>) frag;
+			// Safe caller-safe registers
+			// FIXME: Use real ebp
+			Operand ebp = new Operand.Reg(new Temp());
+			// FIXME: Use real esp
+			Operand esp = new Operand.Reg(new Temp());
+			Assem saveFramePointer = new AssemUnaryOp(AssemUnaryOp.Kind.PUSH, ebp);
+			Assem moveFramePointer = new AssemBinaryOp(AssemBinaryOp.Kind.MOV, ebp, esp);
+			Assem moveStackPointer = new AssemBinaryOp(AssemBinaryOp.Kind.SUB, esp, new Operand.Imm(procedure.frame.size()));
+			stringBuilder.append(saveFramePointer.accept(new I386PrintAssemblyVisitor())).append("\n");
+			stringBuilder.append(moveFramePointer.accept(new I386PrintAssemblyVisitor())).append("\n");
+			stringBuilder.append(moveStackPointer.accept(new I386PrintAssemblyVisitor())).append("\n");
+			// Print body
 			for (Assem assem : ((FragmentProc<List<Assem>>)frag).body) {
 				stringBuilder.append(new I386PrintAssemblyVisitor().visit(assem));
+				// TODO: Add newline
 			}
 			// TODO: restore caller safe registers
 		}
