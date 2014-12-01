@@ -65,17 +65,25 @@ public class I386PrintAssemblyVisitor implements
 	}
 	
 	public String visit(Operand.Mem op) {
-		// reg * s + n
-		StringBuilder operation = new StringBuilder()
-			.append(op.base.toString())
-			.append("*")
-			.append(op.scale);
+		// base + index * size + displacement
+		StringBuilder operation = new StringBuilder();
+		
+		if (op.base != null) {
+			operation.append(op.base.toString());
+			
+		}
 		
 		if (op.index != null) {
 			operation
 				.append("+")
 				.append(op.index);
-		}	
+		}
+		
+		operation
+			.append("*")
+			.append(op.scale)
+			.append("+")
+			.append(op.displacement);
 		
 		return operation.toString();
 	}
