@@ -54,7 +54,7 @@ public class I386MachineSpecifics implements MachineSpecifics {
 
 	@Override
 	public Fragment<List<Assem>> codeGen(Fragment<List<TreeStm>> frag) {
-		AssemblerVisitor i386AssemblerVisitor = new AssemblerVisitor(eax);
+		AssemblerVisitor i386AssemblerVisitor = new AssemblerVisitor(eax, ebp);
 		FragmentProc<List<Assem>> assemFragement = frag.accept(i386AssemblerVisitor);
 		return assemFragement;
 	}
