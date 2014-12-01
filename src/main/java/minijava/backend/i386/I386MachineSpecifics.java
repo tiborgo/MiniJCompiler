@@ -14,9 +14,9 @@ import minijava.intermediate.tree.TreeStm;
 import minijava.intermediate.visitors.AssemblerVisitor;
 
 public class I386MachineSpecifics implements MachineSpecifics {
-	private final Operand eax;
-	private final Operand ebp;
-	private final Operand esp;
+	private final Operand.Reg eax;
+	private final Operand.Reg ebp;
+	private final Operand.Reg esp;
 
 	public I386MachineSpecifics() {
 		eax = new Operand.Reg(new Temp());
