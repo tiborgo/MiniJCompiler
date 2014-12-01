@@ -14,49 +14,67 @@ public class I386PrintAssemblyVisitor implements
 
 	public String visit(AssemBinaryOp assem) {
 		
-		StringBuilder operation = new StringBuilder();
-		operation.append(assem.kind.name());
-		operation.append(assem.dst.accept(this));
-		operation.append(",");
-		operation.append(assem.src.accept(this));
+		StringBuilder operation = new StringBuilder()
+			.append(assem.kind.name())
+			.append(" ")
+			.append(assem.dst.accept(this))
+			.append(",")
+			.append(assem.src.accept(this));
 		
 		return operation.toString();
 	}
 	
 	public String visit(AssemInstr assem) {
-		// TODO implement
-		return null;
+		return assem.kind.name();
 	}
 	
 	public String visit(AssemJump assem) {
-		// TODO implement
-		return null;
+		
+		StringBuilder operation = new StringBuilder()
+			.append(assem.kind.name());
+		
+		if (assem.kind == AssemJump.Kind.J) {
+			operation.append(assem.cond.name());
+		}
+		
+		operation.append(" ")
+			.append(assem.dest.accept(this));
+		
+		return operation.toString();
 	}
 	
 	public String visit(AssemUnaryOp assem) {
-		// TODO implement
-		return null;
+		StringBuilder operation = new StringBuilder()
+			.append(assem.kind.name())
+			.append(" ")
+			.append(assem.op.accept(this));
+		
+		return operation.toString();
 	}
 	
 	//-----
 	
 	public String visit(Operand.Imm op) {
-		// TODO implement
-		return null;
+		return Integer.toString(op.imm);
 	}
 	
 	public String visit(Operand.Reg op) {
-		// TODO implement
-		return null;
+		return op.reg.toString();
 	}
 	
 	public String visit(Operand.Mem op) {
-		// TODO implement
-		return null;
+		// reg * s + n
+		StringBuilder operation = new StringBuilder()
+			.append(op.base.toString())
+			.append("*")
+			.append(op.scale)
+			.append("+")
+			.append(op.index);
+		
+		return operation.toString();
 	}
 	
 	public String visit(Operand.Label op) {
-		// TODO implement
-		return null;
+		return op.label.toString();
 	}
 }
