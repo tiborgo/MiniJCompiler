@@ -21,10 +21,10 @@ public final class AssemJump implements Assem {
 		E, NE, L, LE, G, GE, Z
 	}
 
-	private final Kind kind;
-	private final Label label;
-	private final Operand dest;
-	private final Cond cond;
+	public final Kind kind;
+	public final Label label;
+	public final Operand dest;
+	public final Cond cond;
 
 	public AssemJump(Kind kind, Label label) {
 		this(kind, label, null, null);

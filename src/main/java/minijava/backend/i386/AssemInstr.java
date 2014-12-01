@@ -16,7 +16,7 @@ public final class AssemInstr implements Assem {
 		RET, LEAVE, NOP
 	}
 
-	private final Kind kind;
+	public final Kind kind;
 
 	public AssemInstr(Kind kind) {
 		this.kind = kind;

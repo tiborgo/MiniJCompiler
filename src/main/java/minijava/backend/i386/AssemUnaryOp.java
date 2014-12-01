@@ -16,8 +16,8 @@ public final class AssemUnaryOp implements Assem {
 		PUSH, POP, NEG, NOT, INC, DEC, IMUL, IDIV, ENTER
 	}
 
-	private final Operand op;
-	private final Kind kind;
+	public final Operand op;
+	public final Kind kind;
 
 	public AssemUnaryOp(Kind kind, Operand op) {
 		assert ((kind == Kind.POP || kind == Kind.NEG || kind == Kind.NEG

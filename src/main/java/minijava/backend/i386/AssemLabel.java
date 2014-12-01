@@ -12,7 +12,7 @@ import minijava.util.Pair;
 
 public final class AssemLabel implements Assem {
 
-	private final Label label;
+	public final Label label;
 
 	public AssemLabel(Label label) {
 		this.label = label;
