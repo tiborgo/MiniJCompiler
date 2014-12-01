@@ -23,7 +23,7 @@ int32_t L_println_int(int32_t n)
 // Print character to the standard output
 int32_t L_print_char(int32_t n)
 {
-  printf("%" PRId32, n);
+  printf("%c", n);
   return 0;
 }
 
