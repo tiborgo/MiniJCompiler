@@ -13,8 +13,14 @@ public class I386PrintAssemblyVisitor implements
 	}
 
 	public String visit(AssemBinaryOp assem) {
-		// TODO implement
-		return null;
+		
+		StringBuilder operation = new StringBuilder();
+		operation.append(assem.kind.name());
+		operation.append(assem.dst.accept(this));
+		operation.append(",");
+		operation.append(assem.src.accept(this));
+		
+		return operation.toString();
 	}
 	
 	public String visit(AssemInstr assem) {
