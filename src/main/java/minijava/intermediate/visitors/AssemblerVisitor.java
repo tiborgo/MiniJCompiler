@@ -1,6 +1,6 @@
 package minijava.intermediate.visitors;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -39,16 +39,16 @@ public class AssemblerVisitor implements
 	public FragmentProc<List<Assem>> visit(FragmentProc<List<TreeStm>> fragProc) {
 		List<Assem> instructions = new LinkedList<>();
 		for (TreeStm statement : fragProc.body) {
-			List<Assem> statementInstructions =
-					statement.accept(new StatementExpressionVisitor());
-			instructions.addAll(statementInstructions);
+			StatementExpressionVisitor visitor = new StatementExpressionVisitor();
+			statement.accept(visitor);
+			instructions.addAll(visitor.getInstructions());
 		}
 		// FIXME: Set correct frame?
 		return new FragmentProc<List<Assem>>(fragProc.frame, instructions);
 	}
 
 	protected static class StatementExpressionVisitor implements
-	TreeStmVisitor<List<Assem>, RuntimeException>,
+	TreeStmVisitor<Void, RuntimeException>,
  	TreeExpVisitor<Operand, RuntimeException> {
 		private final List<Assem> instructions;
 
@@ -172,33 +172,34 @@ public class AssemblerVisitor implements
 		}
 
 		@Override
-		public List<Assem> visit(TreeStmMOVE stmMOVE) {
+		public Void visit(TreeStmMOVE stmMOVE) {
 
 			AssemBinaryOp assemBinaryOp = new AssemBinaryOp(
 				Kind.MOV,
 				stmMOVE.dest.accept(this),
 				stmMOVE.src.accept(this)
 			);
-
-			return Arrays.<Assem>asList(assemBinaryOp);
+			emit(assemBinaryOp);
+			return null;
 		}
 
 		@Override
-		public List<Assem> visit(TreeStmEXP stmEXP) {
+		public Void visit(TreeStmEXP stmEXP) {
 			// TODO Auto-generated method stub
 			return null;
 		}
 
 		@Override
-		public List<Assem> visit(TreeStmJUMP stmJUMP) {
+		public Void visit(TreeStmJUMP stmJUMP) {
 
 			Operand dest = stmJUMP.dest.accept(this);
 			AssemJump assemJump = new AssemJump(AssemJump.Kind.JMP, dest);
-			return Arrays.<Assem>asList(assemJump);
+			emit(assemJump);
+			return null;
 		}
 
 		@Override
-		public List<Assem> visit(TreeStmCJUMP stmCJUMP) {
+		public Void visit(TreeStmCJUMP stmCJUMP) {
 
 			AssemJump.Cond cond;
 
@@ -234,24 +235,30 @@ public class AssemblerVisitor implements
 				stmCJUMP.left.accept(this),
 				stmCJUMP.right.accept(this)
 			);
+			emit(cmpOp);
 			AssemJump jump = new AssemJump(AssemJump.Kind.J, stmCJUMP.ltrue, cond);
-
-			return Arrays.asList(cmpOp, jump);
+			emit(jump);
+			return null;
 		}
 
 		@Override
-		public List<Assem> visit(TreeStmSEQ stmSEQ) {
+		public Void visit(TreeStmSEQ stmSEQ) {
 			throw new UnsupportedOperationException("Cannot translate TreeStmSEQ into assembler instructions");
 		}
 
 		@Override
-		public List<Assem> visit(TreeStmLABEL stmLABEL) {
+		public Void visit(TreeStmLABEL stmLABEL) {
 			AssemLabel label = new AssemLabel(stmLABEL.label);
-			return Arrays.<Assem>asList(label);
+			emit(label);
+			return null;
 		}
 
 		protected void emit(Assem instruction) {
 			this.instructions.add(instruction);
+		}
+
+		public List<Assem> getInstructions() {
+			return Collections.unmodifiableList(instructions);
 		}
 	}
 }
