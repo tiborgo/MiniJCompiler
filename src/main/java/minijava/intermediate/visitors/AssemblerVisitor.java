@@ -31,15 +31,17 @@ import minijava.intermediate.tree.TreeStmSEQ;
 
 public class AssemblerVisitor implements
 	FragmentVisitor<List<TreeStm>, FragmentProc<List<Assem>>> {
+	private final Operand eax;
 
-	public AssemblerVisitor() {
+	public AssemblerVisitor(Operand eax) {
+		this.eax = eax;
 	}
 
 	@Override
 	public FragmentProc<List<Assem>> visit(FragmentProc<List<TreeStm>> fragProc) {
 		List<Assem> instructions = new LinkedList<>();
 		for (TreeStm statement : fragProc.body) {
-			StatementExpressionVisitor visitor = new StatementExpressionVisitor();
+			StatementExpressionVisitor visitor = new StatementExpressionVisitor(eax);
 			statement.accept(visitor);
 			instructions.addAll(visitor.getInstructions());
 		}
@@ -51,9 +53,11 @@ public class AssemblerVisitor implements
 	TreeStmVisitor<Void, RuntimeException>,
  	TreeExpVisitor<Operand, RuntimeException> {
 		private final List<Assem> instructions;
+		private final Operand eax;
 
-		public StatementExpressionVisitor() {
+		public StatementExpressionVisitor(Operand eax) {
 			this.instructions = new LinkedList<>();
+			this.eax = eax;
 		}
 
 		@Override
@@ -139,16 +143,12 @@ public class AssemblerVisitor implements
 
 			// Unary instructions
 			if (operatorUnary != AssemUnaryOp.Kind.IDIV) {
-				// FIXME: Set destination to proper EAX register
-				Operand eax = new Operand.Reg(null);
 				AssemBinaryOp moveToEAX = new AssemBinaryOp(Kind.MOV, eax, o1);
 				// TODO: Save register EDX?
 				AssemUnaryOp division = new AssemUnaryOp(operatorUnary, o2);
 				emit(moveToEAX, division);
 				return eax;
 			} else if (operatorUnary != AssemUnaryOp.Kind.IMUL) {
-				// FIXME: Set destination to proper EAX register
-				Operand eax = new Operand.Reg(null);
 				AssemBinaryOp moveToEAX = new AssemBinaryOp(Kind.MOV, eax, o1);
 				// TODO: Save register EDX?
 				AssemUnaryOp division = new AssemUnaryOp(operatorUnary, o2);
