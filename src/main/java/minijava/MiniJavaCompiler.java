@@ -93,7 +93,7 @@ public class MiniJavaCompiler implements Frontend {
 
 			String intermediateOutput;
 			
-			try {
+			//try {
 				List<FragmentProc<List<TreeStm>>> fragmentsCanonicalized = new ArrayList<>(procFragements.size());
 				for (FragmentProc<TreeStm> fragment : procFragements) {
 					FragmentProc<List<TreeStm>> canonFrag = (FragmentProc<List<TreeStm>>) fragment.accept(new Canon());
@@ -104,7 +104,7 @@ public class MiniJavaCompiler implements Frontend {
 					fragmentsCanonicalized.add(new FragmentProc<List<TreeStm>>(canonFrag.frame, tracedBody));
 				}
 				
-				List<Fragment<TreeStm>> tempProcFragements = new LinkedList<>();
+				/*List<Fragment<TreeStm>> tempProcFragements = new LinkedList<>();
 				for (FragmentProc<List<TreeStm>> frag : fragmentsCanonicalized) {
 					tempProcFragements.add(new FragmentProc<TreeStm>(
 						frag.frame,
@@ -113,22 +113,22 @@ public class MiniJavaCompiler implements Frontend {
 				}
 				
 				intermediateOutput = IntermediateToCmm.stmFragmentsToCmm(tempProcFragements);
-				System.out.println(intermediateOutput);
+				System.out.println(intermediateOutput);*/
 				
 				List<Fragment<List<Assem>>> assemFragments = new LinkedList<>(); 
 				for (FragmentProc<List<TreeStm>> fragment : fragmentsCanonicalized) {
 					assemFragments.add(machineSpecifics.codeGen(fragment));
 				}
 				
-				String assembly = machineSpecifics.printAssembly(assemFragments);
-				System.out.println(assembly);
-			}
+				intermediateOutput = machineSpecifics.printAssembly(assemFragments);
+				System.out.println(intermediateOutput);
+			/*}
 			catch (Exception e) {
 				intermediateOutput = IntermediateToCmm.stmFragmentsToCmm(procFragements);
 				System.err.println(intermediateOutput);
 				e.printStackTrace();
 				
-			}
+			}*/
 			
 			System.out.println("-------------------------");
 
