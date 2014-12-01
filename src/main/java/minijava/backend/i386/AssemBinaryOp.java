@@ -1,5 +1,6 @@
 package minijava.backend.i386;
 
+
 import java.util.List;
 
 import minijava.backend.Assem;
@@ -16,9 +17,9 @@ public final class AssemBinaryOp implements Assem {
 		MOV, ADD, SUB, SHL, SHR, SAL, SAR, AND, OR, XOR, TEST, CMP, LEA
 	}
 
-	private final Operand src;
-	private final Operand dst;
-	private final Kind kind;
+	public final Operand src;
+	public final Operand dst;
+	public final Kind kind;
 
 	public AssemBinaryOp(Kind kind, Operand dst, Operand src) {
 		assert (kind != null && src != null && dst != null);
