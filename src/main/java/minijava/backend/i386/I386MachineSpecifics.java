@@ -1,5 +1,6 @@
 package minijava.backend.i386;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import minijava.backend.Assem;
@@ -58,22 +59,28 @@ public class I386MachineSpecifics implements MachineSpecifics {
 		for (Fragment<List<Assem>> frag : frags) {
 			// TODO: Treat FragmentProc as special case
 			FragmentProc<List<Assem>> procedure = (FragmentProc<List<Assem>>) frag;
+			List<Assem> procedureWithEntryExitCode = new LinkedList<>();
+
 			// Safe caller-safe registers
 			// FIXME: Use real ebp
 			Operand ebp = new Operand.Reg(new Temp());
 			// FIXME: Use real esp
 			Operand esp = new Operand.Reg(new Temp());
 			Assem saveFramePointer = new AssemUnaryOp(AssemUnaryOp.Kind.PUSH, ebp);
+			procedureWithEntryExitCode.add(saveFramePointer);
 			Assem moveFramePointer = new AssemBinaryOp(AssemBinaryOp.Kind.MOV, ebp, esp);
+			procedureWithEntryExitCode.add(moveFramePointer);
 			Assem moveStackPointer = new AssemBinaryOp(AssemBinaryOp.Kind.SUB, esp, new Operand.Imm(procedure.frame.size()));
-			stringBuilder.append(saveFramePointer.accept(new I386PrintAssemblyVisitor())).append("\n");
-			stringBuilder.append(moveFramePointer.accept(new I386PrintAssemblyVisitor())).append("\n");
-			stringBuilder.append(moveStackPointer.accept(new I386PrintAssemblyVisitor())).append("\n");
-			// Print body
-			for (Assem assem : ((FragmentProc<List<Assem>>)frag).body) {
+			procedureWithEntryExitCode.add(moveStackPointer);
+
+			procedureWithEntryExitCode.addAll(procedure.body);
+
+			// TODO: restore caller safe registers
+
+			// Print instructions
+			for (Assem assem : procedureWithEntryExitCode) {
 				stringBuilder.append(new I386PrintAssemblyVisitor().visit(assem)).append("\n");
 			}
-			// TODO: restore caller safe registers
 		}
 		return stringBuilder.toString();
 	}
