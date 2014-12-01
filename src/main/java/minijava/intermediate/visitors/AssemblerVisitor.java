@@ -183,7 +183,7 @@ public class AssemblerVisitor implements
 
 		@Override
 		public Void visit(TreeStmEXP stmEXP) {
-			// TODO Auto-generated method stub
+			stmEXP.exp.accept(this);
 			return null;
 		}
 

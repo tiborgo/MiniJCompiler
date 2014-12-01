@@ -23,7 +23,7 @@ int64_t L_println_int(int64_t n)
 // Print character to the standard output
 int64_t L_print_char(int64_t n)
 {
-  printf("%" PRId64, n);
+  printf("%c", n);
   return 0;
 }
 
