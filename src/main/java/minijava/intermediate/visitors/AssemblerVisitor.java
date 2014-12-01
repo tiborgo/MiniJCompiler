@@ -37,8 +37,14 @@ public class AssemblerVisitor implements
 
 	@Override
 	public FragmentProc<List<Assem>> visit(FragmentProc<List<TreeStm>> fragProc) {
-		// TODO Auto-generated method stub
-		return null;
+		List<Assem> instructions = new LinkedList<>();
+		for (TreeStm statement : fragProc.body) {
+			List<Assem> statementInstructions =
+					statement.accept(new StatementExpressionVisitor());
+			instructions.addAll(statementInstructions);
+		}
+		// FIXME: Set correct frame?
+		return new FragmentProc<List<Assem>>(fragProc.frame, instructions);
 	}
 
 	protected static class StatementExpressionVisitor implements
