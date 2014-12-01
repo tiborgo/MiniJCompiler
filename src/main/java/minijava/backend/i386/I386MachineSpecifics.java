@@ -85,7 +85,7 @@ public class I386MachineSpecifics implements MachineSpecifics {
 
 			// Print instructions
 			for (Assem assem : procedureWithEntryExitCode) {
-				stringBuilder.append(new I386PrintAssemblyVisitor().visit(assem)).append("\n");
+				stringBuilder.append(assem.accept(new I386PrintAssemblyVisitor())).append("\n");
 			}
 		}
 		return stringBuilder.toString();
