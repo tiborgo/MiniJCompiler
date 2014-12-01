@@ -142,19 +142,17 @@ public class AssemblerVisitor implements
 				// FIXME: Set destination to proper EAX register
 				Operand eax = new Operand.Reg(null);
 				AssemBinaryOp moveToEAX = new AssemBinaryOp(Kind.MOV, eax, o1);
-				emit(moveToEAX);
 				// TODO: Save register EDX?
 				AssemUnaryOp division = new AssemUnaryOp(operatorUnary, o2);
-				emit(division);
+				emit(moveToEAX, division);
 				return eax;
 			} else if (operatorUnary != AssemUnaryOp.Kind.IMUL) {
 				// FIXME: Set destination to proper EAX register
 				Operand eax = new Operand.Reg(null);
 				AssemBinaryOp moveToEAX = new AssemBinaryOp(Kind.MOV, eax, o1);
-				emit(moveToEAX);
 				// TODO: Save register EDX?
 				AssemUnaryOp division = new AssemUnaryOp(operatorUnary, o2);
-				emit(division);
+				emit(moveToEAX, division);
 				return eax;
 			} else if (operatorUnary != null) {
 				throw new UnsupportedOperationException("Unsupported operator \"" + operatorUnary + "\"");
@@ -235,9 +233,8 @@ public class AssemblerVisitor implements
 				stmCJUMP.left.accept(this),
 				stmCJUMP.right.accept(this)
 			);
-			emit(cmpOp);
 			AssemJump jump = new AssemJump(AssemJump.Kind.J, stmCJUMP.ltrue, cond);
-			emit(jump);
+			emit(cmpOp, jump);
 			return null;
 		}
 
@@ -253,8 +250,10 @@ public class AssemblerVisitor implements
 			return null;
 		}
 
-		protected void emit(Assem instruction) {
-			this.instructions.add(instruction);
+		protected void emit(Assem... instructions) {
+			for (Assem instruction : instructions) {
+				this.instructions.add(instruction);
+			}
 		}
 
 		public List<Assem> getInstructions() {
