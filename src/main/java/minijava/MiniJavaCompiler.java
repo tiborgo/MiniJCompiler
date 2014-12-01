@@ -22,6 +22,7 @@ import minijava.ast.visitors.baseblocks.BaseBlock;
 import minijava.ast.visitors.baseblocks.Generator;
 import minijava.ast.visitors.baseblocks.ToTreeStmConverter;
 import minijava.ast.visitors.baseblocks.Tracer;
+import minijava.backend.Assem;
 import minijava.backend.MachineSpecifics;
 import minijava.backend.dummymachine.IntermediateToCmm;
 import minijava.backend.i386.I386MachineSpecifics;
@@ -114,9 +115,13 @@ public class MiniJavaCompiler implements Frontend {
 				intermediateOutput = IntermediateToCmm.stmFragmentsToCmm(tempProcFragements);
 				System.out.println(intermediateOutput);
 				
+				List<Fragment<List<Assem>>> assemFragments = new LinkedList<>(); 
 				for (FragmentProc<List<TreeStm>> fragment : fragmentsCanonicalized) {
-					machineSpecifics.codeGen(fragment);
+					assemFragments.add(machineSpecifics.codeGen(fragment));
 				}
+				
+				String assembly = machineSpecifics.printAssembly(assemFragments);
+				System.out.println(assembly);
 			}
 			catch (Exception e) {
 				intermediateOutput = IntermediateToCmm.stmFragmentsToCmm(procFragements);
