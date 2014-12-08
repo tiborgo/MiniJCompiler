@@ -20,9 +20,9 @@ public class I386MachineSpecifics implements MachineSpecifics {
 	private final String indentation = "\t";
 
 	public I386MachineSpecifics() {
-		eax = new Operand.Reg(new Temp());
-		ebp = new Operand.Reg(new Temp());
-		esp = new Operand.Reg(new Temp());
+		eax = new Operand.Reg(new I386RegTemp("eax"));
+		ebp = new Operand.Reg(new I386RegTemp("ebp"));
+		esp = new Operand.Reg(new I386RegTemp("esp"));
 	}
 
 	@Override
