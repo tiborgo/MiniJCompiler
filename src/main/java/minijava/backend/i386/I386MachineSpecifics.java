@@ -44,7 +44,7 @@ public class I386MachineSpecifics implements MachineSpecifics {
 
 	@Override
 	public Frame newFrame(Label name, int paramCount) {
-		return new I386Frame(name, paramCount);
+		return new I386Frame(name, paramCount, eax.reg);
 	}
 
 	@Override
@@ -70,19 +70,29 @@ public class I386MachineSpecifics implements MachineSpecifics {
 			FragmentProc<List<Assem>> procedure = (FragmentProc<List<Assem>>) frag;
 			List<Assem> procedureWithEntryExitCode = new LinkedList<>();
 
-			// Safe caller-safe registers
+			Assem functionLabel = new AssemLabel(procedure.frame.getName());
+			procedureWithEntryExitCode.add(functionLabel);
+
+			// Prologue
 			Assem saveFramePointer = new AssemUnaryOp(AssemUnaryOp.Kind.PUSH, ebp);
 			procedureWithEntryExitCode.add(saveFramePointer);
 			Assem moveFramePointer = new AssemBinaryOp(AssemBinaryOp.Kind.MOV, ebp, esp);
 			procedureWithEntryExitCode.add(moveFramePointer);
-			Assem moveStackPointer = new AssemBinaryOp(AssemBinaryOp.Kind.SUB, esp, new Operand.Imm(procedure.frame.size()));
+			// TODO: Allocate space on stack for local variables
+			int localVariableSize = 0;
+			Assem moveStackPointer = new AssemBinaryOp(AssemBinaryOp.Kind.SUB, esp, new Operand.Imm(localVariableSize));
 			procedureWithEntryExitCode.add(moveStackPointer);
+
+			// TODO: Save callee-safe registers
 
 			procedureWithEntryExitCode.addAll(procedure.body);
 
 			// Restore caller-safe registers
 			Assem leave = new AssemInstr(AssemInstr.Kind.LEAVE);
 			procedureWithEntryExitCode.add(leave);
+
+			Assem ret = new AssemInstr(AssemInstr.Kind.RET);
+			procedureWithEntryExitCode.add(ret);
 
 			// Print instructions
 			for (Assem assem : procedureWithEntryExitCode) {
