@@ -1,6 +1,6 @@
 package minijava.intermediate;
 
-public final class Temp implements Comparable<Temp> {
+public class Temp implements Comparable<Temp> {
 
   private static int nextId = 0;
 
@@ -9,7 +9,7 @@ public final class Temp implements Comparable<Temp> {
   public Temp() {
     this.id = nextId++;
   }
-  
+
   public static void resetCounter() {
     nextId = 0;
   }
