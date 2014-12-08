@@ -22,28 +22,18 @@ public final class AssemJump implements Assem {
 	}
 
 	public final Kind kind;
-	public final Label label;
 	public final Operand dest;
 	public final Cond cond;
 
-	public AssemJump(Kind kind, Label label) {
-		this(kind, label, null, null);
-	}
-
 	public AssemJump(Kind kind, Operand dest) {
-		this(kind, null, dest, null);
+		this(kind, dest, null);
 	}
 
-	public AssemJump(Kind kind, Label label, Cond cond) {
-		this(kind, label, null, cond);
-	}
-
-	public AssemJump(Kind kind, Label label, Operand dest, Cond cond) {
+	public AssemJump(Kind kind, Operand dest, Cond cond) {
 		assert (kind != Kind.J || cond != null) : "J needs condition argument";
-		assert (kind == Kind.CALL || label != null) : "J and JMP need label as destination";
+		assert (kind == Kind.CALL || dest instanceof Operand.Label) : "J and JMP need label as destination";
 		assert (dest == null || dest instanceof Operand.Reg) : "dynamic destination of CALL must be Reg";
 		this.kind = kind;
-		this.label = label;
 		this.dest = dest;
 		this.cond = cond;
 	}
