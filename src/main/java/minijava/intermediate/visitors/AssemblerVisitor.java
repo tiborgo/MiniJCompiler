@@ -34,17 +34,19 @@ public class AssemblerVisitor implements
 	FragmentVisitor<List<TreeStm>, FragmentProc<List<Assem>>> {
 	private final Operand.Reg eax;
 	private final Operand.Reg ebp;
+	private final Operand.Reg esp;
 
-	public AssemblerVisitor(Operand.Reg eax, Operand.Reg ebp) {
+	public AssemblerVisitor(Operand.Reg eax, Operand.Reg ebp, Operand.Reg esp) {
 		this.eax = eax;
 		this.ebp = ebp;
+		this.esp = esp;
 	}
 
 	@Override
 	public FragmentProc<List<Assem>> visit(FragmentProc<List<TreeStm>> fragProc) {
 		List<Assem> instructions = new LinkedList<>();
 		for (TreeStm statement : fragProc.body) {
-			StatementExpressionVisitor visitor = new StatementExpressionVisitor(eax, ebp);
+			StatementExpressionVisitor visitor = new StatementExpressionVisitor(eax, ebp, esp);
 			statement.accept(visitor);
 			instructions.addAll(visitor.getInstructions());
 		}
@@ -58,21 +60,25 @@ public class AssemblerVisitor implements
 		private final List<Assem> instructions;
 		private final Operand.Reg eax;
 		private final Operand.Reg ebp;
+		private final Operand.Reg esp;
 
-		public StatementExpressionVisitor(Operand.Reg eax, Operand.Reg ebp) {
+		public StatementExpressionVisitor(Operand.Reg eax, Operand.Reg ebp, Operand.Reg esp) {
 			this.instructions = new LinkedList<>();
 			this.eax = eax;
 			this.ebp = ebp;
+			this.esp = esp;
 		}
 
 		@Override
 		public Operand visit(TreeExpCALL e) throws RuntimeException {
 			// Push arguments on stack
+			int parameterCount = e.args.size();
+			emit(new AssemBinaryOp(Kind.SUB, esp, new Operand.Imm(parameterCount)));
 			for (TreeExp arg : e.args) {
 				// TODO: Calculate address according to word size
 				Operand dst = new Operand.Mem(ebp.reg, null, null, 4*e.args.indexOf(arg));
 				Operand src = arg.accept(this);
-				instructions.add(new AssemBinaryOp(Kind.MOV, dst, src));
+				emit(new AssemBinaryOp(Kind.MOV, dst, src));
 			}
 			// TODO: Save Caller-Save registers?
 			Operand dest = e.func.accept(this);
