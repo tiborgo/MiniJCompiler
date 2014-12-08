@@ -70,12 +70,12 @@ public class MiniJavaCompiler implements Frontend {
 			PrettyPrintVisitor prettyPrintVisitor = new PrettyPrintVisitor("");
 			String output = program.accept(prettyPrintVisitor);
 			System.out.print(output);
-			
+
 			System.out.println("-------------------------");
-			
-			SymbolTableVisitor symbolTableVisitor = new SymbolTableVisitor(); 
+
+			SymbolTableVisitor symbolTableVisitor = new SymbolTableVisitor();
 			Program symbolTable = program.accept(symbolTableVisitor);
-			
+
 			TypeCheckVisitor typeCheckVisitor = new TypeCheckVisitor(symbolTable);
 			if (program.accept(typeCheckVisitor)) {
 				System.out.println("No Type Errors");
@@ -84,15 +84,15 @@ public class MiniJavaCompiler implements Frontend {
 				System.err.println("Type errors");
 				System.err.flush();
 			}
-			
+
 			System.out.println("-------------------------");
-			
+
 			MachineSpecifics machineSpecifics = new I386MachineSpecifics();//new DummyMachineSpecifics();
 			IntermediateVisitor intermediateVisitor = new IntermediateVisitor(machineSpecifics, symbolTable);
 			List<FragmentProc<TreeStm>> procFragements = program.accept(intermediateVisitor);
 
 			String intermediateOutput;
-			
+
 			//try {
 				List<FragmentProc<List<TreeStm>>> fragmentsCanonicalized = new ArrayList<>(procFragements.size());
 				for (FragmentProc<TreeStm> fragment : procFragements) {
@@ -100,10 +100,10 @@ public class MiniJavaCompiler implements Frontend {
 					Generator.BaseBlockContainer baseBlocks = Generator.generate(canonFrag.body);
 					List<BaseBlock> tracedBaseBlocks = Tracer.trace(baseBlocks);
 					List<TreeStm> tracedBody = ToTreeStmConverter.convert(tracedBaseBlocks, baseBlocks.startLabel, baseBlocks.endLabel);
-	
+
 					fragmentsCanonicalized.add(new FragmentProc<List<TreeStm>>(canonFrag.frame, tracedBody));
 				}
-				
+
 				/*List<Fragment<TreeStm>> tempProcFragements = new LinkedList<>();
 				for (FragmentProc<List<TreeStm>> frag : fragmentsCanonicalized) {
 					tempProcFragements.add(new FragmentProc<TreeStm>(
@@ -111,15 +111,15 @@ public class MiniJavaCompiler implements Frontend {
 					 	TreeStmSEQ.fromList(frag.body))
 					 );
 				}
-				
+
 				intermediateOutput = IntermediateToCmm.stmFragmentsToCmm(tempProcFragements);
 				System.out.println(intermediateOutput);*/
-				
-				List<Fragment<List<Assem>>> assemFragments = new LinkedList<>(); 
+
+				List<Fragment<List<Assem>>> assemFragments = new LinkedList<>();
 				for (FragmentProc<List<TreeStm>> fragment : fragmentsCanonicalized) {
 					assemFragments.add(machineSpecifics.codeGen(fragment));
 				}
-				
+
 				intermediateOutput = machineSpecifics.printAssembly(assemFragments);
 				System.out.println(intermediateOutput);
 			/*}
@@ -127,21 +127,21 @@ public class MiniJavaCompiler implements Frontend {
 				intermediateOutput = IntermediateToCmm.stmFragmentsToCmm(procFragements);
 				System.err.println(intermediateOutput);
 				e.printStackTrace();
-				
+
 			}*/
-			
+
 			System.out.println("-------------------------");
 
 			Runtime runtime = Runtime.getRuntime();
 			// -xc specifies the input language as C and is required for GCC to read from stdin
-			ProcessBuilder processBuilder = new ProcessBuilder("gcc", "-o", compilerOutputFile.toString(), "-m32", "-xc", "runtime_32.c", "-");
+			ProcessBuilder processBuilder = new ProcessBuilder("gcc", "-o", compilerOutputFile.toString(), "-m32", "-xc", "runtime_32.c", "-xassembler", "-");
 			processBuilder.directory(RUNTIME_DIRECTORY.toFile());
 			Process gccCall = processBuilder.start();
 			// Write C code to stdin of C Compiler
 			OutputStream stdin = gccCall.getOutputStream();
 			stdin.write(intermediateOutput.getBytes());
 			stdin.close();
-			
+
 			try {
 				gccCall.waitFor();
 			} catch (InterruptedException e) {
@@ -166,14 +166,14 @@ public class MiniJavaCompiler implements Frontend {
 				System.err.println("GCC compilation failed");
 				System.err.flush();
 			}
-			
+
 			System.out.println("-------------------------");
-			
+
 			Process outCall = runtime.exec(compilerOutputFile.toString());
-			
+
 			try {
 				outCall.waitFor();
-				
+
 				switch (outCall.exitValue()) {
 				case 0:
 					InputStream stdout = outCall.getInputStream();
@@ -199,11 +199,11 @@ public class MiniJavaCompiler implements Frontend {
 					bufferedStderr.close();
 					stderr.close();
 				}
-				
+
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			
+
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.out.println("Not Accepted");
