@@ -33,8 +33,13 @@ public class I386PrintAssemblyVisitor implements
 			operation.append(assem.cond.name());
 		}
 		
-		operation.append(" ")
-			.append(assem.dest.accept(this));
+		if (assem.dest instanceof Operand.Label) {
+			operation.append(" ")
+				.append(assem.dest.accept(this));
+		}
+		else {
+			throw new UnsupportedOperationException("Can only print jumps to labels");
+		}
 		
 		return operation.toString();
 	}
@@ -79,11 +84,18 @@ public class I386PrintAssemblyVisitor implements
 				.append(op.index);
 		}
 		
-		operation
-			.append("*")
-			.append(op.scale)
-			.append("+")
-			.append(op.displacement);
+		if (op.scale != null) {
+			operation
+				.append("*")
+				.append(op.scale);
+		}
+		
+		if (op.displacement != 0) {
+			operation
+				.append("+")
+				.append(op.displacement);
+		}
+			
 		
 		return operation.toString();
 	}

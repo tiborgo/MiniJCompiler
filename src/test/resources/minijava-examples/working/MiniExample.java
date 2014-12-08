@@ -11,8 +11,8 @@ class Main {
     		System.out.println(2);
     	}*/
     	//System.out.print((char)100);
-    	System.out.println((new Test3()).test());
-    	
+    	//System.out.println((new Test3()).test());
+    	System.out.print((char)100);
     }
 }
 
@@ -22,7 +22,7 @@ class Main {
 	}
 }*/
 
-class Test3 {
+/*class Test3 {
 	public int test() {
 		int[] a;
 		a = new int[10];
@@ -61,4 +61,4 @@ class Test {
 		a = x.run();
 		return 1;
 	}
-}
+}*/

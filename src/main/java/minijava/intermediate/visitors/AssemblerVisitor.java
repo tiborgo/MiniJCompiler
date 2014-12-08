@@ -13,6 +13,7 @@ import minijava.backend.i386.AssemUnaryOp;
 import minijava.backend.i386.Operand;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.FragmentVisitor;
+import minijava.intermediate.Label;
 import minijava.intermediate.tree.TreeExp;
 import minijava.intermediate.tree.TreeExpCALL;
 import minijava.intermediate.tree.TreeExpCONST;
@@ -74,10 +75,10 @@ public class AssemblerVisitor implements
 				instructions.add(new AssemBinaryOp(Kind.MOV, dst, src));
 			}
 			// TODO: Save Caller-Save registers?
-			Operand result = e.func.accept(this);
-			AssemJump callInstruction = new AssemJump(AssemJump.Kind.CALL, result);
+			Operand dest = e.func.accept(this);
+			AssemJump callInstruction = new AssemJump(AssemJump.Kind.CALL, dest);
 			emit(callInstruction);
-			return result;
+			return dest;
 		}
 
 		@Override
@@ -239,7 +240,7 @@ public class AssemblerVisitor implements
 				stmCJUMP.left.accept(this),
 				stmCJUMP.right.accept(this)
 			);
-			AssemJump jump = new AssemJump(AssemJump.Kind.J, stmCJUMP.ltrue, cond);
+			AssemJump jump = new AssemJump(AssemJump.Kind.J, new Operand.Label(stmCJUMP.ltrue), cond);
 			emit(cmpOp, jump);
 			return null;
 		}

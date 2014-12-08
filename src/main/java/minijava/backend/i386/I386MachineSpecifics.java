@@ -17,6 +17,7 @@ public class I386MachineSpecifics implements MachineSpecifics {
 	private final Operand.Reg eax;
 	private final Operand.Reg ebp;
 	private final Operand.Reg esp;
+	private final String indentation = "\t";
 
 	public I386MachineSpecifics() {
 		eax = new Operand.Reg(new Temp());
@@ -85,6 +86,9 @@ public class I386MachineSpecifics implements MachineSpecifics {
 
 			// Print instructions
 			for (Assem assem : procedureWithEntryExitCode) {
+				if (!(assem instanceof AssemLabel)) {
+					stringBuilder.append(indentation);
+				}
 				stringBuilder.append(assem.accept(new I386PrintAssemblyVisitor())).append("\n");
 			}
 		}
