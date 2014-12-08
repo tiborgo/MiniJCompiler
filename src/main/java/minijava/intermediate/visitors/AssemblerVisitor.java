@@ -146,26 +146,28 @@ public class AssemblerVisitor implements
 			}
 
 			// Unary instructions
-			if (operatorUnary != AssemUnaryOp.Kind.IDIV) {
-				AssemBinaryOp moveToEAX = new AssemBinaryOp(Kind.MOV, eax, o1);
-				// TODO: Save register EDX?
-				AssemUnaryOp division = new AssemUnaryOp(operatorUnary, o2);
-				emit(moveToEAX, division);
-				return eax;
-			} else if (operatorUnary != AssemUnaryOp.Kind.IMUL) {
-				AssemBinaryOp moveToEAX = new AssemBinaryOp(Kind.MOV, eax, o1);
-				// TODO: Save register EDX?
-				AssemUnaryOp division = new AssemUnaryOp(operatorUnary, o2);
-				emit(moveToEAX, division);
-				return eax;
-			} else if (operatorUnary != null) {
-				throw new UnsupportedOperationException("Unsupported operator \"" + operatorUnary + "\"");
+			if (operatorUnary != null) {
+				if (operatorUnary == AssemUnaryOp.Kind.IDIV) {
+					AssemBinaryOp moveToEAX = new AssemBinaryOp(Kind.MOV, eax, o1);
+					// TODO: Save register EDX?
+					AssemUnaryOp division = new AssemUnaryOp(operatorUnary, o2);
+					emit(moveToEAX, division);
+					return eax;
+				} else if (operatorUnary == AssemUnaryOp.Kind.IMUL) {
+					AssemBinaryOp moveToEAX = new AssemBinaryOp(Kind.MOV, eax, o1);
+					// TODO: Save register EDX?
+					AssemUnaryOp division = new AssemUnaryOp(operatorUnary, o2);
+					emit(moveToEAX, division);
+					return eax;
+				} else {
+					throw new UnsupportedOperationException("Unsupported operator \"" + operatorUnary + "\"");
+				}
+			} else {
+				// Binary instructions
+				AssemBinaryOp binaryOperation = new AssemBinaryOp(operatorBinary, o1, o2);
+				emit(binaryOperation);
+				return o1;
 			}
-
-			// Binary instructions
-			AssemBinaryOp binaryOperation = new AssemBinaryOp(operatorBinary, o1, o2);
-			emit(binaryOperation);
-			return o1;
 		}
 
 		@Override
