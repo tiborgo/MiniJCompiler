@@ -17,21 +17,23 @@ final class I386Frame implements Frame {
   final Label name;
   final List<Temp> params;
   final List<Temp> locals;
-  final static Temp returnReg = new Temp();
+  final Temp returnReg;
 
   I386Frame(I386Frame frame) {
     this.name = frame.name;
     this.params = new ArrayList<Temp>(frame.params);
     this.locals = new ArrayList<Temp>(frame.locals);
+    this.returnReg = frame.returnReg;
   }
 
-  I386Frame(Label name, int paramCount) {
+  I386Frame(Label name, int paramCount, Temp returnRegister) {
     this.name = name;
     this.params = new ArrayList<Temp>();
     this.locals = new LinkedList<Temp>();
     for (int i = 0; i < paramCount; i++) {
       this.params.add(new Temp());
     }
+    this.returnReg = returnRegister;
   }
 
   @Override
@@ -59,8 +61,6 @@ final class I386Frame implements Frame {
 
   @Override
   public TreeStm makeProc(TreeStm body, TreeExp returnValue) {
-		// TODO: Save callee-save registers
-		// TODO: Restore callee-save registers
     return new TreeStmSEQ(body,
             new TreeStmMOVE(new TreeExpTEMP(returnReg), returnValue));
   }

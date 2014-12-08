@@ -71,19 +71,28 @@ public class AssemblerVisitor implements
 
 		@Override
 		public Operand visit(TreeExpCALL e) throws RuntimeException {
+			// TODO: Save Caller-Save registers?
+
 			// Push arguments on stack
 			int parameterCount = e.args.size();
-			emit(new AssemBinaryOp(Kind.SUB, esp, new Operand.Imm(parameterCount)));
+			// TODO: Use machine specifics to get word size
+			int parameterSize = parameterCount*4;
+			emit(new AssemBinaryOp(Kind.SUB, esp, new Operand.Imm(parameterSize)));
 			for (TreeExp arg : e.args) {
 				// TODO: Calculate address according to word size
-				Operand dst = new Operand.Mem(ebp.reg, null, null, 4*e.args.indexOf(arg));
+				Operand dst = new Operand.Mem(esp.reg, null, null, 4*e.args.indexOf(arg));
 				Operand src = arg.accept(this);
 				emit(new AssemBinaryOp(Kind.MOV, dst, src));
 			}
-			// TODO: Save Caller-Save registers?
+
 			Operand dest = e.func.accept(this);
 			AssemJump callInstruction = new AssemJump(AssemJump.Kind.CALL, dest);
 			emit(callInstruction);
+
+			emit(new AssemBinaryOp(Kind.ADD, esp, new Operand.Imm(parameterSize)));
+
+			// TODO: Restore Caller-Save registers?
+
 			return dest;
 		}
 
