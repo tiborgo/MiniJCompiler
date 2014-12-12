@@ -118,7 +118,7 @@ public class IntermediateVisitor implements
 
 		DeclMeth mainMethod = new DeclMeth(
 			new TyInt(),
-			"main",
+			"_lmain",
 			Arrays.asList(new Parameter(d.mainArg, new TyArr(new TyInt()))),
 			Collections.<DeclVar>emptyList(),
 			d.mainBody,
