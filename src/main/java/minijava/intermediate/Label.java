@@ -27,9 +27,9 @@ public final class Label {
     if (name.startsWith("$$")) {
       throw new RuntimeException("Label name " + name + " is reserved and cannot be used");
     }
-    this.name = "L" + name;
+    this.name = name;
   }
-
+  
   public static void resetCounter() {
     nextId = 0;
   }

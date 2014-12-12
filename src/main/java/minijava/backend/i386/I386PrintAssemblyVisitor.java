@@ -10,9 +10,9 @@ public class I386PrintAssemblyVisitor implements
 
 		StringBuilder operation = new StringBuilder()
 			.append(assem.kind.name())
-			.append(" ")
+			.append("\t")
 			.append(assem.dst.accept(this))
-			.append(",")
+			.append(",\t")
 			.append(assem.src.accept(this));
 
 		return operation.toString();
@@ -34,7 +34,7 @@ public class I386PrintAssemblyVisitor implements
 		}
 
 		if (assem.dest instanceof Operand.Label) {
-			operation.append(" ")
+			operation.append("\t")
 				.append(assem.dest.accept(this));
 		}
 		else {
@@ -48,7 +48,7 @@ public class I386PrintAssemblyVisitor implements
 	public String visit(AssemUnaryOp assem) {
 		StringBuilder operation = new StringBuilder()
 			.append(assem.kind.name())
-			.append(" ")
+			.append("\t")
 			.append(assem.op.accept(this));
 
 		return operation.toString();
@@ -66,18 +66,16 @@ public class I386PrintAssemblyVisitor implements
 	}
 
 	public String visit(Operand.Reg op) {
-		return "%" + op.reg.toString();
+		return op.reg.toString();
 	}
 
 	public String visit(Operand.Mem op) {
 		// base + index * size + displacement
 		StringBuilder operation = new StringBuilder();
-		operation.append("[");
+		operation.append("DWORD PTR [");
 
 		if (op.base != null) {
-			operation.append("%");
 			operation.append(op.base.toString());
-
 		}
 
 		if (op.index != null) {

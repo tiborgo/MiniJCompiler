@@ -64,6 +64,11 @@ public class I386MachineSpecifics implements MachineSpecifics {
 	public String printAssembly(List<Fragment<List<Assem>>> frags) {
 
 		StringBuilder stringBuilder = new StringBuilder();
+		
+		stringBuilder
+			.append("\t.intel_syntax\n")
+			.append("\t.global _lmain\n")
+			.append("\n");
 
 		for (Fragment<List<Assem>> frag : frags) {
 			// TODO: Treat FragmentProc as special case
@@ -99,7 +104,10 @@ public class I386MachineSpecifics implements MachineSpecifics {
 				if (!(assem instanceof AssemLabel)) {
 					stringBuilder.append(indentation);
 				}
-				stringBuilder.append(assem.accept(new I386PrintAssemblyVisitor())).append("\n");
+				stringBuilder.append(assem.accept(new I386PrintAssemblyVisitor()));
+				if (!(assem instanceof AssemLabel)) {
+					stringBuilder.append("\n");
+				}
 			}
 		}
 		return stringBuilder.toString();
