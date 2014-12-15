@@ -75,7 +75,8 @@ public class I386PrintAssemblyVisitor implements
 		operation.append("DWORD PTR [");
 
 		if (op.base != null) {
-			operation.append(op.base.toString());
+			operation.append("%")
+				.append(op.base.toString());
 		}
 
 		if (op.index != null) {
