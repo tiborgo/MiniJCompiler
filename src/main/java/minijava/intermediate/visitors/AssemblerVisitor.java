@@ -14,6 +14,7 @@ import minijava.backend.i386.Operand;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.FragmentVisitor;
 import minijava.intermediate.Label;
+import minijava.intermediate.Temp;
 import minijava.intermediate.tree.TreeExp;
 import minijava.intermediate.tree.TreeExpCALL;
 import minijava.intermediate.tree.TreeExpCONST;
@@ -169,14 +170,18 @@ public class AssemblerVisitor implements
 				if (operatorUnary == AssemUnaryOp.Kind.IDIV) {
 					AssemBinaryOp moveToEAX = new AssemBinaryOp(Kind.MOV, eax, o1);
 					// TODO: Save register EDX?
+					Operand.Reg o2Temp = new Operand.Reg(new Temp());
+					AssemBinaryOp moveToO2Temp = new AssemBinaryOp(Kind.MOV, o2Temp, o2);
 					AssemUnaryOp division = new AssemUnaryOp(operatorUnary, o2);
-					emit(moveToEAX, division);
+					emit(moveToEAX, moveToO2Temp, division);
 					return eax;
 				} else if (operatorUnary == AssemUnaryOp.Kind.IMUL) {
 					AssemBinaryOp moveToEAX = new AssemBinaryOp(Kind.MOV, eax, o1);
 					// TODO: Save register EDX?
-					AssemUnaryOp division = new AssemUnaryOp(operatorUnary, o2);
-					emit(moveToEAX, division);
+					Operand.Reg o2Temp = new Operand.Reg(new Temp());
+					AssemBinaryOp moveToO2Temp = new AssemBinaryOp(Kind.MOV, o2Temp, o2);
+					AssemUnaryOp division = new AssemUnaryOp(operatorUnary, o2Temp);
+					emit(moveToEAX, moveToO2Temp, division);
 					return eax;
 				} else {
 					throw new UnsupportedOperationException("Unsupported operator \"" + operatorUnary + "\"");
