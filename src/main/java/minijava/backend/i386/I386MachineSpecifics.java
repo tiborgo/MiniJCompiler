@@ -67,7 +67,8 @@ public class I386MachineSpecifics implements MachineSpecifics {
 		
 		stringBuilder
 			.append("\t.intel_syntax noprefix\n")
-			.append("\t.global _lmain\n")
+				// TODO: Entry point should be set programatically
+			.append("\t.global lmain\n")
 			.append("\n");
 
 		for (Fragment<List<Assem>> frag : frags) {
