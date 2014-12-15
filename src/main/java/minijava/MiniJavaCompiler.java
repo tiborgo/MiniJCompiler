@@ -132,6 +132,8 @@ public class MiniJavaCompiler implements Frontend {
 					assemFragments.add(machineSpecifics.codeGen(fragment));
 				}
 
+				// TODO: Build liveness graph
+				
 				intermediateOutput = machineSpecifics.printAssembly(assemFragments);
 				System.out.println(intermediateOutput);
 			/*}

@@ -12,15 +12,15 @@ class Main {
     	}*/
     	//System.out.print((char)100);
     	//System.out.println((new Test3()).test());
-    	System.out.print((char)100);
+    	System.out.print((char)new Test().test());
     }
 }
 
-/*class Test {
+class Test {
 	public int test() {
-		return 1;
+		return 100;
 	}
-}*/
+}
 
 /*class Test3 {
 	public int test() {
