@@ -78,6 +78,8 @@ public class I386MachineSpecifics implements MachineSpecifics {
 			Assem functionLabel = new AssemLabel(procedure.frame.getName());
 			procedureWithEntryExitCode.add(functionLabel);
 
+			// TODO make prologue architecture dependent
+			
 			// Prologue
 			Assem saveFramePointer = new AssemUnaryOp(AssemUnaryOp.Kind.PUSH, ebp);
 			procedureWithEntryExitCode.add(saveFramePointer);
@@ -85,13 +87,19 @@ public class I386MachineSpecifics implements MachineSpecifics {
 			procedureWithEntryExitCode.add(moveFramePointer);
 			// TODO: Allocate space on stack for local variables
 			int localVariableSize = 0;
-			Assem moveStackPointer = new AssemBinaryOp(AssemBinaryOp.Kind.SUB, esp, new Operand.Imm(localVariableSize));
+			// 4 (push ebp) + 4 (ret address) + localVariableSize
+			int padding = 16 - ((localVariableSize + 8) % 16);
+			Assem moveStackPointer = new AssemBinaryOp(AssemBinaryOp.Kind.SUB, esp, new Operand.Imm(localVariableSize + padding));
 			procedureWithEntryExitCode.add(moveStackPointer);
 
 			// TODO: Save callee-safe registers
 
 			procedureWithEntryExitCode.addAll(procedure.body);
 
+			// remove padding
+			Assem leavePadding = new AssemBinaryOp(AssemBinaryOp.Kind.ADD, esp, new Operand.Imm(padding));
+			procedureWithEntryExitCode.add(leavePadding);
+			
 			// Restore caller-safe registers
 			Assem leave = new AssemInstr(AssemInstr.Kind.LEAVE);
 			procedureWithEntryExitCode.add(leave);
