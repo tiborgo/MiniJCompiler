@@ -77,7 +77,10 @@ public class AssemblerVisitor implements
 			int parameterCount = e.args.size();
 			// TODO: Use machine specifics to get word size
 			int parameterSize = parameterCount*4;
-			emit(new AssemBinaryOp(Kind.SUB, esp, new Operand.Imm(parameterSize)));
+			// TODO: Padding should be specific for OSX
+			int padding = 16 - (parameterSize % 16);
+			int stackIncrement = parameterSize + padding;
+			emit(new AssemBinaryOp(Kind.SUB, esp, new Operand.Imm(stackIncrement)));
 			for (TreeExp arg : e.args) {
 				// TODO: Calculate address according to word size
 				Operand dst = new Operand.Mem(esp.reg, null, null, 4*e.args.indexOf(arg));
@@ -89,7 +92,7 @@ public class AssemblerVisitor implements
 			AssemJump callInstruction = new AssemJump(AssemJump.Kind.CALL, dest);
 			emit(callInstruction);
 
-			emit(new AssemBinaryOp(Kind.ADD, esp, new Operand.Imm(parameterSize)));
+			emit(new AssemBinaryOp(Kind.ADD, esp, new Operand.Imm(stackIncrement)));
 
 			// TODO: Restore Caller-Save registers?
 
