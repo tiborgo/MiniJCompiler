@@ -66,7 +66,7 @@ public class I386PrintAssemblyVisitor implements
 	}
 
 	public String visit(Operand.Reg op) {
-		return op.reg.toString();
+		return "%" + op.reg.toString();
 	}
 
 	public String visit(Operand.Mem op) {
