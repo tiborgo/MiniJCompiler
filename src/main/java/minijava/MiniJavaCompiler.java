@@ -60,8 +60,14 @@ public class MiniJavaCompiler implements Frontend {
 		// SymbolTable table = new SymbolTable();
 
 		String osName = System.getProperty("os.name").toLowerCase();
+		// TODO: better solution?
+		String gcc;
 		if (osName.contains("mac")) {
 			Label.leadingUnderscore = true;
+			gcc = "/usr/local/bin/gcc-4.9";
+		}
+		else {
+			gcc = "gcc";
 		}
 
 		MiniJavaCompiler compiler = new MiniJavaCompiler();
@@ -140,7 +146,6 @@ public class MiniJavaCompiler implements Frontend {
 
 			Runtime runtime = Runtime.getRuntime();
 			// -xc specifies the input language as C and is required for GCC to read from stdin
-			String gcc = "/usr/local/bin/gcc-4.9";
 			ProcessBuilder processBuilder = new ProcessBuilder(gcc, "-o", compilerOutputFile.toString(), "-m32", "-xc", "runtime_32.c", "-xassembler", "-");
 			processBuilder.directory(RUNTIME_DIRECTORY.toFile());
 			Process gccCall = processBuilder.start();
