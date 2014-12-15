@@ -1,5 +1,6 @@
 package minijava.backend.i386;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import minijava.backend.Assem;
@@ -29,7 +30,19 @@ public final class AssemUnaryOp implements Assem {
 	}
 
 	public List<Temp> use() {
-		throw new UnsupportedOperationException("Not supported yet.");
+		ArrayList<Temp> usedTemporaries = new ArrayList<>(2);
+		if (op instanceof Operand.Reg) {
+			usedTemporaries.add(((Operand.Reg) op).reg);
+		} else if (op instanceof Operand.Mem) {
+			Operand.Mem memoryAccess = (Operand.Mem) op;
+			if (memoryAccess.base != null) {
+				usedTemporaries.add(memoryAccess.base);
+			}
+			if (memoryAccess.index != null) {
+				usedTemporaries.add(memoryAccess.index);
+			}
+		}
+		return usedTemporaries;
 	}
 
 	public List<Temp> def() {

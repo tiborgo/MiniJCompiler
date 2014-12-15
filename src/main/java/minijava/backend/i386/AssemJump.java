@@ -1,5 +1,8 @@
 package minijava.backend.i386;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import minijava.backend.Assem;
@@ -39,15 +42,31 @@ public final class AssemJump implements Assem {
 	}
 
 	public List<Temp> use() {
-		throw new UnsupportedOperationException("Not supported yet.");
+		List<Temp> usedTemporaries = new ArrayList<>(2);
+		if (dest instanceof Operand.Reg) {
+			usedTemporaries.add(((Operand.Reg) dest).reg);
+		} else if (dest instanceof Operand.Mem) {
+			Operand.Mem memoryAccess = (Operand.Mem) dest;
+			if (memoryAccess.base != null) {
+				usedTemporaries.add(memoryAccess.base);
+			}
+			if (memoryAccess.index != null) {
+				usedTemporaries.add(memoryAccess.index);
+			}
+		}
+		return usedTemporaries;
 	}
 
 	public List<Temp> def() {
-		throw new UnsupportedOperationException("Not supported yet.");
+		return Collections.emptyList();
 	}
 
 	public List<Label> jumps() {
-		throw new UnsupportedOperationException("Not supported yet.");
+		if (dest instanceof Operand.Label) {
+			return Collections.singletonList(((Operand.Label) dest).label);
+		}
+		// TODO: Enable jump to an address given as Operand.Imm
+		return Collections.emptyList();
 	}
 
 	public boolean isFallThrough() {

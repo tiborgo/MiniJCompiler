@@ -1,5 +1,6 @@
 package minijava.backend.i386;
 
+import java.util.Collections;
 import java.util.List;
 
 import minijava.backend.Assem;
@@ -23,11 +24,16 @@ public final class AssemInstr implements Assem {
 	}
 
 	public List<Temp> use() {
-		throw new UnsupportedOperationException("Not supported yet.");
+		return Collections.emptyList();
 	}
 
 	public List<Temp> def() {
-		throw new UnsupportedOperationException("Not supported yet.");
+		/*
+		 * Instructions like RET or LEAVE change esp and ebp.
+		 * Those registers do not need to be preserved, because they are saved
+		 * and restored by the function prologue and epilogue.
+		 */
+		return Collections.emptyList();
 	}
 
 	public List<Label> jumps() {
