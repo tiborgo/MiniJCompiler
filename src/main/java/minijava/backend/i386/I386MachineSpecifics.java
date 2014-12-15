@@ -66,9 +66,8 @@ public class I386MachineSpecifics implements MachineSpecifics {
 		StringBuilder stringBuilder = new StringBuilder();
 		
 		stringBuilder
-			.append("\t.intel_syntax noprefix\n")
-				// TODO: Entry point should be set programatically
-			.append("\t.global lmain\n")
+			.append("\t.intel_syntax\n")
+			.append("\t.globl " + new Label("lmain").toString() + "\n")
 			.append("\n");
 
 		for (Fragment<List<Assem>> frag : frags) {
