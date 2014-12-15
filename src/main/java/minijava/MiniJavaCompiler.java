@@ -28,6 +28,7 @@ import minijava.backend.dummymachine.IntermediateToCmm;
 import minijava.backend.i386.I386MachineSpecifics;
 import minijava.intermediate.Fragment;
 import minijava.intermediate.FragmentProc;
+import minijava.intermediate.Label;
 import minijava.intermediate.canon.Canon;
 import minijava.intermediate.tree.TreeStm;
 import minijava.intermediate.tree.TreeStmSEQ;
@@ -57,6 +58,11 @@ public class MiniJavaCompiler implements Frontend {
 	public static void main(String[] args) {
 		// TODO code application logic here
 		// SymbolTable table = new SymbolTable();
+
+		String osName = System.getProperty("os.name").toLowerCase();
+		if (osName.contains("mac")) {
+			Label.leadingUnderscore = true;
+		}
 
 		MiniJavaCompiler compiler = new MiniJavaCompiler();
 		Path compilerOutputFile = null;

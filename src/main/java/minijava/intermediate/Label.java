@@ -2,6 +2,8 @@ package minijava.intermediate;
 
 public final class Label {
 
+  // TODO: Labels should be created by a factory
+  public static boolean leadingUnderscore;
   private static int nextId = 0;
   private final String name;  // invariant: is always non-null
 
@@ -13,11 +15,11 @@ public final class Label {
   }
 
   /**
-   * Generates a label with the given name. 
-   * 
-   * The parameter {@code name} must not be null. 
+   * Generates a label with the given name.
+   *
+   * The parameter {@code name} must not be null.
    * Names starting with {@code $$} are reserved and may not be used.
-   * 
+   *
    * @param name Name of label
    */
   public Label(String name) {
@@ -29,13 +31,16 @@ public final class Label {
     }
     this.name = name;
   }
-  
+
   public static void resetCounter() {
     nextId = 0;
   }
 
   @Override
   public String toString() {
+	if (leadingUnderscore) {
+		return "_" + name;
+	}
     return name;
   }
 
