@@ -54,7 +54,7 @@ public final class AssemUnaryOp implements Assem {
 	}
 
 	public boolean isFallThrough() {
-		throw new UnsupportedOperationException("Not supported yet.");
+		return true;
 	}
 
 	public Pair<Temp, Temp> isMoveBetweenTemps() {
@@ -62,7 +62,7 @@ public final class AssemUnaryOp implements Assem {
 	}
 
 	public Label isLabel() {
-		throw new UnsupportedOperationException("Not supported yet.");
+		return null;
 	}
 
 	public String toString() {

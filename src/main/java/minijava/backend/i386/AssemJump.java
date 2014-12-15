@@ -70,7 +70,7 @@ public final class AssemJump implements Assem {
 	}
 
 	public boolean isFallThrough() {
-		throw new UnsupportedOperationException("Not supported yet.");
+		return (kind == Kind.J) ? false : true;
 	}
 
 	public Pair<Temp, Temp> isMoveBetweenTemps() {
@@ -78,7 +78,7 @@ public final class AssemJump implements Assem {
 	}
 
 	public Label isLabel() {
-		throw new UnsupportedOperationException("Not supported yet.");
+		return null;
 	}
 
 	public String toString() {
