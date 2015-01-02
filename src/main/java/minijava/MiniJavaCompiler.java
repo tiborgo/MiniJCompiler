@@ -24,15 +24,16 @@ import minijava.ast.visitors.baseblocks.ToTreeStmConverter;
 import minijava.ast.visitors.baseblocks.Tracer;
 import minijava.backend.Assem;
 import minijava.backend.MachineSpecifics;
-import minijava.backend.dummymachine.IntermediateToCmm;
+import minijava.backend.controlflowanalysis.ControlFlowGraphBuilder;
 import minijava.backend.i386.I386MachineSpecifics;
+import minijava.backend.i386.I386PrintAssemblyVisitor;
 import minijava.intermediate.Fragment;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.Label;
 import minijava.intermediate.canon.Canon;
 import minijava.intermediate.tree.TreeStm;
-import minijava.intermediate.tree.TreeStmSEQ;
 import minijava.symboltable.tree.Program;
+import minijava.util.SimpleGraph;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CharStream;
@@ -132,10 +133,55 @@ public class MiniJavaCompiler implements Frontend {
 					assemFragments.add(machineSpecifics.codeGen(fragment));
 				}
 
-				// TODO: Build liveness graph
-				
 				intermediateOutput = machineSpecifics.printAssembly(assemFragments);
 				System.out.println(intermediateOutput);
+				
+				System.out.println("-------------------------");
+				
+				// TODO: Build liveness graph
+				for (Fragment<List<Assem>> frag : assemFragments) {
+					SimpleGraph<Assem> controlFlowGraph = ControlFlowGraphBuilder.buildControlFlowGraph((FragmentProc<List<Assem>>) frag);
+					String graphString = controlFlowGraph.getDot();
+					
+					System.out.println("******************");
+					System.out.println(((FragmentProc<List<Assem>>)frag).frame.getName());
+					System.out.println("******************");
+					
+					ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "graph-easy");
+					
+					processBuilder.directory(RUNTIME_DIRECTORY.toFile());
+					processBuilder.environment().put("PATH", "/usr/local/bin:" + processBuilder.environment().get("PATH"));
+					Process dotCall = processBuilder.start();
+					OutputStream stdin = dotCall.getOutputStream();
+					stdin.write(graphString.getBytes());
+					stdin.close();
+
+					try {
+						dotCall.waitFor();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					
+					InputStream stdout = dotCall.getInputStream();
+					BufferedReader bufferedStderr = new BufferedReader(new InputStreamReader(stdout));
+					String line;
+					while ((line = bufferedStderr.readLine()) != null) {
+						System.out.println(line);
+					}
+					bufferedStderr.close();
+					stdout.close();
+					
+					InputStream stderr = dotCall.getErrorStream();
+					bufferedStderr = new BufferedReader(new InputStreamReader(stderr));
+					while ((line = bufferedStderr.readLine()) != null) {
+						System.err.println(line);
+						System.err.flush();
+					}
+					bufferedStderr.close();
+					stderr.close();
+					
+					System.out.println();
+				}
 			/*}
 			catch (Exception e) {
 				intermediateOutput = IntermediateToCmm.stmFragmentsToCmm(procFragements);

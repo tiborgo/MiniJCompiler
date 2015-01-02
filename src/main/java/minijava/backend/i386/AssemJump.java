@@ -12,7 +12,7 @@ import minijava.intermediate.Temp;
 import minijava.util.Function;
 import minijava.util.Pair;
 
-public final class AssemJump implements Assem {
+public final class AssemJump extends I386Assem {
 
 	public enum Kind {
 
@@ -79,10 +79,6 @@ public final class AssemJump implements Assem {
 
 	public Label isLabel() {
 		return null;
-	}
-
-	public String toString() {
-		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
 	public Assem rename(Function<Temp, Temp> sigma) {
