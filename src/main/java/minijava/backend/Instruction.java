@@ -40,4 +40,9 @@ public abstract class Instruction implements Assem {
 	public <A, T extends Throwable> A accept(AssemVisitor<A, T> visitor) throws T {
 		return visitor.visit(this);
 	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName().toUpperCase();
+	}
 }
