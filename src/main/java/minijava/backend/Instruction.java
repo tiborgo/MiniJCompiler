@@ -35,4 +35,9 @@ public abstract class Instruction implements Assem {
 		}
 		return usedTemporaries;
 	}
+
+	@Override
+	public <A, T extends Throwable> A accept(AssemVisitor<A, T> visitor) throws T {
+		return visitor.visit(this);
+	}
 }

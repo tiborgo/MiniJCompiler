@@ -50,9 +50,4 @@ public class DefaultInstruction extends Instruction {
 	public Assem rename(Function<Temp, Temp> sigma) {
 		return null;
 	}
-
-	@Override
-	public <A, T extends Throwable> A accept(AssemVisitor<A, T> visitor) throws T {
-		return null;
-	}
 }

@@ -14,4 +14,5 @@ public interface AssemVisitor<A, T extends Throwable> {
 	A visit(AssemLabel assem) throws T;
 	A visit(AssemUnaryOp assem) throws T;
 	A visit(Directive assem) throws T;
+	A visit(Instruction instruction) throws T;
 }
