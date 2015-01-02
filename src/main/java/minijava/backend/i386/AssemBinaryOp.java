@@ -1,6 +1,7 @@
 package minijava.backend.i386;
 
 
+import java.util.Collections;
 import java.util.List;
 
 import minijava.backend.Assem;
@@ -31,18 +32,28 @@ public final class AssemBinaryOp extends DefaultInstruction {
 		this.kind = kind;
 	}
 
+	@Override
 	public List<Temp> def() {
-		throw new UnsupportedOperationException("Not supported yet.");
+		if (kind != Kind.CMP && dst instanceof Operand.Reg) {
+			return Collections.singletonList(((Operand.Reg) dst).reg);
+		}
+		return Collections.emptyList();
 	}
 
+	@Override
 	public Pair<Temp, Temp> isMoveBetweenTemps() {
-		throw new UnsupportedOperationException("Not supported yet.");
+		if (dst instanceof Operand.Reg && src instanceof Operand.Reg) {
+			return new Pair(((Operand.Reg) dst).reg, ((Operand.Reg) src).reg);
+		}
+		return null;
 	}
 
+	@Override
 	public String toString() {
 		return kind.toString();
 	}
 
+	@Override
 	public Assem rename(Function<Temp, Temp> sigma) {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
