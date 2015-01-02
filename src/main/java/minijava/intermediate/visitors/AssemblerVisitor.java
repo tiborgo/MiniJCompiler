@@ -5,15 +5,16 @@ import java.util.LinkedList;
 import java.util.List;
 
 import minijava.backend.Assem;
+import minijava.backend.Instruction;
 import minijava.backend.i386.AssemBinaryOp;
 import minijava.backend.i386.AssemBinaryOp.Kind;
 import minijava.backend.i386.AssemJump;
 import minijava.backend.i386.AssemLabel;
-import minijava.backend.i386.AssemUnaryOp;
 import minijava.backend.i386.Operand;
+import minijava.backend.i386.instructions.Idiv;
+import minijava.backend.i386.instructions.Imul;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.FragmentVisitor;
-import minijava.intermediate.Label;
 import minijava.intermediate.Temp;
 import minijava.intermediate.tree.TreeExp;
 import minijava.intermediate.tree.TreeExpCALL;
@@ -125,16 +126,25 @@ public class AssemblerVisitor implements
 		public Operand visit(TreeExpOP e) throws RuntimeException {
 			Operand o1 = e.left.accept(this);
 			Operand o2 = e.right.accept(this);
-			AssemUnaryOp.Kind operatorUnary = null;
 			AssemBinaryOp.Kind operatorBinary = null;
 			switch (e.op) {
 				// Unary operators
 				case MUL:
-					operatorUnary = AssemUnaryOp.Kind.IMUL;
-					break;
+					AssemBinaryOp moveToEAX = new AssemBinaryOp(Kind.MOV, eax, o1);
+					// TODO: Save register EDX?
+					Operand.Reg o2Temp = new Operand.Reg(new Temp());
+					AssemBinaryOp moveToO2Temp = new AssemBinaryOp(Kind.MOV, o2Temp, o2);
+					Instruction multiplication = new Imul(o2Temp);
+					emit(moveToEAX, moveToO2Temp, multiplication);
+					return eax;
 				case DIV:
-					operatorUnary = AssemUnaryOp.Kind.IDIV;
-					break;
+					AssemBinaryOp moveToEAX_div = new AssemBinaryOp(Kind.MOV, eax, o1);
+					// TODO: Save register EDX?
+					Operand.Reg o2Temp_div = new Operand.Reg(new Temp());
+					AssemBinaryOp moveToO2Temp_div = new AssemBinaryOp(Kind.MOV, o2Temp_div, o2);
+					Instruction division = new Idiv(o2Temp_div);
+					emit(moveToEAX_div, moveToO2Temp_div, division);
+					return eax;
 				// Binary operators
 				case PLUS:
 					operatorBinary = AssemBinaryOp.Kind.ADD;
@@ -165,33 +175,10 @@ public class AssemblerVisitor implements
 							"Unsupported operator \""+ e.op + "\"");
 			}
 
-			// Unary instructions
-			if (operatorUnary != null) {
-				if (operatorUnary == AssemUnaryOp.Kind.IDIV) {
-					AssemBinaryOp moveToEAX = new AssemBinaryOp(Kind.MOV, eax, o1);
-					// TODO: Save register EDX?
-					Operand.Reg o2Temp = new Operand.Reg(new Temp());
-					AssemBinaryOp moveToO2Temp = new AssemBinaryOp(Kind.MOV, o2Temp, o2);
-					AssemUnaryOp division = new AssemUnaryOp(operatorUnary, o2);
-					emit(moveToEAX, moveToO2Temp, division);
-					return eax;
-				} else if (operatorUnary == AssemUnaryOp.Kind.IMUL) {
-					AssemBinaryOp moveToEAX = new AssemBinaryOp(Kind.MOV, eax, o1);
-					// TODO: Save register EDX?
-					Operand.Reg o2Temp = new Operand.Reg(new Temp());
-					AssemBinaryOp moveToO2Temp = new AssemBinaryOp(Kind.MOV, o2Temp, o2);
-					AssemUnaryOp division = new AssemUnaryOp(operatorUnary, o2Temp);
-					emit(moveToEAX, moveToO2Temp, division);
-					return eax;
-				} else {
-					throw new UnsupportedOperationException("Unsupported operator \"" + operatorUnary + "\"");
-				}
-			} else {
-				// Binary instructions
-				AssemBinaryOp binaryOperation = new AssemBinaryOp(operatorBinary, o1, o2);
-				emit(binaryOperation);
-				return o1;
-			}
+			// Binary instructions
+			AssemBinaryOp binaryOperation = new AssemBinaryOp(operatorBinary, o1, o2);
+			emit(binaryOperation);
+			return o1;
 		}
 
 		@Override
