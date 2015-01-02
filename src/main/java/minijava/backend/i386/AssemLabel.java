@@ -10,7 +10,7 @@ import minijava.intermediate.Temp;
 import minijava.util.Function;
 import minijava.util.Pair;
 
-public final class AssemLabel implements Assem {
+public final class AssemLabel extends I386Assem {
 
 	public final Label label;
 
@@ -40,10 +40,6 @@ public final class AssemLabel implements Assem {
 
 	public Label isLabel() {
 		return label;
-	}
-
-	public String toString() {
-		return label + ":\n";
 	}
 
 	public Assem rename(Function<Temp, Temp> sigma) {
