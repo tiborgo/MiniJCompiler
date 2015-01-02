@@ -28,7 +28,8 @@ public class ControlFlowGraphBuilder {
 			if (previousNode != null && previousNode.info.isFallThrough()) {
 				graph.addEdge(previousNode, currentNode);
 			}
-			else {
+			
+			if (currentNode.info.jumps().size() > 0){
 				jumps.add(currentNode);
 			}
 			

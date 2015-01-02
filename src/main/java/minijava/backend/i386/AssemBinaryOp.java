@@ -1,6 +1,7 @@
 package minijava.backend.i386;
 
 
+import java.util.Collections;
 import java.util.List;
 
 import minijava.backend.Assem;
@@ -39,7 +40,7 @@ public final class AssemBinaryOp extends I386Assem {
 	}
 
 	public List<Label> jumps() {
-		throw new UnsupportedOperationException("Not supported yet.");
+		return Collections.emptyList();
 	}
 
 	public boolean isFallThrough() {

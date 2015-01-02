@@ -58,6 +58,10 @@ public class SimpleGraph<NodeInfo> {
     public int degree() {
       return inDegree() + outDegree();
     }
+    
+    public String toString() {
+    	return "Node: " + info.toString();
+    }
   }
 
   public Set<Node> nodeSet() {

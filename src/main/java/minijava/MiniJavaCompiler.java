@@ -147,7 +147,7 @@ public class MiniJavaCompiler implements Frontend {
 					System.out.println(((FragmentProc<List<Assem>>)frag).frame.getName());
 					System.out.println("******************");
 					
-					ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "graph-easy");
+					ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "graph-easy --as boxart");
 					
 					processBuilder.directory(RUNTIME_DIRECTORY.toFile());
 					processBuilder.environment().put("PATH", "/usr/local/bin:" + processBuilder.environment().get("PATH"));
