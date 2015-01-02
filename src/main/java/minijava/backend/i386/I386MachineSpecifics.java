@@ -5,6 +5,7 @@ import java.util.List;
 
 import minijava.backend.Assem;
 import minijava.backend.MachineSpecifics;
+import minijava.backend.i386.instructions.Push;
 import minijava.intermediate.Fragment;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.Frame;
@@ -81,7 +82,7 @@ public class I386MachineSpecifics implements MachineSpecifics {
 			// TODO make prologue architecture dependent
 			
 			// Prologue
-			Assem saveFramePointer = new AssemUnaryOp(AssemUnaryOp.Kind.PUSH, ebp);
+			Assem saveFramePointer = new Push(ebp);
 			procedureWithEntryExitCode.add(saveFramePointer);
 			Assem moveFramePointer = new AssemBinaryOp(AssemBinaryOp.Kind.MOV, ebp, esp);
 			procedureWithEntryExitCode.add(moveFramePointer);
