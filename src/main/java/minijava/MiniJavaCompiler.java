@@ -54,20 +54,14 @@ public class MiniJavaCompiler {
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
-		private final Exception nested;
 		
-		public CompilerException(String message, Exception nested) {
+		public CompilerException(String message) {
 			super(message);
-			this.nested = nested;
 		}
 		
-		@Override
-		public void printStackTrace() {
-			super.printStackTrace();
-			System.err.println("nested:");
-			nested.printStackTrace();
+		public CompilerException(String message, Throwable cause) {
+			super(message, cause);
 		}
-		
 	}
 	
 	public MiniJavaCompiler(MachineSpecifics machineSpecifics) {
@@ -153,6 +147,7 @@ public class MiniJavaCompiler {
 			return symbolTable;
 		}
 		catch (Exception e) {
+			// TODO: Proper exceptions
 			throw new CompilerException("Failed to create symbol table", e);
 		}
 	}
@@ -166,7 +161,7 @@ public class MiniJavaCompiler {
 
 		} else {
 			// TODO: Proper exceptions
-			throw new CompilerException("Type check failed", new Exception(""));
+			throw new CompilerException("Type check failed");
 		}
 	}
 	
@@ -291,7 +286,7 @@ public class MiniJavaCompiler {
 							bufferedStderr.close();
 							stderr.close();
 	
-							throw new CompilerException("Failed to create print of control flow graph: " + errOutput.toString(), new Exception());
+							throw new CompilerException("Failed to create print of control flow graph: " + errOutput.toString());
 						}
 					}
 					catch (IOException e) {
@@ -341,7 +336,7 @@ public class MiniJavaCompiler {
 				bufferedStderr.close();
 				stderr.close();
 
-				throw new CompilerException("Failed to compile assembly:" + System.lineSeparator() + errOutput.toString(), new Exception());
+				throw new CompilerException("Failed to compile assembly:" + System.lineSeparator() + errOutput.toString());
 			}
 			
 			printVerbose("Successfully compiled assembly");
@@ -392,7 +387,7 @@ public class MiniJavaCompiler {
 			}
 			
 			if (outCall.exitValue() != 0) {
-				throw new CompilerException("Failed to compile assembly:" + System.lineSeparator() + errOutput.toString(), new Exception());
+				throw new CompilerException("Failed to compile assembly:" + System.lineSeparator() + errOutput.toString());
 			}
 
 		}
@@ -459,13 +454,7 @@ public class MiniJavaCompiler {
 				compiler.compile(gcc);
 			}
 			catch(CompilerException e) {
-				if (compiler.isVerbose()) {
-					e.printStackTrace();
-					System.err.println("Compilation failed");
-				}
-				else {
-					System.err.println("Compilation failed: " + e.getMessage());
-				}
+				e.printStackTrace();
 				System.exit(-1);
 			}
 	
