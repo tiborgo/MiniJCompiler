@@ -1,18 +1,17 @@
 package minijava.backend.i386;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import minijava.backend.Assem;
 import minijava.backend.AssemVisitor;
+import minijava.backend.DefaultInstruction;
 import minijava.intermediate.Label;
 import minijava.intermediate.Temp;
 import minijava.util.Function;
-import minijava.util.Pair;
 
-public final class AssemJump implements Assem {
+public final class AssemJump extends DefaultInstruction {
 
 	public enum Kind {
 
@@ -33,6 +32,7 @@ public final class AssemJump implements Assem {
 	}
 
 	public AssemJump(Kind kind, Operand dest, Cond cond) {
+		super(dest);
 		assert (kind != Kind.J || cond != null) : "J needs condition argument";
 		assert (kind == Kind.CALL || dest instanceof Operand.Label) : "J and JMP need label as destination";
 		assert (dest == null || dest instanceof Operand.Reg) : "dynamic destination of CALL must be Reg";
@@ -71,14 +71,6 @@ public final class AssemJump implements Assem {
 
 	public boolean isFallThrough() {
 		return (kind == Kind.J) ? false : true;
-	}
-
-	public Pair<Temp, Temp> isMoveBetweenTemps() {
-		throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public Label isLabel() {
-		return null;
 	}
 
 	public String toString() {
