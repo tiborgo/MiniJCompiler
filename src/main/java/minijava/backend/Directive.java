@@ -1,10 +1,8 @@
-package minijava.backend.i386;
+package minijava.backend;
 
 import java.util.Collections;
 import java.util.List;
 
-import minijava.backend.Assem;
-import minijava.backend.AssemVisitor;
 import minijava.intermediate.Label;
 import minijava.intermediate.Temp;
 import minijava.util.Function;

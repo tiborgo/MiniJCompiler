@@ -1,6 +1,7 @@
 package minijava.backend.i386;
 
 import minijava.backend.AssemVisitor;
+import minijava.backend.Directive;
 
 public class I386PrintAssemblyVisitor implements
 		AssemVisitor<String, RuntimeException> {
