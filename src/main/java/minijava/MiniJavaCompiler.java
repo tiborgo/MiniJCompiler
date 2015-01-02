@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.nio.file.Files;
+//import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -79,8 +79,11 @@ public class MiniJavaCompiler {
 	@Argument(usage = "Input files", required = true)
 	private List<String> files = new ArrayList<String>();
 	
+	@Option(name = "--output", usage = "Output file")
+	private String outputFile = "CC.out";
+	
 	@Option(name = "--verbose", usage = "Print additional information")
-	private boolean verbose;
+	private boolean verbose = false;
 	
 	@Option(name = "--print-source-code", usage = "Pretty print the input source code", depends = "--verbose")
 	private boolean printSourceCode;
@@ -90,7 +93,14 @@ public class MiniJavaCompiler {
 	
 	@Option(name = "--print-control-flow-graphs", usage = "Prints the control flow graph", depends = "--verbose")
 	private boolean printControlFlowGraphs;
+	
+	@Option(name = "--run-executable", usage = "Runs the compiled executable")
+	private boolean runExecutable = false;
 
+	public boolean isVerbose() {
+		return verbose;
+	}
+	
 	private void printDelimiter() {
 		System.out.println("-------------------------");
 	}
@@ -112,7 +122,7 @@ public class MiniJavaCompiler {
 
 	// Compiler pipeline
 	
-	public Prg parse() throws CompilerException {
+	private Prg parse() throws CompilerException {
 		try {
 			ANTLRFileStream reader = new ANTLRFileStream(files.get(0));
 			MiniJavaLexer lexer = new MiniJavaLexer((CharStream) reader);
@@ -132,7 +142,7 @@ public class MiniJavaCompiler {
 		}
 	}
 	
-	public Program inferTypes(Prg program) throws CompilerException {
+	private Program inferTypes(Prg program) throws CompilerException {
 		
 		try {
 			SymbolTableVisitor symbolTableVisitor = new SymbolTableVisitor();
@@ -147,7 +157,7 @@ public class MiniJavaCompiler {
 		}
 	}
 	
-	public void checkTypes(Prg program, Program symbolTable) throws CompilerException {
+	private void checkTypes(Prg program, Program symbolTable) throws CompilerException {
 
 		TypeCheckVisitor typeCheckVisitor = new TypeCheckVisitor(symbolTable);
 		if (program.accept(typeCheckVisitor)) {
@@ -160,7 +170,7 @@ public class MiniJavaCompiler {
 		}
 	}
 	
-	public List<FragmentProc<TreeStm>> generateIntermediate(Prg program, Program symbolTable) throws CompilerException {
+	private List<FragmentProc<TreeStm>> generateIntermediate(Prg program, Program symbolTable) throws CompilerException {
 		
 		try {
 			IntermediateVisitor intermediateVisitor = new IntermediateVisitor(machineSpecifics, symbolTable);
@@ -304,9 +314,113 @@ public class MiniJavaCompiler {
 		}
 	}
 	
-	public static void main(String[] args) {
-		// TODO code application logic here
-		// SymbolTable table = new SymbolTable();
+	private void compileAssembly (String gcc, String assembly) throws CompilerException {
+		
+		try {
+			// -xc specifies the input language as C and is required for GCC to read from stdin
+			ProcessBuilder processBuilder = new ProcessBuilder(gcc, "-o", outputFile, "-m32", "-xc", "runtime_32.c", "-m32", "-xassembler", "-");
+			processBuilder.directory(RUNTIME_DIRECTORY.toFile());
+			Process gccCall = processBuilder.start();
+			// Write C code to stdin of C Compiler
+			OutputStream stdin = gccCall.getOutputStream();
+			stdin.write(assembly.getBytes());
+			stdin.close();
+	
+			gccCall.waitFor();
+			
+			// Print error messages of GCC
+			if (gccCall.exitValue() != 0) {
+				
+				StringBuilder errOutput = new StringBuilder();
+				InputStream stderr = gccCall.getErrorStream();
+				String line;
+				BufferedReader bufferedStderr = new BufferedReader(new InputStreamReader(stderr));
+				while ((line = bufferedStderr.readLine()) != null) {
+					errOutput.append(line + System.lineSeparator());
+				}
+				bufferedStderr.close();
+				stderr.close();
+
+				throw new CompilerException("Failed to compile assembly:" + System.lineSeparator() + errOutput.toString(), new Exception());
+			}
+			
+			printVerbose("Successfully compiled assembly");
+		}
+		catch (IOException e) {
+			throw new CompilerException("Failed to transfer assembly to gcc", e);
+		}
+		catch (InterruptedException e) {
+			throw new CompilerException("Failed to invoke gcc", e);
+		}
+		
+	}
+	
+	private void runExecutable() throws CompilerException {
+		
+		try {
+			Runtime runtime = Runtime.getRuntime();
+			Process outCall = runtime.exec(outputFile.toString());
+			outCall.waitFor();
+
+			String line;
+			
+			StringBuilder output = new StringBuilder();
+			StringBuilder errOutput = new StringBuilder();
+			
+			switch (outCall.exitValue()) {
+			case 0:
+				InputStream stdout = outCall.getInputStream();
+				BufferedReader bufferedStdout = new BufferedReader(new InputStreamReader(stdout));
+				while ((line = bufferedStdout.readLine()) != null) {
+					output.append(line + System.lineSeparator());
+				}
+				bufferedStdout.close();
+				stdout.close();
+				break;
+			case 139:
+				errOutput.append("Segmentation Fault" + System.lineSeparator());
+				break;
+			default:
+				System.err.println("Exit Code: " + outCall.exitValue());
+				InputStream stderr = outCall.getErrorStream();
+				BufferedReader bufferedStderr = new BufferedReader(new InputStreamReader(stderr));
+				while ((line = bufferedStderr.readLine()) != null) {
+					errOutput.append(line + System.lineSeparator());
+				}
+				bufferedStderr.close();
+				stderr.close();
+			}
+			
+			if (outCall.exitValue() != 0) {
+				throw new CompilerException("Failed to compile assembly:" + System.lineSeparator() + errOutput.toString(), new Exception());
+			}
+
+		}
+		catch (IOException e) {
+			throw new CompilerException("Failed to read output of compiled executable", e);
+		}
+		catch (InterruptedException e) {
+			throw new CompilerException("Failed to invoke compiled executable", e);
+		}
+	}
+	
+	public void compile(String gcc) throws CompilerException {
+		Prg program = parse();
+		Program symbolTable = inferTypes(program);
+		checkTypes(program, symbolTable);
+		List<FragmentProc<TreeStm>> intermediate = generateIntermediate(program, symbolTable);
+		List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = canonicalize(intermediate); 
+		List<Fragment<List<Assem>>> assemFragments = generateAssembly(intermediateCanonicalized);
+		String assembly = generateAssemblyCode(assemFragments);
+		List<SimpleGraph<Assem>> controlFlowGraphs = generateControlFlowGraphs(assemFragments);
+		// TODO build liveness graph
+		compileAssembly(gcc, assembly);
+		if (runExecutable) {
+			runExecutable();
+		}
+	}
+	
+	public static void main (String[] args) {
 
 		MiniJavaCompiler compiler = new MiniJavaCompiler(new I386MachineSpecifics());
 		
@@ -340,113 +454,38 @@ public class MiniJavaCompiler {
 				Label.leadingUnderscore = false;
 				gcc = "gcc";
 			}
+			
+			try {
+				compiler.compile(gcc);
+			}
+			catch(CompilerException e) {
+				if (compiler.isVerbose()) {
+					e.printStackTrace();
+					System.err.println("Compilation failed");
+				}
+				else {
+					System.err.println("Compilation failed: " + e.getMessage());
+				}
+				System.exit(-1);
+			}
 	
 			
-			Path compilerOutputFile = null;
+			/*Path compilerOutputFile = null;
 			try {
 				compilerOutputFile = Files.createTempFile("miniJavaCompiler", "CC.out");
 			} catch (IOException e) {
 				e.printStackTrace();
-			}
+			}*/
 			
-			try {
-				Prg program = compiler.parse();
-				Program symbolTable = compiler.inferTypes(program);
-				compiler.checkTypes(program, symbolTable);
-				List<FragmentProc<TreeStm>> intermediate = compiler.generateIntermediate(program, symbolTable);
-				List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = compiler.canonicalize(intermediate); 
-				List<Fragment<List<Assem>>> assemFragments = compiler.generateAssembly(intermediateCanonicalized);
-				String assembly = compiler.generateAssemblyCode(assemFragments);
-				List<SimpleGraph<Assem>> controlFlowGraphs = compiler.generateControlFlowGraphs(assemFragments);
-	
-				System.out.println("-------------------------");
-	
-				Runtime runtime = Runtime.getRuntime();
-				// -xc specifies the input language as C and is required for GCC to read from stdin
-				ProcessBuilder processBuilder = new ProcessBuilder(gcc, "-o", compilerOutputFile.toString(), "-m32", "-xc", "runtime_32.c", "-m32", "-xassembler", "-");
-				processBuilder.directory(RUNTIME_DIRECTORY.toFile());
-				Process gccCall = processBuilder.start();
-				// Write C code to stdin of C Compiler
-				OutputStream stdin = gccCall.getOutputStream();
-				stdin.write(assembly.getBytes());
-				stdin.close();
-	
-				try {
-					gccCall.waitFor();
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-	
-				// Print error messages of GCC
-				InputStream stderr = gccCall.getErrorStream();
-				BufferedReader bufferedStderr = new BufferedReader(new InputStreamReader(stderr));
-				String line;
-				while ((line = bufferedStderr.readLine()) != null) {
-					System.err.println(line);
-					System.err.flush();
-				}
-				bufferedStderr.close();
-				stderr.close();
-	
-				int retVal = gccCall.exitValue();
-				if (retVal == 0) {
-					System.out.println("Successful GCC compilation");
-				} else {
-					System.err.println("GCC compilation failed");
-					System.err.flush();
-				}
-	
-				System.out.println("-------------------------");
-	
-				Process outCall = runtime.exec(compilerOutputFile.toString());
-	
-				try {
-					outCall.waitFor();
-	
-					switch (outCall.exitValue()) {
-					case 0:
-						InputStream stdout = outCall.getInputStream();
-						BufferedReader bufferedStdout = new BufferedReader(new InputStreamReader(stdout));
-						while ((line = bufferedStdout.readLine()) != null) {
-							System.out.println(line);
-						}
-						bufferedStdout.close();
-						stdout.close();
-						break;
-					case 139:
-						System.err.println("Segmentation Fault");
-						System.err.flush();
-						break;
-					default:
-						System.err.println("Exit Code: " + outCall.exitValue());
-						stderr = outCall.getErrorStream();
-						bufferedStderr = new BufferedReader(new InputStreamReader(stderr));
-						while ((line = bufferedStderr.readLine()) != null) {
-							System.err.println(line);
-						}
-						System.err.flush();
-						bufferedStderr.close();
-						stderr.close();
-					}
-	
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-	
-			} catch (CompilerException e) {
-				e.printStackTrace();
-				System.out.println("Compilation failed");
-			}
-			catch (IOException e) {
-				e.printStackTrace();
-			}
-			finally {
+			
+			
+			/*finally {
 				try {
 					Files.delete(compilerOutputFile);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-			}
+			}*/
 	    }
 	}
 
