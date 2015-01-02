@@ -62,15 +62,17 @@ public final class AssemJump extends I386Assem {
 	}
 
 	public List<Label> jumps() {
-		if (dest instanceof Operand.Label) {
+		if (kind != Kind.CALL && dest instanceof Operand.Label) {
 			return Collections.singletonList(((Operand.Label) dest).label);
 		}
-		// TODO: Enable jump to an address given as Operand.Imm
-		return Collections.emptyList();
+		else {
+			// TODO: Enable jump to an address given as Operand.Imm
+			return Collections.emptyList();
+		}
 	}
 
 	public boolean isFallThrough() {
-		return (kind == Kind.J) ? false : true;
+		return (kind == Kind.JMP) ? false : true;
 	}
 
 	public Pair<Temp, Temp> isMoveBetweenTemps() {
