@@ -18,8 +18,9 @@ import java.util.List;
 
 import static org.junit.Assert.fail;
 
-import minijava.Frontend;
-import minijava.MiniJavaCompiler;
+import minijava.MiniJavaLexer;
+import minijava.MiniJavaParser;
+import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Prg;
 import minijava.backend.dummymachine.DummyMachineSpecifics;
 import minijava.backend.dummymachine.IntermediateToCmm;
@@ -27,8 +28,12 @@ import minijava.intermediate.FragmentProc;
 import minijava.intermediate.canon.Canon;
 import minijava.intermediate.tree.TreeStm;
 import minijava.symboltable.tree.Program;
+import org.antlr.v4.runtime.ANTLRFileStream;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class IntermediateVisitorTest {
@@ -37,12 +42,6 @@ public class IntermediateVisitorTest {
 	private static final File RUNTIME_DIRECTORY = new File("src/main/resources/minijava/runtime").getAbsoluteFile();
 
 	private static IntermediateVisitor visitor;
-	private static Frontend miniJavaFrontend;
-
-	@BeforeClass
-	public static void setUpBeforeClass() {
-		miniJavaFrontend = new MiniJavaCompiler();
-	}
 
 	@Before
 	public void setUp() {
@@ -55,7 +54,14 @@ public class IntermediateVisitorTest {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 				System.out.println("Testing creation translation to intermediate language for file \""+file.toString()+"\"");
-				Prg ast = miniJavaFrontend.getAbstractSyntaxTree(file.toString());
+				ANTLRFileStream reader = new ANTLRFileStream(file.toString());
+				MiniJavaLexer lexer = new MiniJavaLexer((CharStream) reader);
+				TokenStream tokens = new CommonTokenStream(lexer);
+				MiniJavaParser parser = new MiniJavaParser(tokens);
+				ParseTree parseTree = parser.prog();
+				ASTVisitor astVisitor = new ASTVisitor();
+				Prg ast = (Prg) astVisitor.visit(parseTree);
+
 				Program symbolTable = ast.accept(new SymbolTableVisitor());
 				visitor = new IntermediateVisitor(new DummyMachineSpecifics(), symbolTable);
 				List<FragmentProc<TreeStm>> fragmentList = ast.accept(visitor);
