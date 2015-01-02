@@ -12,7 +12,7 @@ class Main {
     	}*/
     	//System.out.print((char)100);
     	//System.out.println((new Test3()).test());
-    	if (1 == 0) {
+    	if (1 < 0) {
     		System.out.print((char)new Test().test());
     	}
     	else {
