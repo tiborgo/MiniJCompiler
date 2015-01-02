@@ -58,6 +58,10 @@ public class SimpleGraph<NodeInfo> {
     public int degree() {
       return inDegree() + outDegree();
     }
+    
+    public String toString() {
+    	return "Node: " + info.toString();
+    }
   }
 
   public Set<Node> nodeSet() {
@@ -96,16 +100,18 @@ public class SimpleGraph<NodeInfo> {
    * with dot (<code>dot -Tpdf output.dot > output.pdf</code>).
    * See: http://www.graphviz.com
    */
-  public void printDot(PrintStream out) {
-    out.println("digraph G {");
+  public String getDot() {
+    StringBuilder out = new StringBuilder();
+    out.append("digraph G {" + System.lineSeparator());
     for (Node n : nodes) {
-      out.println("\"" + n + "\" [label=\"" + n.info.toString() + "\"];");
+      out.append("\"" + n.hashCode() + "\" [label=\"" + n.info.toString() + "\"];" + System.lineSeparator());
     }
     for (Node n : nodes) {
       for (Node m : n.successors()) {
-        out.println("\"" + n + "\"  -> \"" + m + "\"");
+        out.append("\"" + n.hashCode() + "\"  -> \"" + m.hashCode() + "\"" + System.lineSeparator());
       }
     }
-    out.println("}");
+    out.append("}" + System.lineSeparator());
+    return out.toString();
   }
 }

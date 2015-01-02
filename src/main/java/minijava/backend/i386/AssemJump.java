@@ -62,19 +62,17 @@ public final class AssemJump extends DefaultInstruction {
 	}
 
 	public List<Label> jumps() {
-		if (dest instanceof Operand.Label) {
+		if (kind != Kind.CALL && dest instanceof Operand.Label) {
 			return Collections.singletonList(((Operand.Label) dest).label);
 		}
-		// TODO: Enable jump to an address given as Operand.Imm
-		return Collections.emptyList();
+		else {
+			// TODO: Enable jump to an address given as Operand.Imm
+			return Collections.emptyList();
+		}
 	}
 
 	public boolean isFallThrough() {
-		return (kind == Kind.J) ? false : true;
-	}
-
-	public String toString() {
-		throw new UnsupportedOperationException("Not supported yet.");
+		return (kind == Kind.JMP) ? false : true;
 	}
 
 	public Assem rename(Function<Temp, Temp> sigma) {
