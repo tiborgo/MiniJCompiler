@@ -9,12 +9,17 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
-import minijava.Frontend;
-import minijava.MiniJavaCompiler;
+import minijava.MiniJavaLexer;
+import minijava.MiniJavaParser;
+import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Prg;
 import minijava.symboltable.tree.Program;
+import org.antlr.v4.runtime.ANTLRFileStream;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class SymbolTableVisitorTest {
@@ -23,12 +28,6 @@ public class SymbolTableVisitorTest {
 	private static final Path EXAMPLE_PROGRAM_PATH_FAILING = EXAMPLE_PROGRAM_PATH_BASE.resolve("typeErrors");
 
 	private static SymbolTableVisitor visitor;
-	private static Frontend miniJavaFrontend;
-
-	@BeforeClass
-	public static void setUpBeforeClass() {
-		miniJavaFrontend = new MiniJavaCompiler();
-	}
 
 	@Before
 	public void setUp() throws Exception {
@@ -41,7 +40,13 @@ public class SymbolTableVisitorTest {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 				System.out.println("Testing creation of symbol table for file \""+file.toString()+"\"");
-				Prg ast = miniJavaFrontend.getAbstractSyntaxTree(file.toString());
+				ANTLRFileStream reader = new ANTLRFileStream(file.toString());
+				MiniJavaLexer lexer = new MiniJavaLexer((CharStream) reader);
+				TokenStream tokens = new CommonTokenStream(lexer);
+				MiniJavaParser parser = new MiniJavaParser(tokens);
+				ParseTree parseTree = parser.prog();
+				ASTVisitor astVisitor = new ASTVisitor();
+				Prg ast = (Prg) astVisitor.visit(parseTree);
 				Program symbolTable = ast.accept(visitor);
 				// TODO: Check contents of symbol table
 				return super.visitFile(file, attrs);

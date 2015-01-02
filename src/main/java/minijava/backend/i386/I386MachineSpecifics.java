@@ -5,13 +5,13 @@ import java.util.List;
 
 import minijava.backend.Assem;
 import minijava.backend.MachineSpecifics;
+import minijava.backend.i386.instructions.Push;
 import minijava.intermediate.Fragment;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.Frame;
 import minijava.intermediate.Label;
 import minijava.intermediate.Temp;
 import minijava.intermediate.tree.TreeStm;
-import minijava.intermediate.visitors.AssemblerVisitor;
 
 public class I386MachineSpecifics implements MachineSpecifics {
 	public static final Operand.Reg EAX = new Operand.Reg(new I386RegTemp("eax"));
@@ -23,11 +23,13 @@ public class I386MachineSpecifics implements MachineSpecifics {
 	public static final Operand.Reg ESI = new Operand.Reg(new I386RegTemp("esi"));
 	public static final Operand.Reg EDI = new Operand.Reg(new I386RegTemp("edi"));
 	
+	public static final int WORD_SIZE = 4;
+	
 	private final String indentation = "\t";
 
 	@Override
 	public int getWordSize() {
-		return 4;
+		return WORD_SIZE;
 	}
 
 	@Override
@@ -54,7 +56,7 @@ public class I386MachineSpecifics implements MachineSpecifics {
 
 	@Override
 	public Fragment<List<Assem>> codeGen(Fragment<List<TreeStm>> frag) {
-		AssemblerVisitor i386AssemblerVisitor = new AssemblerVisitor(EAX, EBP, ESP);
+		AssemblerVisitor i386AssemblerVisitor = new AssemblerVisitor();
 		FragmentProc<List<Assem>> assemFragement = frag.accept(i386AssemblerVisitor);
 		return assemFragement;
 	}
@@ -80,7 +82,7 @@ public class I386MachineSpecifics implements MachineSpecifics {
 			// TODO make prologue architecture dependent
 			
 			// Prologue
-			Assem saveFramePointer = new AssemUnaryOp(AssemUnaryOp.Kind.PUSH, EBP);
+			Assem saveFramePointer = new Push(EBP);
 			procedureWithEntryExitCode.add(saveFramePointer);
 			Assem moveFramePointer = new AssemBinaryOp(AssemBinaryOp.Kind.MOV, EBP, ESP);
 			procedureWithEntryExitCode.add(moveFramePointer);

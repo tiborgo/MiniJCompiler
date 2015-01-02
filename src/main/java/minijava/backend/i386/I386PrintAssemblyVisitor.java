@@ -1,6 +1,10 @@
 package minijava.backend.i386;
 
+import java.util.Iterator;
+
 import minijava.backend.AssemVisitor;
+import minijava.backend.Directive;
+import minijava.backend.Instruction;
 
 public class I386PrintAssemblyVisitor implements
 		AssemVisitor<String, RuntimeException> {
@@ -45,18 +49,31 @@ public class I386PrintAssemblyVisitor implements
 	}
 
 	@Override
-	public String visit(AssemUnaryOp assem) {
-		StringBuilder operation = new StringBuilder()
-			.append(assem.kind.name())
-			.append("\t")
-			.append(assem.op.accept(this));
-
-		return operation.toString();
+	public String visit(Instruction instruction) throws RuntimeException {
+		StringBuilder instructionString = new StringBuilder()
+			.append(instruction.toString());
+		Iterator<Operand> operandIterator = instruction.operands.iterator();
+		if (operandIterator.hasNext()) {
+			instructionString.append("\t");
+		}
+		while (operandIterator.hasNext()) {
+			Operand operand = operandIterator.next();
+			instructionString.append(operand.accept(this));
+			if (operandIterator.hasNext()) {
+				instructionString.append(",\t");
+			}
+		}
+		return instructionString.toString();
 	}
 
 	@Override
 	public String visit(AssemLabel assem) {
 		return assem.label.toString() + ":";
+	}
+
+	@Override
+	public String visit(Directive assem) throws RuntimeException {
+		return assem.toString();
 	}
 
 	//-----
