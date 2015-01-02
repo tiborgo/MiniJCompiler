@@ -1,6 +1,7 @@
 package minijava.backend.i386;
 
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,11 +33,21 @@ public final class AssemBinaryOp extends I386Assem {
 	}
 
 	public List<Temp> use() {
-		throw new UnsupportedOperationException("Not supported yet.");
+		if (src instanceof Operand.Reg) {
+			return Arrays.asList(((Operand.Reg)src).reg);
+		}
+		else {
+			return Collections.emptyList();
+		}
 	}
 
 	public List<Temp> def() {
-		throw new UnsupportedOperationException("Not supported yet.");
+		if (dst instanceof Operand.Reg) {
+			return Arrays.asList(((Operand.Reg)dst).reg);
+		}
+		else {
+			return Collections.emptyList();
+		}
 	}
 
 	public List<Label> jumps() {
