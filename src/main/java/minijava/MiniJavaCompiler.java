@@ -70,8 +70,8 @@ public class MiniJavaCompiler {
 	
 	// Command line Arguments
 	
-	@Argument(usage = "Input files", required = true)
-	private List<String> files = new ArrayList<String>();
+	@Argument(usage = "Input file", required = true)
+	private String inputFile;
 	
 	@Option(name = "--output", usage = "Output file")
 	private String outputFile = "CC.out";
@@ -90,10 +90,6 @@ public class MiniJavaCompiler {
 	
 	@Option(name = "--run-executable", usage = "Runs the compiled executable")
 	private boolean runExecutable = false;
-
-	public boolean isVerbose() {
-		return verbose;
-	}
 	
 	private void printDelimiter() {
 		System.out.println("-------------------------");
@@ -118,7 +114,7 @@ public class MiniJavaCompiler {
 	
 	private Prg parse() throws CompilerException {
 		try {
-			ANTLRFileStream reader = new ANTLRFileStream(files.get(0));
+			ANTLRFileStream reader = new ANTLRFileStream(inputFile);
 			MiniJavaLexer lexer = new MiniJavaLexer((CharStream) reader);
 			TokenStream tokens = new CommonTokenStream(lexer);
 			MiniJavaParser parser = new MiniJavaParser(tokens);
@@ -422,7 +418,7 @@ public class MiniJavaCompiler {
 	    CmdLineParser commandLineParser = new CmdLineParser(compiler);
 	    
 	    if (args.length == 0) {
-	    	System.out.println("java MiniJavaCompiler [options...] input files");
+	    	System.out.println("java MiniJavaCompiler [options...] input_file");
 			System.out.println("Options:");
 			commandLineParser.printUsage(System.out);
 	    }
