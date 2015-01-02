@@ -59,6 +59,11 @@ public class I386PrintAssemblyVisitor implements
 		return assem.label.toString() + ":";
 	}
 
+	@Override
+	public String visit(Directive assem) throws RuntimeException {
+		return assem.toString();
+	}
+
 	//-----
 
 	public String visit(Operand.Imm op) {
