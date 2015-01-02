@@ -7,12 +7,12 @@ import java.util.List;
 
 import minijava.backend.Assem;
 import minijava.backend.AssemVisitor;
-import minijava.intermediate.Label;
+import minijava.backend.DefaultInstruction;
 import minijava.intermediate.Temp;
 import minijava.util.Function;
 import minijava.util.Pair;
 
-public final class AssemBinaryOp extends I386Assem {
+public final class AssemBinaryOp extends DefaultInstruction {
 
 	public static enum Kind {
 
@@ -24,6 +24,7 @@ public final class AssemBinaryOp extends I386Assem {
 	public final Kind kind;
 
 	public AssemBinaryOp(Kind kind, Operand dst, Operand src) {
+		super(dst, src);
 		assert (kind != null && src != null && dst != null);
 		assert (!((src instanceof Operand.Mem) && (dst instanceof Operand.Mem)));
 		assert (kind != Kind.LEA || ((src instanceof Operand.Mem) && (dst instanceof Operand.Reg)));
@@ -32,47 +33,34 @@ public final class AssemBinaryOp extends I386Assem {
 		this.kind = kind;
 	}
 
-	public List<Temp> use() {
-		if (src instanceof Operand.Reg) {
-			return Arrays.asList(((Operand.Reg)src).reg);
-		}
-		else {
-			return Collections.emptyList();
-		}
-	}
-
+	@Override
 	public List<Temp> def() {
-		if (dst instanceof Operand.Reg) {
-			return Arrays.asList(((Operand.Reg)dst).reg);
+		if (kind != Kind.CMP && dst instanceof Operand.Reg) {
+			return Collections.singletonList(((Operand.Reg) dst).reg);
 		}
-		else {
-			return Collections.emptyList();
-		}
-	}
-
-	public List<Label> jumps() {
 		return Collections.emptyList();
 	}
 
-	public boolean isFallThrough() {
-		return true;
-	}
-
+	@Override
 	public Pair<Temp, Temp> isMoveBetweenTemps() {
-		throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public Label isLabel() {
+		if (dst instanceof Operand.Reg && src instanceof Operand.Reg) {
+			return new Pair(((Operand.Reg) dst).reg, ((Operand.Reg) src).reg);
+		}
 		return null;
 	}
 
+	@Override
+	public String toString() {
+		return kind.toString();
+	}
+
+	@Override
 	public Assem rename(Function<Temp, Temp> sigma) {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
 	@Override
-	public <A, T extends Throwable> A accept(AssemVisitor<A, T> visitor)
-			throws T {
+	public <A, T extends Throwable> A accept(AssemVisitor<A, T> visitor) throws T {
 		return visitor.visit(this);
 	}
 }

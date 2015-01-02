@@ -11,11 +11,16 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 import static org.junit.Assert.assertTrue;
 
-import minijava.Frontend;
-import minijava.MiniJavaCompiler;
+import minijava.MiniJavaLexer;
+import minijava.MiniJavaParser;
+import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Prg;
 import minijava.symboltable.tree.Program;
-import org.junit.BeforeClass;
+import org.antlr.v4.runtime.ANTLRFileStream;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Test;
 
 public class TypeCheckVisitorTest {
@@ -23,20 +28,19 @@ public class TypeCheckVisitorTest {
 	private static final Path EXAMPLE_PROGRAM_PATH_WORKING = EXAMPLE_PROGRAM_PATH_BASE.resolve("working");
 	private static final Path EXAMPLE_PROGRAM_PATH_FAILING = EXAMPLE_PROGRAM_PATH_BASE.resolve("parseErrors");
 
-	private static Frontend miniJavaFrontend;
-
-	@BeforeClass
-	public static void setUpBeforeClass() {
-		miniJavaFrontend = new MiniJavaCompiler();
-	}
-
 	@Test
 	public void testVisitWorkingExamples() throws Exception {
 		FileVisitor<Path> workingFilesVisitior = new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
 				System.out.println("Testing creation of symbol table for file \""+file.toString()+"\"");
-				Prg ast = miniJavaFrontend.getAbstractSyntaxTree(file.toString());
+				ANTLRFileStream reader = new ANTLRFileStream(file.toString());
+				MiniJavaLexer lexer = new MiniJavaLexer((CharStream) reader);
+				TokenStream tokens = new CommonTokenStream(lexer);
+				MiniJavaParser parser = new MiniJavaParser(tokens);
+				ParseTree parseTree = parser.prog();
+				ASTVisitor astVisitor = new ASTVisitor();
+				Prg ast = (Prg) astVisitor.visit(parseTree);
 				SymbolTableVisitor symbolTableVisitor = new SymbolTableVisitor();
 				Program symbolTable = symbolTableVisitor.visit(ast);
 				TypeCheckVisitor visitor = new TypeCheckVisitor(symbolTable);

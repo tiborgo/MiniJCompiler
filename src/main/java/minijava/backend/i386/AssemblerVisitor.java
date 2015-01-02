@@ -1,19 +1,16 @@
-package minijava.intermediate.visitors;
+package minijava.backend.i386;
 
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 import minijava.backend.Assem;
-import minijava.backend.i386.AssemBinaryOp;
+import minijava.backend.Instruction;
+import minijava.backend.i386.instructions.Idiv;
+import minijava.backend.i386.instructions.Imul;
 import minijava.backend.i386.AssemBinaryOp.Kind;
-import minijava.backend.i386.AssemJump;
-import minijava.backend.i386.AssemLabel;
-import minijava.backend.i386.AssemUnaryOp;
-import minijava.backend.i386.Operand;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.FragmentVisitor;
-import minijava.intermediate.Label;
 import minijava.intermediate.Temp;
 import minijava.intermediate.tree.TreeExp;
 import minijava.intermediate.tree.TreeExpCALL;
@@ -30,24 +27,20 @@ import minijava.intermediate.tree.TreeStmJUMP;
 import minijava.intermediate.tree.TreeStmLABEL;
 import minijava.intermediate.tree.TreeStmMOVE;
 import minijava.intermediate.tree.TreeStmSEQ;
+import minijava.intermediate.visitors.TreeExpVisitor;
+import minijava.intermediate.visitors.TreeStmVisitor;
 
 public class AssemblerVisitor implements
 	FragmentVisitor<List<TreeStm>, FragmentProc<List<Assem>>> {
-	private final Operand.Reg eax;
-	private final Operand.Reg ebp;
-	private final Operand.Reg esp;
 
-	public AssemblerVisitor(Operand.Reg eax, Operand.Reg ebp, Operand.Reg esp) {
-		this.eax = eax;
-		this.ebp = ebp;
-		this.esp = esp;
+	public AssemblerVisitor() {
 	}
 
 	@Override
 	public FragmentProc<List<Assem>> visit(FragmentProc<List<TreeStm>> fragProc) {
 		List<Assem> instructions = new LinkedList<>();
 		for (TreeStm statement : fragProc.body) {
-			StatementExpressionVisitor visitor = new StatementExpressionVisitor(eax, ebp, esp);
+			StatementExpressionVisitor visitor = new StatementExpressionVisitor();
 			statement.accept(visitor);
 			instructions.addAll(visitor.getInstructions());
 		}
@@ -59,15 +52,9 @@ public class AssemblerVisitor implements
 	TreeStmVisitor<Void, RuntimeException>,
  	TreeExpVisitor<Operand, RuntimeException> {
 		private final List<Assem> instructions;
-		private final Operand.Reg eax;
-		private final Operand.Reg ebp;
-		private final Operand.Reg esp;
 
-		public StatementExpressionVisitor(Operand.Reg eax, Operand.Reg ebp, Operand.Reg esp) {
+		public StatementExpressionVisitor() {
 			this.instructions = new LinkedList<>();
-			this.eax = eax;
-			this.ebp = ebp;
-			this.esp = esp;
 		}
 
 		@Override
@@ -76,15 +63,13 @@ public class AssemblerVisitor implements
 
 			// Push arguments on stack
 			int parameterCount = e.args.size();
-			// TODO: Use machine specifics to get word size
-			int parameterSize = parameterCount*4;
+			int parameterSize = parameterCount*I386MachineSpecifics.WORD_SIZE;
 			// TODO: Padding should be specific for OSX
 			int padding = 16 - (parameterSize % 16);
 			int stackIncrement = parameterSize + padding;
-			emit(new AssemBinaryOp(Kind.SUB, esp, new Operand.Imm(stackIncrement)));
+			emit(new AssemBinaryOp(Kind.SUB, I386MachineSpecifics.ESP, new Operand.Imm(stackIncrement)));
 			for (TreeExp arg : e.args) {
-				// TODO: Calculate address according to word size
-				Operand dst = new Operand.Mem(esp.reg, null, null, 4*e.args.indexOf(arg));
+				Operand dst = new Operand.Mem(I386MachineSpecifics.ESP.reg, null, null, I386MachineSpecifics.WORD_SIZE*e.args.indexOf(arg));
 				Operand src = arg.accept(this);
 				emit(new AssemBinaryOp(Kind.MOV, dst, src));
 			}
@@ -93,7 +78,7 @@ public class AssemblerVisitor implements
 			AssemJump callInstruction = new AssemJump(AssemJump.Kind.CALL, dest);
 			emit(callInstruction);
 
-			emit(new AssemBinaryOp(Kind.ADD, esp, new Operand.Imm(stackIncrement)));
+			emit(new AssemBinaryOp(Kind.ADD, I386MachineSpecifics.ESP, new Operand.Imm(stackIncrement)));
 
 			// TODO: Restore Caller-Save registers?
 
@@ -125,16 +110,25 @@ public class AssemblerVisitor implements
 		public Operand visit(TreeExpOP e) throws RuntimeException {
 			Operand o1 = e.left.accept(this);
 			Operand o2 = e.right.accept(this);
-			AssemUnaryOp.Kind operatorUnary = null;
 			AssemBinaryOp.Kind operatorBinary = null;
 			switch (e.op) {
 				// Unary operators
 				case MUL:
-					operatorUnary = AssemUnaryOp.Kind.IMUL;
-					break;
+					AssemBinaryOp moveToEAX = new AssemBinaryOp(Kind.MOV, I386MachineSpecifics.EAX, o1);
+					// TODO: Save register EDX?
+					Operand.Reg o2Temp = new Operand.Reg(new Temp());
+					AssemBinaryOp moveToO2Temp = new AssemBinaryOp(Kind.MOV, o2Temp, o2);
+					Instruction multiplication = new Imul(o2Temp);
+					emit(moveToEAX, moveToO2Temp, multiplication);
+					return I386MachineSpecifics.EAX;
 				case DIV:
-					operatorUnary = AssemUnaryOp.Kind.IDIV;
-					break;
+					AssemBinaryOp moveToEAX_div = new AssemBinaryOp(Kind.MOV, I386MachineSpecifics.EAX, o1);
+					// TODO: Save register EDX?
+					Operand.Reg o2Temp_div = new Operand.Reg(new Temp());
+					AssemBinaryOp moveToO2Temp_div = new AssemBinaryOp(Kind.MOV, o2Temp_div, o2);
+					Instruction division = new Idiv(o2Temp_div);
+					emit(moveToEAX_div, moveToO2Temp_div, division);
+					return I386MachineSpecifics.EAX;
 				// Binary operators
 				case PLUS:
 					operatorBinary = AssemBinaryOp.Kind.ADD;
@@ -165,33 +159,10 @@ public class AssemblerVisitor implements
 							"Unsupported operator \""+ e.op + "\"");
 			}
 
-			// Unary instructions
-			if (operatorUnary != null) {
-				if (operatorUnary == AssemUnaryOp.Kind.IDIV) {
-					AssemBinaryOp moveToEAX = new AssemBinaryOp(Kind.MOV, eax, o1);
-					// TODO: Save register EDX?
-					Operand.Reg o2Temp = new Operand.Reg(new Temp());
-					AssemBinaryOp moveToO2Temp = new AssemBinaryOp(Kind.MOV, o2Temp, o2);
-					AssemUnaryOp division = new AssemUnaryOp(operatorUnary, o2);
-					emit(moveToEAX, moveToO2Temp, division);
-					return eax;
-				} else if (operatorUnary == AssemUnaryOp.Kind.IMUL) {
-					AssemBinaryOp moveToEAX = new AssemBinaryOp(Kind.MOV, eax, o1);
-					// TODO: Save register EDX?
-					Operand.Reg o2Temp = new Operand.Reg(new Temp());
-					AssemBinaryOp moveToO2Temp = new AssemBinaryOp(Kind.MOV, o2Temp, o2);
-					AssemUnaryOp division = new AssemUnaryOp(operatorUnary, o2Temp);
-					emit(moveToEAX, moveToO2Temp, division);
-					return eax;
-				} else {
-					throw new UnsupportedOperationException("Unsupported operator \"" + operatorUnary + "\"");
-				}
-			} else {
-				// Binary instructions
-				AssemBinaryOp binaryOperation = new AssemBinaryOp(operatorBinary, o1, o2);
-				emit(binaryOperation);
-				return o1;
-			}
+			// Binary instructions
+			AssemBinaryOp binaryOperation = new AssemBinaryOp(operatorBinary, o1, o2);
+			emit(binaryOperation);
+			return o1;
 		}
 
 		@Override
