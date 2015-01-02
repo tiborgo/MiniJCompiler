@@ -46,6 +46,7 @@ import org.kohsuke.args4j.Option;
 
 public class MiniJavaCompiler {
 	private static final Path RUNTIME_DIRECTORY = Paths.get("src/main/resources/minijava/runtime");
+	private final MachineSpecifics machineSpecifics;
 	
 	public static class CompilerException extends Exception {
 
@@ -69,6 +70,10 @@ public class MiniJavaCompiler {
 		
 	}
 	
+	public MiniJavaCompiler(MachineSpecifics machineSpecifics) {
+		this.machineSpecifics = machineSpecifics;
+	}
+	
 	// Command line Arguments
 	
 	@Argument(usage = "Input files", required = true)
@@ -79,9 +84,30 @@ public class MiniJavaCompiler {
 	
 	@Option(name = "--print-source-code", usage = "Pretty print the input source code", depends = "--verbose")
 	private boolean printSourceCode;
+	
+	@Option(name = "--print-assembly", usage = "Prints the assembly", depends = "--verbose")
+	private boolean printAssembly;
+	
+	@Option(name = "--print-control-flow-graphs", usage = "Prints the control flow graph", depends = "--verbose")
+	private boolean printControlFlowGraphs;
 
 	private void printDelimiter() {
 		System.out.println("-------------------------");
+	}
+	
+	private void printVerbose(String... infos) {
+		if (verbose) {
+			printDelimiter();
+			for (int i = 0; i < infos.length; i++) {
+				if (infos[i] != null) {
+					if (i != 0) {
+						printDelimiter();
+					}
+					System.out.println(infos[i]);
+				}
+			}
+			printDelimiter();
+		}
 	}
 
 	// Compiler pipeline
@@ -96,22 +122,13 @@ public class MiniJavaCompiler {
 			ASTVisitor astVisitor = new ASTVisitor();
 			Prg program = (Prg) astVisitor.visit(parseTree);
 			
-			if (verbose) {
-				printDelimiter();
-				System.out.println("Successfully Parsed Input File");
-				
-				if (printSourceCode) {
-					printDelimiter();
-					System.out.print(program.accept(new PrettyPrintVisitor("")));
-				}
-				
-				printDelimiter();
-			}
+			printVerbose("Successfully parsed input file",
+					(printSourceCode) ? program.accept(new PrettyPrintVisitor("")) : null);
 			
 			return program;
 		}
 		catch (IOException e) {
-			throw new CompilerException("Lexer/Parser failed", e);
+			throw new CompilerException("Lexer/parser failed", e);
 		}
 	}
 	
@@ -121,11 +138,7 @@ public class MiniJavaCompiler {
 			SymbolTableVisitor symbolTableVisitor = new SymbolTableVisitor();
 			Program symbolTable = program.accept(symbolTableVisitor);
 			
-			if (verbose) {
-				printDelimiter();
-				System.out.println("Successfully Built Symbol Table");
-				printDelimiter();
-			}
+			printVerbose("Successfully built symbol table");
 			
 			return symbolTable;
 		}
@@ -139,22 +152,163 @@ public class MiniJavaCompiler {
 		TypeCheckVisitor typeCheckVisitor = new TypeCheckVisitor(symbolTable);
 		if (program.accept(typeCheckVisitor)) {
 			
-			if (verbose) {
-				printDelimiter();
-				System.out.println("Successfully Checked Types");
-				printDelimiter();
-			}
+			printVerbose("Successfully checked types");
+
 		} else {
 			// TODO: Proper exceptions
-			throw new CompilerException("Type Check Failed", new Exception(""));
+			throw new CompilerException("Type check failed", new Exception(""));
+		}
+	}
+	
+	public List<FragmentProc<TreeStm>> generateIntermediate(Prg program, Program symbolTable) throws CompilerException {
+		
+		try {
+			IntermediateVisitor intermediateVisitor = new IntermediateVisitor(machineSpecifics, symbolTable);
+			List<FragmentProc<TreeStm>> procFragements = program.accept(intermediateVisitor);
+			
+			printVerbose("Successfully generated intermediate language");
+			
+			return procFragements;
+		}
+		catch (Exception e) {
+			// TODO: proper exceptions
+			throw new CompilerException("Failed to generate intermediate language", e);
+		}
+	}
+	
+	private List<FragmentProc<List<TreeStm>>> canonicalize(List<FragmentProc<TreeStm>> intermediate) throws CompilerException {
+		
+		try {
+			List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = new ArrayList<>(intermediate.size());
+			for (FragmentProc<TreeStm> fragment : intermediate) {
+				FragmentProc<List<TreeStm>> canonFrag = (FragmentProc<List<TreeStm>>) fragment.accept(new Canon());
+				Generator.BaseBlockContainer baseBlocks = Generator.generate(canonFrag.body);
+				List<BaseBlock> tracedBaseBlocks = Tracer.trace(baseBlocks);
+				List<TreeStm> tracedBody = ToTreeStmConverter.convert(tracedBaseBlocks, baseBlocks.startLabel, baseBlocks.endLabel);
+	
+				intermediateCanonicalized.add(new FragmentProc<List<TreeStm>>(canonFrag.frame, tracedBody));
+			}
+			
+			printVerbose("Successfully canonicalized intermediate language");
+			
+			return intermediateCanonicalized;
+		}
+		catch (Exception e) {
+			// TODO: proper exception
+			throw new CompilerException("Failed to canonicalize intermediate language", e);
+		}
+	}
+	
+	private List<Fragment<List<Assem>>> generateAssembly (List<FragmentProc<List<TreeStm>>> intermediateCanonicalized) throws CompilerException {
+		
+		try {
+			List<Fragment<List<Assem>>> assemFragments = new LinkedList<>();
+			for (FragmentProc<List<TreeStm>> fragment : intermediateCanonicalized) {
+				assemFragments.add(machineSpecifics.codeGen(fragment));
+			}
+			
+			printVerbose("Successfully generated assembly");
+			
+			return assemFragments;
+		}
+		catch (Exception e) {
+			// TODO: proper exception
+			throw new CompilerException("Failed to generate assembly", e);
+		}
+	}
+	
+	private String generateAssemblyCode (List<Fragment<List<Assem>>> assemFragments) throws CompilerException {
+		
+		try {
+			String assembly = machineSpecifics.printAssembly(assemFragments);
+			
+			printVerbose("Successfully generated assembly code",
+					(printAssembly) ? assembly : null);
+			
+			return assembly;
+		}
+		catch (Exception e) {
+			// TODO: proper exception
+			throw new CompilerException("Failed to generate assembly code", e);
 		}
 	}
 
+	private List<SimpleGraph<Assem>> generateControlFlowGraphs (List<Fragment<List<Assem>>> assemFragments) throws CompilerException {
+		
+		try {
+			List<SimpleGraph<Assem>> controlFlowGraphs = new ArrayList<>(assemFragments.size());
+			for (Fragment<List<Assem>> frag : assemFragments) {
+				controlFlowGraphs.add(ControlFlowGraphBuilder.buildControlFlowGraph((FragmentProc<List<Assem>>) frag));
+			}
+			
+			StringBuilder graphOutput = new StringBuilder();
+			if (printControlFlowGraphs) {
+				
+				for (int i = 0; i < controlFlowGraphs.size(); i++) {
+					String dotCode = controlFlowGraphs.get(i).getDot();
+					
+					graphOutput.append(System.lineSeparator());
+					graphOutput.append(((FragmentProc<List<Assem>>)assemFragments.get(i)).frame.getName() + System.lineSeparator());
+					graphOutput.append(System.lineSeparator());
+					
+					try {
+						ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "graph-easy --as boxart");
+						processBuilder.environment().put("PATH", "/usr/local/bin:" + processBuilder.environment().get("PATH"));
+						Process graphEasyCall = processBuilder.start();
+						OutputStream stdin = graphEasyCall.getOutputStream();
+						stdin.write(dotCode.getBytes());
+						stdin.close();
+			
+						graphEasyCall.waitFor();
+						
+						InputStream stdout = graphEasyCall.getInputStream();
+						BufferedReader bufferedStdout = new BufferedReader(new InputStreamReader(stdout));
+						String line;
+						while ((line = bufferedStdout.readLine()) != null) {
+							graphOutput.append(line + System.lineSeparator());
+						}
+						bufferedStdout.close();
+						stdout.close();
+						
+						if (graphEasyCall.exitValue() != 0) {
+						
+							StringBuilder errOutput = new StringBuilder();
+							InputStream stderr = graphEasyCall.getErrorStream();
+							BufferedReader bufferedStderr = new BufferedReader(new InputStreamReader(stderr));
+							while ((line = bufferedStderr.readLine()) != null) {
+								errOutput.append(line + System.lineSeparator());
+							}
+							bufferedStderr.close();
+							stderr.close();
+	
+							throw new CompilerException("Failed to create print of control flow graph: " + errOutput.toString(), new Exception());
+						}
+					}
+					catch (IOException e) {
+						throw new CompilerException("Failed to transfer dot code to graph-easy", e);
+					}
+					catch (InterruptedException e) {
+						throw new CompilerException("Failed to invoke graph-easy", e);
+					}
+				}
+			}
+			
+			printVerbose("Successfully generated control flow graphs",
+					(printControlFlowGraphs) ? graphOutput.toString() : null);
+			
+			return controlFlowGraphs;
+		}
+		catch (Exception e) {
+			// TODO: proper exception
+			throw new CompilerException("Failed to generate control flow graph", e);
+		}
+	}
+	
 	public static void main(String[] args) {
 		// TODO code application logic here
 		// SymbolTable table = new SymbolTable();
 
-		MiniJavaCompiler compiler = new MiniJavaCompiler();
+		MiniJavaCompiler compiler = new MiniJavaCompiler(new I386MachineSpecifics());
 		
 	    CmdLineParser commandLineParser = new CmdLineParser(compiler);
 	    
@@ -199,97 +353,11 @@ public class MiniJavaCompiler {
 				Prg program = compiler.parse();
 				Program symbolTable = compiler.inferTypes(program);
 				compiler.checkTypes(program, symbolTable);
-				
-	
-				MachineSpecifics machineSpecifics = new I386MachineSpecifics();//new DummyMachineSpecifics();
-				IntermediateVisitor intermediateVisitor = new IntermediateVisitor(machineSpecifics, symbolTable);
-				List<FragmentProc<TreeStm>> procFragements = program.accept(intermediateVisitor);
-	
-				String intermediateOutput;
-	
-				//try {
-					List<FragmentProc<List<TreeStm>>> fragmentsCanonicalized = new ArrayList<>(procFragements.size());
-					for (FragmentProc<TreeStm> fragment : procFragements) {
-						FragmentProc<List<TreeStm>> canonFrag = (FragmentProc<List<TreeStm>>) fragment.accept(new Canon());
-						Generator.BaseBlockContainer baseBlocks = Generator.generate(canonFrag.body);
-						List<BaseBlock> tracedBaseBlocks = Tracer.trace(baseBlocks);
-						List<TreeStm> tracedBody = ToTreeStmConverter.convert(tracedBaseBlocks, baseBlocks.startLabel, baseBlocks.endLabel);
-	
-						fragmentsCanonicalized.add(new FragmentProc<List<TreeStm>>(canonFrag.frame, tracedBody));
-					}
-	
-					/*List<Fragment<TreeStm>> tempProcFragements = new LinkedList<>();
-					for (FragmentProc<List<TreeStm>> frag : fragmentsCanonicalized) {
-						tempProcFragements.add(new FragmentProc<TreeStm>(
-							frag.frame,
-						 	TreeStmSEQ.fromList(frag.body))
-						 );
-					}
-	
-					intermediateOutput = IntermediateToCmm.stmFragmentsToCmm(tempProcFragements);
-					System.out.println(intermediateOutput);*/
-	
-					List<Fragment<List<Assem>>> assemFragments = new LinkedList<>();
-					for (FragmentProc<List<TreeStm>> fragment : fragmentsCanonicalized) {
-						assemFragments.add(machineSpecifics.codeGen(fragment));
-					}
-	
-					intermediateOutput = machineSpecifics.printAssembly(assemFragments);
-					System.out.println(intermediateOutput);
-					
-					System.out.println("-------------------------");
-					
-					// TODO: Build liveness graph
-					for (Fragment<List<Assem>> frag : assemFragments) {
-						SimpleGraph<Assem> controlFlowGraph = ControlFlowGraphBuilder.buildControlFlowGraph((FragmentProc<List<Assem>>) frag);
-						String graphString = controlFlowGraph.getDot();
-						
-						System.out.println("******************");
-						System.out.println(((FragmentProc<List<Assem>>)frag).frame.getName());
-						System.out.println("******************");
-						
-						ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "graph-easy --as boxart");
-						
-						processBuilder.directory(RUNTIME_DIRECTORY.toFile());
-						processBuilder.environment().put("PATH", "/usr/local/bin:" + processBuilder.environment().get("PATH"));
-						Process dotCall = processBuilder.start();
-						OutputStream stdin = dotCall.getOutputStream();
-						stdin.write(graphString.getBytes());
-						stdin.close();
-	
-						try {
-							dotCall.waitFor();
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-						
-						InputStream stdout = dotCall.getInputStream();
-						BufferedReader bufferedStderr = new BufferedReader(new InputStreamReader(stdout));
-						String line;
-						while ((line = bufferedStderr.readLine()) != null) {
-							System.out.println(line);
-						}
-						bufferedStderr.close();
-						stdout.close();
-						
-						InputStream stderr = dotCall.getErrorStream();
-						bufferedStderr = new BufferedReader(new InputStreamReader(stderr));
-						while ((line = bufferedStderr.readLine()) != null) {
-							System.err.println(line);
-							System.err.flush();
-						}
-						bufferedStderr.close();
-						stderr.close();
-						
-						System.out.println();
-					}
-				/*}
-				catch (Exception e) {
-					intermediateOutput = IntermediateToCmm.stmFragmentsToCmm(procFragements);
-					System.err.println(intermediateOutput);
-					e.printStackTrace();
-	
-				}*/
+				List<FragmentProc<TreeStm>> intermediate = compiler.generateIntermediate(program, symbolTable);
+				List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = compiler.canonicalize(intermediate); 
+				List<Fragment<List<Assem>>> assemFragments = compiler.generateAssembly(intermediateCanonicalized);
+				String assembly = compiler.generateAssemblyCode(assemFragments);
+				List<SimpleGraph<Assem>> controlFlowGraphs = compiler.generateControlFlowGraphs(assemFragments);
 	
 				System.out.println("-------------------------");
 	
@@ -300,7 +368,7 @@ public class MiniJavaCompiler {
 				Process gccCall = processBuilder.start();
 				// Write C code to stdin of C Compiler
 				OutputStream stdin = gccCall.getOutputStream();
-				stdin.write(intermediateOutput.getBytes());
+				stdin.write(assembly.getBytes());
 				stdin.close();
 	
 				try {
@@ -381,4 +449,6 @@ public class MiniJavaCompiler {
 			}
 	    }
 	}
+
+	
 }
