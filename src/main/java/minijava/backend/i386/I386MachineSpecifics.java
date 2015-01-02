@@ -14,16 +14,16 @@ import minijava.intermediate.tree.TreeStm;
 import minijava.intermediate.visitors.AssemblerVisitor;
 
 public class I386MachineSpecifics implements MachineSpecifics {
-	private final Operand.Reg eax;
-	private final Operand.Reg ebp;
-	private final Operand.Reg esp;
+	public static final Operand.Reg EAX = new Operand.Reg(new I386RegTemp("eax"));
+	public static final Operand.Reg EBP = new Operand.Reg(new I386RegTemp("ebp"));
+	public static final Operand.Reg ESP = new Operand.Reg(new I386RegTemp("esp"));
+	public static final Operand.Reg EBX = new Operand.Reg(new I386RegTemp("ebx"));
+	public static final Operand.Reg ECX = new Operand.Reg(new I386RegTemp("ecx"));
+	public static final Operand.Reg EDX = new Operand.Reg(new I386RegTemp("edx"));
+	public static final Operand.Reg ESI = new Operand.Reg(new I386RegTemp("esi"));
+	public static final Operand.Reg EDI = new Operand.Reg(new I386RegTemp("edi"));
+	
 	private final String indentation = "\t";
-
-	public I386MachineSpecifics() {
-		eax = new Operand.Reg(new I386RegTemp("eax"));
-		ebp = new Operand.Reg(new I386RegTemp("ebp"));
-		esp = new Operand.Reg(new I386RegTemp("esp"));
-	}
 
 	@Override
 	public int getWordSize() {
@@ -38,13 +38,12 @@ public class I386MachineSpecifics implements MachineSpecifics {
 
 	@Override
 	public Temp[] getGeneralPurposeRegisters() {
-		// TODO Auto-generated method stub
-		return null;
+		return new Temp[]{EAX.reg, EBP.reg, ESP.reg, EBX.reg, ECX.reg, EDX.reg, ESI.reg, EDI.reg};
 	}
 
 	@Override
 	public Frame newFrame(Label name, int paramCount) {
-		return new I386Frame(name, paramCount, eax.reg);
+		return new I386Frame(name, paramCount, EAX.reg);
 	}
 
 	@Override
@@ -55,7 +54,7 @@ public class I386MachineSpecifics implements MachineSpecifics {
 
 	@Override
 	public Fragment<List<Assem>> codeGen(Fragment<List<TreeStm>> frag) {
-		AssemblerVisitor i386AssemblerVisitor = new AssemblerVisitor(eax, ebp, esp);
+		AssemblerVisitor i386AssemblerVisitor = new AssemblerVisitor(EAX, EBP, ESP);
 		FragmentProc<List<Assem>> assemFragement = frag.accept(i386AssemblerVisitor);
 		return assemFragement;
 	}
@@ -81,15 +80,15 @@ public class I386MachineSpecifics implements MachineSpecifics {
 			// TODO make prologue architecture dependent
 			
 			// Prologue
-			Assem saveFramePointer = new AssemUnaryOp(AssemUnaryOp.Kind.PUSH, ebp);
+			Assem saveFramePointer = new AssemUnaryOp(AssemUnaryOp.Kind.PUSH, EBP);
 			procedureWithEntryExitCode.add(saveFramePointer);
-			Assem moveFramePointer = new AssemBinaryOp(AssemBinaryOp.Kind.MOV, ebp, esp);
+			Assem moveFramePointer = new AssemBinaryOp(AssemBinaryOp.Kind.MOV, EBP, ESP);
 			procedureWithEntryExitCode.add(moveFramePointer);
 			// TODO: Allocate space on stack for local variables
 			int localVariableSize = 0;
 			// 4 (push ebp) + 4 (ret address) + localVariableSize
 			int padding = 16 - ((localVariableSize + 8) % 16);
-			Assem moveStackPointer = new AssemBinaryOp(AssemBinaryOp.Kind.SUB, esp, new Operand.Imm(localVariableSize + padding));
+			Assem moveStackPointer = new AssemBinaryOp(AssemBinaryOp.Kind.SUB, ESP, new Operand.Imm(localVariableSize + padding));
 			procedureWithEntryExitCode.add(moveStackPointer);
 
 			// TODO: Save callee-safe registers
@@ -97,7 +96,7 @@ public class I386MachineSpecifics implements MachineSpecifics {
 			procedureWithEntryExitCode.addAll(procedure.body);
 
 			// remove padding
-			Assem leavePadding = new AssemBinaryOp(AssemBinaryOp.Kind.ADD, esp, new Operand.Imm(padding));
+			Assem leavePadding = new AssemBinaryOp(AssemBinaryOp.Kind.ADD, ESP, new Operand.Imm(padding));
 			procedureWithEntryExitCode.add(leavePadding);
 			
 			// Restore caller-safe registers

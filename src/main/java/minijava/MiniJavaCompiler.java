@@ -11,6 +11,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Prg;
@@ -24,14 +26,18 @@ import minijava.ast.visitors.baseblocks.ToTreeStmConverter;
 import minijava.ast.visitors.baseblocks.Tracer;
 import minijava.backend.Assem;
 import minijava.backend.MachineSpecifics;
-import minijava.backend.controlflowanalysis.ControlFlowGraphBuilder;
 import minijava.backend.i386.I386MachineSpecifics;
+import minijava.backend.livenessanalysis.ControlFlowGraphBuilder;
+import minijava.backend.livenessanalysis.InferenceGraphBuilder;
+import minijava.backend.livenessanalysis.LivenessSetsBuilder;
 import minijava.intermediate.Fragment;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.Label;
+import minijava.intermediate.Temp;
 import minijava.intermediate.canon.Canon;
 import minijava.intermediate.tree.TreeStm;
 import minijava.symboltable.tree.Program;
+import minijava.util.Pair;
 import minijava.util.SimpleGraph;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
@@ -239,7 +245,7 @@ public class MiniJavaCompiler {
 		try {
 			List<SimpleGraph<Assem>> controlFlowGraphs = new ArrayList<>(assemFragments.size());
 			for (Fragment<List<Assem>> frag : assemFragments) {
-				controlFlowGraphs.add(ControlFlowGraphBuilder.buildControlFlowGraph((FragmentProc<List<Assem>>) frag));
+				controlFlowGraphs.add(ControlFlowGraphBuilder.build((FragmentProc<List<Assem>>) frag));
 			}
 			
 			StringBuilder graphOutput = new StringBuilder();
@@ -302,6 +308,26 @@ public class MiniJavaCompiler {
 		catch (Exception e) {
 			// TODO: proper exception
 			throw new CompilerException("Failed to generate control flow graph", e);
+		}
+	}
+	
+	private List<SimpleGraph<Temp>> generateInferenceGraphs(List<SimpleGraph<Assem>> controlFlowGraphs) throws CompilerException {
+		
+		try {
+			List<SimpleGraph<Temp>> inferenceGraphs = new LinkedList<>();
+			for (SimpleGraph<Assem> controlFlowGraph : controlFlowGraphs) {
+				Pair<Map<Assem, Set<Temp>>, Map<Assem, Set<Temp>>> livenessSets = LivenessSetsBuilder.build(controlFlowGraph);
+				SimpleGraph<Temp> inferenceGraph = InferenceGraphBuilder.build(controlFlowGraph, livenessSets.fst, livenessSets.snd);
+				inferenceGraphs.add(inferenceGraph);
+			}
+			
+			printVerbose("Successfully generated inference graphs");
+			
+			return inferenceGraphs;
+		}
+		catch (Exception e) {
+			// TODO: proper exception
+			throw new CompilerException("Failed to generate inference graphs", e);
 		}
 	}
 	
@@ -404,13 +430,16 @@ public class MiniJavaCompiler {
 		List<Fragment<List<Assem>>> assemFragments = generateAssembly(intermediateCanonicalized);
 		String assembly = generateAssemblyCode(assemFragments);
 		List<SimpleGraph<Assem>> controlFlowGraphs = generateControlFlowGraphs(assemFragments);
-		// TODO build liveness graph
+		List<SimpleGraph<Temp>> inferenceGraphs = generateInferenceGraphs(controlFlowGraphs);
+		
+		// TODO Allocate registers
+		
 		compileAssembly(gcc, assembly);
 		if (runExecutable) {
 			runExecutable();
 		}
 	}
-	
+
 	public static void main (String[] args) {
 
 		MiniJavaCompiler compiler = new MiniJavaCompiler(new I386MachineSpecifics());
