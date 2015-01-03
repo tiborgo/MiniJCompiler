@@ -1,7 +1,7 @@
 package minijava.symboltable.visitors;
 
-import minijava.ast.rules.Prg;
-import minijava.ast.rules.PrgVisitor;
+import minijava.ast.rules.Program;
+import minijava.ast.rules.ProgramVisitor;
 import minijava.ast.rules.declarations.DeclarationVisitor;
 import minijava.ast.rules.declarations.Main;
 import minijava.ast.rules.declarations.Method;
@@ -36,16 +36,16 @@ import minijava.ast.rules.types.Type;
 import minijava.ast.rules.types.TypeVisitor;
 import minijava.ast.rules.types.Void;
 
-public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeException> {
+public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, RuntimeException> {
 	
-	private final Prg symbolTable;
+	private final Program symbolTable;
 
-	public TypeCheckVisitor(Prg symbolTable) {
+	public TypeCheckVisitor(Program symbolTable) {
 		this.symbolTable = symbolTable;
 	}
 	
 	@Override
-	public java.lang.Boolean visit(Prg p) throws RuntimeException {
+	public java.lang.Boolean visit(Program p) throws RuntimeException {
 		boolean ok = true;
 		TypeCheckVisitorExpTyStm expTyStmVisitor = new TypeCheckVisitorExpTyStm(symbolTable);
 		ok = p.mainClass.accept(expTyStmVisitor) ? ok : false;
@@ -61,16 +61,16 @@ public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeEx
 			StatementVisitor<java.lang.Boolean, RuntimeException>,
 			DeclarationVisitor<java.lang.Boolean, RuntimeException> {
 		
-		private final Prg symbolTable;
+		private final Program symbolTable;
 		private minijava.ast.rules.declarations.Class classContext;
 		private Method methodContext;
 		
-		public TypeCheckVisitorExpTyStm(Prg symbolTable) {
+		public TypeCheckVisitorExpTyStm(Program symbolTable) {
 			this.symbolTable = symbolTable;
 		}
 
 		// TODO: Remove constructor
-		public TypeCheckVisitorExpTyStm(Prg symbolTable, minijava.ast.rules.declarations.Class classContext, Method methodContext) {
+		public TypeCheckVisitorExpTyStm(Program symbolTable, minijava.ast.rules.declarations.Class classContext, Method methodContext) {
 			this.symbolTable = symbolTable;
 			this.classContext = classContext;
 			this.methodContext = methodContext;

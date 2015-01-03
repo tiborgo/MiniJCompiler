@@ -9,11 +9,11 @@ import java.util.Map;
 import minijava.ast.rules.declarations.Class;
 import minijava.ast.rules.declarations.Main;
 
-public class Prg {
+public class Program {
 	public final Main mainClass;
 	private final Map<String, Class> classes;
 
-	public Prg(Main mainClass, List<Class> classes) {
+	public Program(Main mainClass, List<Class> classes) {
 		this.mainClass = mainClass;
 		this.classes = new HashMap<>(classes.size());
 		for (Class clazz : classes) {
@@ -21,7 +21,7 @@ public class Prg {
 		}
 	}
 
-	public <A, T extends Throwable> A accept(PrgVisitor<A, T> v) throws T {
+	public <A, T extends Throwable> A accept(ProgramVisitor<A, T> v) throws T {
 		return v.visit(this);
 	}
 

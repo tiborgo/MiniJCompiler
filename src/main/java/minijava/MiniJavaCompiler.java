@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 import minijava.antlr.visitors.ASTVisitor;
-import minijava.ast.rules.Prg;
+import minijava.ast.rules.Program;
 import minijava.ast.visitors.PrettyPrintVisitor;
 import minijava.ast.visitors.baseblocks.BaseBlock;
 import minijava.ast.visitors.baseblocks.Generator;
@@ -122,7 +122,7 @@ public class MiniJavaCompiler {
 
 	// Compiler pipeline
 	
-	private Prg parse() throws CompilerException {
+	private Program parse() throws CompilerException {
 		try {
 			ANTLRFileStream reader = new ANTLRFileStream(inputFile);
 			MiniJavaLexer lexer = new MiniJavaLexer((CharStream) reader);
@@ -130,7 +130,7 @@ public class MiniJavaCompiler {
 			MiniJavaParser parser = new MiniJavaParser(tokens);
 			ParseTree parseTree = parser.prog();
 			ASTVisitor astVisitor = new ASTVisitor();
-			Prg program = (Prg) astVisitor.visit(parseTree);
+			Program program = (Program) astVisitor.visit(parseTree);
 			
 			printVerbose("Successfully parsed input file",
 					(printSourceCode) ? program.accept(new PrettyPrintVisitor("")) : null);
@@ -142,10 +142,10 @@ public class MiniJavaCompiler {
 		}
 	}
 	
-	private Prg inferTypes(Prg program) throws CompilerException {
+	private Program inferTypes(Program program) throws CompilerException {
 		
 		try {
-			Prg symbolTable = program;
+			Program symbolTable = program;
 			
 			printVerbose("Successfully built symbol table");
 			
@@ -157,7 +157,7 @@ public class MiniJavaCompiler {
 		}
 	}
 	
-	private void checkTypes(Prg program, Prg symbolTable) throws CompilerException {
+	private void checkTypes(Program program, Program symbolTable) throws CompilerException {
 
 		TypeCheckVisitor typeCheckVisitor = new TypeCheckVisitor(symbolTable);
 		if (program.accept(typeCheckVisitor)) {
@@ -170,7 +170,7 @@ public class MiniJavaCompiler {
 		}
 	}
 	
-	private List<FragmentProc<TreeStm>> generateIntermediate(Prg program, Prg symbolTable) throws CompilerException {
+	private List<FragmentProc<TreeStm>> generateIntermediate(Program program, Program symbolTable) throws CompilerException {
 		
 		try {
 			IntermediateVisitor intermediateVisitor = new IntermediateVisitor(machineSpecifics, symbolTable);
@@ -442,8 +442,8 @@ public class MiniJavaCompiler {
 	}
 	
 	public void compile(String gcc) throws CompilerException {
-		Prg program = parse();
-		Prg symbolTable = inferTypes(program);
+		Program program = parse();
+		Program symbolTable = inferTypes(program);
 		if (!skipTypeCheck) {
 			checkTypes(program, symbolTable);
 		}

@@ -12,7 +12,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import static org.junit.Assert.fail;
 
 import minijava.antlr.visitors.ASTVisitor;
-import minijava.ast.rules.Prg;
+import minijava.ast.rules.Program;
 import minijava.symboltable.visitors.TypeCheckVisitor;
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
@@ -86,7 +86,7 @@ public class MiniJavaParserTest {
 				
 				ParseTree tree = parser.prog();
 				ASTVisitor astVisitor = new ASTVisitor();
-				Prg program = (Prg) astVisitor.visit(tree);
+				Program program = (Program) astVisitor.visit(tree);
 				
 				TypeCheckVisitor typeCheckVisitor = new TypeCheckVisitor(program);
 				if (program.accept(typeCheckVisitor)) {

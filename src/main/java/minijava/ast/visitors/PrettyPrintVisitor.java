@@ -8,8 +8,8 @@ import minijava.ast.rules.declarations.Method;
 import minijava.ast.rules.declarations.Variable;
 import minijava.ast.rules.declarations.DeclarationVisitor;
 import minijava.ast.rules.Parameter;
-import minijava.ast.rules.Prg;
-import minijava.ast.rules.PrgVisitor;
+import minijava.ast.rules.Program;
+import minijava.ast.rules.ProgramVisitor;
 import minijava.ast.rules.expressions.Expression;
 import minijava.ast.rules.expressions.ArrayGet;
 import minijava.ast.rules.expressions.ArrayLength;
@@ -40,7 +40,7 @@ import minijava.ast.rules.types.Integer;
 import minijava.ast.rules.types.TypeVisitor;
 import minijava.ast.rules.types.Void;
 
-public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> {
+public class PrettyPrintVisitor implements ProgramVisitor<String, RuntimeException> {
 
 	private static final String indentStep = "  ";
 	private final String indent;
@@ -61,7 +61,7 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 	}
 
 	@Override
-	public String visit(Prg p) {
+	public String visit(Program p) {
 		return p.mainClass.accept(new PrettyPrintVisitorDecl(indent)) + "\n"
 				+ prettyPrintClassList(p.getClasses(), indent);
 	}
