@@ -45,6 +45,11 @@ public class TypeCheckVisitorTest {
 				ast.accept(typeInferenceVisitor);
 				TypeCheckVisitor visitor = new TypeCheckVisitor();
 				boolean typesCorrect = ast.accept(visitor);
+				if (!typesCorrect) {
+					for (String error : visitor.getErrors()) {
+						System.err.println(error);
+					}
+				}
 				assertTrue(typesCorrect);
 				return super.visitFile(file, attrs);
 			}
