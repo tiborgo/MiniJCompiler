@@ -2,20 +2,20 @@ package minijava.ast.rules.statements;
 
 import minijava.ast.rules.expressions.Expression;
 
-public class StmIf extends Stm {
+public class If extends Statement {
 
   final public Expression cond;
-  final public Stm bodyTrue;
-  final public Stm bodyFalse;
+  final public Statement bodyTrue;
+  final public Statement bodyFalse;
 
-  public StmIf(Expression cond, Stm bodyTrue, Stm bodyFalse) {
+  public If(Expression cond, Statement bodyTrue, Statement bodyFalse) {
     this.cond = cond;
     this.bodyTrue = bodyTrue;
     this.bodyFalse = bodyFalse;
   }
 
   @Override
-  public <A, T extends Throwable> A accept(StmVisitor<A, T> v) throws T {
+  public <A, T extends Throwable> A accept(StatementVisitor<A, T> v) throws T {
     return v.visit(this);
   }
 }

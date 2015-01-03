@@ -30,15 +30,15 @@ import minijava.ast.rules.expressions.NewIntArray;
 import minijava.ast.rules.expressions.This;
 import minijava.ast.rules.expressions.True;
 import minijava.ast.rules.expressions.ExpressionVisitor;
-import minijava.ast.rules.statements.Stm;
-import minijava.ast.rules.statements.StmArrayAssign;
-import minijava.ast.rules.statements.StmAssign;
-import minijava.ast.rules.statements.StmIf;
-import minijava.ast.rules.statements.StmList;
-import minijava.ast.rules.statements.StmPrintChar;
-import minijava.ast.rules.statements.StmPrintlnInt;
-import minijava.ast.rules.statements.StmVisitor;
-import minijava.ast.rules.statements.StmWhile;
+import minijava.ast.rules.statements.Statement;
+import minijava.ast.rules.statements.ArrayAssignment;
+import minijava.ast.rules.statements.Assignment;
+import minijava.ast.rules.statements.If;
+import minijava.ast.rules.statements.StatementList;
+import minijava.ast.rules.statements.PrintChar;
+import minijava.ast.rules.statements.PrintlnInt;
+import minijava.ast.rules.statements.StatementVisitor;
+import minijava.ast.rules.statements.While;
 import minijava.ast.rules.types.TyArr;
 import minijava.ast.rules.types.TyClass;
 import minijava.ast.rules.types.TyInt;
@@ -191,7 +191,7 @@ public class IntermediateVisitor implements
 
 	static public class IntermediateVisitorExpStm implements
 			ExpressionVisitor<TreeExp, RuntimeException>,
-			StmVisitor<TreeStm, RuntimeException> {
+			StatementVisitor<TreeStm, RuntimeException> {
 
 		private final Program symbolTable;
 		private final Class classContext;
@@ -431,16 +431,16 @@ public class IntermediateVisitor implements
 		}
 
 		@Override
-		public TreeStm visit(StmList s) throws RuntimeException {
-			List<TreeStm> statementList = new ArrayList<>(s.stms.size());
-			for (Stm statement : s.stms) {
+		public TreeStm visit(StatementList s) throws RuntimeException {
+			List<TreeStm> statementList = new ArrayList<>(s.statements.size());
+			for (Statement statement : s.statements) {
 				statementList.add(statement.accept(this));
 			}
 			return TreeStm.fromList(statementList);
 		}
 
 		@Override
-		public TreeStm visit(StmIf s) throws RuntimeException {
+		public TreeStm visit(If s) throws RuntimeException {
 
 			Label trueLabel  = new Label();
 			Label falseLabel = new Label();
@@ -462,7 +462,7 @@ public class IntermediateVisitor implements
 		}
 
 		@Override
-		public TreeStm visit(StmWhile s) throws RuntimeException {
+		public TreeStm visit(While s) throws RuntimeException {
 
 			Label beforeLabel = new Label();
 			Label bodyLabel   = new Label();
@@ -485,7 +485,7 @@ public class IntermediateVisitor implements
 		}
 
 		@Override
-		public TreeStm visit(StmPrintlnInt s) throws RuntimeException {
+		public TreeStm visit(PrintlnInt s) throws RuntimeException {
 
 			Label printlnIntLabel = new Label("println_int");
 
@@ -498,7 +498,7 @@ public class IntermediateVisitor implements
 		}
 
 		@Override
-		public TreeStm visit(StmPrintChar s) throws RuntimeException {
+		public TreeStm visit(PrintChar s) throws RuntimeException {
 
 			Label printCharLabel = new Label("print_char");
 
@@ -511,7 +511,7 @@ public class IntermediateVisitor implements
 		}
 
 		@Override
-		public TreeStm visit(StmAssign s) throws RuntimeException {
+		public TreeStm visit(Assignment s) throws RuntimeException {
 
 			TreeExp dest = this.temps.get(s.id);
 			TreeExp assignValue = s.rhs.accept(this);
@@ -520,7 +520,7 @@ public class IntermediateVisitor implements
 		}
 
 		@Override
-		public TreeStm visit(StmArrayAssign s) throws RuntimeException {
+		public TreeStm visit(ArrayAssignment s) throws RuntimeException {
 			
 			TreeExp array = this.temps.get(s.id);
 			TreeExp index = s.index.accept(this);
