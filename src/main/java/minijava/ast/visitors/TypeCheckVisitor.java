@@ -381,11 +381,11 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 
 		@Override
 		public java.lang.Boolean visit(ArrayAssignment s) throws RuntimeException {
-			Type arrayType  = new Id(s.id.id).accept(this);
+			Array arrayType  = (Array) s.id.accept(this);
 			Type assignType = s.rhs.accept(this);
 			Type indexType  = s.index.accept(this);
 			
-			if (assignType.equals(arrayType) &&
+			if (assignType.equals(arrayType.type) &&
 					indexType.equals(new Integer())) {
 				return java.lang.Boolean.TRUE;
 			}
