@@ -302,10 +302,6 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 			return e.type;
 		}
 		
-		public java.lang.Boolean visit(Type t) {
-			return false;
-		}
-
 		@Override
 		public java.lang.Boolean visit(Void t) {
 			return true;
@@ -328,7 +324,7 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 
 		@Override
 		public java.lang.Boolean visit(Array t) {
-			return visit(t.type);
+			return t.type.accept(this);
 		}
 		
 		@Override
