@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import minijava.ast.rules.Parameter;
 import minijava.ast.rules.Program;
 import minijava.ast.rules.ProgramVisitor;
 import minijava.ast.rules.declarations.DeclarationVisitor;
@@ -38,8 +37,6 @@ import minijava.ast.rules.statements.Statement;
 import minijava.ast.rules.statements.StatementList;
 import minijava.ast.rules.statements.StatementVisitor;
 import minijava.ast.rules.statements.While;
-import minijava.ast.rules.types.Array;
-import minijava.ast.rules.types.Integer;
 import minijava.backend.MachineSpecifics;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.Frame;
@@ -115,14 +112,7 @@ public class IntermediateVisitor implements
 	@Override
 	public List<FragmentProc<TreeStm>> visit(Main d) throws RuntimeException {
 
-		Method mainMethod = new Method(
-			new Integer(),
-			"lmain",
-			Arrays.asList(new Parameter(d.mainArg, new Array(new Integer()))),
-			Collections.<Variable>emptyList(),
-			d.mainBody,
-			new IntConstant(0)
-		);
+		Method mainMethod = d.mainMethod;
 		
 		minijava.ast.rules.declarations.Class mainClass = new minijava.ast.rules.declarations.Class(
 			d.className,
