@@ -1,14 +1,15 @@
 package minijava.symboltable.visitors;
 
+import minijava.ast.rules.Prg;
+import minijava.ast.rules.PrgVisitor;
+import minijava.ast.rules.declarations.DeclarationVisitor;
 import minijava.ast.rules.declarations.Main;
 import minijava.ast.rules.declarations.Method;
 import minijava.ast.rules.declarations.Variable;
-import minijava.ast.rules.declarations.DeclarationVisitor;
-import minijava.ast.rules.Prg;
-import minijava.ast.rules.PrgVisitor;
 import minijava.ast.rules.expressions.ArrayGet;
 import minijava.ast.rules.expressions.ArrayLength;
 import minijava.ast.rules.expressions.BinOp;
+import minijava.ast.rules.expressions.ExpressionVisitor;
 import minijava.ast.rules.expressions.False;
 import minijava.ast.rules.expressions.Id;
 import minijava.ast.rules.expressions.IntConstant;
@@ -18,31 +19,27 @@ import minijava.ast.rules.expressions.New;
 import minijava.ast.rules.expressions.NewIntArray;
 import minijava.ast.rules.expressions.This;
 import minijava.ast.rules.expressions.True;
-import minijava.ast.rules.expressions.ExpressionVisitor;
-import minijava.ast.rules.statements.Statement;
 import minijava.ast.rules.statements.ArrayAssignment;
 import minijava.ast.rules.statements.Assignment;
 import minijava.ast.rules.statements.If;
-import minijava.ast.rules.statements.StatementList;
 import minijava.ast.rules.statements.PrintChar;
 import minijava.ast.rules.statements.PrintlnInt;
+import minijava.ast.rules.statements.Statement;
+import minijava.ast.rules.statements.StatementList;
 import minijava.ast.rules.statements.StatementVisitor;
 import minijava.ast.rules.statements.While;
-import minijava.ast.rules.types.Type;
 import minijava.ast.rules.types.Array;
 import minijava.ast.rules.types.Boolean;
 import minijava.ast.rules.types.Class;
 import minijava.ast.rules.types.Integer;
+import minijava.ast.rules.types.Type;
 import minijava.ast.rules.types.TypeVisitor;
 import minijava.ast.rules.types.Void;
 import minijava.symboltable.tree.Program;
 
-public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeException>,
-		DeclarationVisitor<java.lang.Boolean, RuntimeException> {
+public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeException> {
 	
 	private final Program symbolTable;
-	private minijava.symboltable.tree.Class classContext;
-	private minijava.symboltable.tree.Method methodContext;
 
 	public TypeCheckVisitor(Program symbolTable) {
 		this.symbolTable = symbolTable;
@@ -50,77 +47,81 @@ public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeEx
 	
 	@Override
 	public java.lang.Boolean visit(Prg p) throws RuntimeException {
-
 		boolean ok = true;
-		ok = visit(p.mainClass) ? ok : false;
+		TypeCheckVisitorExpTyStm expTyStmVisitor = new TypeCheckVisitorExpTyStm(symbolTable);
+		ok = p.mainClass.accept(expTyStmVisitor) ? ok : false;
 		for (minijava.ast.rules.declarations.Class clazz : p.classes) {
-			ok = clazz.accept(this) ? ok : false;
+			ok = clazz.accept(expTyStmVisitor) ? ok : false;
 		}
 		return ok;
 	}
-	
-	@Override
-	public java.lang.Boolean visit(minijava.ast.rules.declarations.Class c) throws RuntimeException {
-		
-		classContext = symbolTable.classes.get(c.className);
-		
-		boolean ok = true;
-		for (Variable variable : c.fields) {
-			ok = variable.accept(this) ? ok : false;
-		}
-		
-		for (Method method : c.methods) {
-			ok = method.accept(this) ? ok : false;
-		}
-		
-		classContext = null;
-		
-		return ok;
-	}
 
-	@Override
-	public java.lang.Boolean visit(Main d) throws RuntimeException {
-		return true;
-	}
-
-	@Override
-	public java.lang.Boolean visit(Method m) throws RuntimeException {
-		
-		methodContext = classContext.methods.get(m.methodName);
-		
-		boolean ok = true;
-		
-		TypeCheckVisitorExpTyStm typeCheckVisitor = new TypeCheckVisitorExpTyStm(symbolTable, classContext, methodContext);
-		
-		ok = (m.body.accept(typeCheckVisitor)) ? ok : false;
-		ok = (m.returnExpression.accept(typeCheckVisitor).equals(m.type)) ? ok : false;
-		
-		methodContext = null;
-		
-		return ok;
-	}
-
-	@Override
-	public java.lang.Boolean visit(Variable d) throws RuntimeException {
-		return d.type.accept(new TypeCheckVisitorExpTyStm(symbolTable, classContext, methodContext));
-	} 
-	
 	public static class TypeCheckVisitorExpTyStm implements
 			ExpressionVisitor<Type, RuntimeException>,
 			TypeVisitor<java.lang.Boolean, RuntimeException>,
-			StatementVisitor<java.lang.Boolean, RuntimeException> {
+			StatementVisitor<java.lang.Boolean, RuntimeException>,
+			DeclarationVisitor<java.lang.Boolean, RuntimeException> {
 		
 		private final Program symbolTable;
-		private final minijava.symboltable.tree.Class classContext;
-		private final minijava.symboltable.tree.Method methodContext;
+		private minijava.symboltable.tree.Class classContext;
+		private minijava.symboltable.tree.Method methodContext;
 		
+		public TypeCheckVisitorExpTyStm(Program symbolTable) {
+			this.symbolTable = symbolTable;
+		}
+
+		// TOOD: Remove constructor
 		public TypeCheckVisitorExpTyStm(Program symbolTable, minijava.symboltable.tree.Class classContext, minijava.symboltable.tree.Method methodContext) {
 			this.symbolTable = symbolTable;
 			this.classContext = classContext;
 			this.methodContext = methodContext;
 		}
-		
-		
+
+		@Override
+		public java.lang.Boolean visit(minijava.ast.rules.declarations.Class c) throws RuntimeException {
+
+			classContext = symbolTable.classes.get(c.className);
+
+			boolean ok = true;
+			for (Variable variable : c.fields) {
+				ok = variable.accept(this) ? ok : false;
+			}
+
+			for (Method method : c.methods) {
+				ok = method.accept(this) ? ok : false;
+			}
+
+			classContext = null;
+
+			return ok;
+		}
+
+		@Override
+		public java.lang.Boolean visit(Main d) throws RuntimeException {
+			return true;
+		}
+
+		@Override
+		public java.lang.Boolean visit(Method m) throws RuntimeException {
+
+			methodContext = classContext.methods.get(m.methodName);
+
+			boolean ok = true;
+
+
+			ok = (m.body.accept(this)) ? ok : false;
+			ok = (m.returnExpression.accept(this).equals(m.type)) ? ok : false;
+
+			methodContext = null;
+
+			return ok;
+		}
+
+		@Override
+		public java.lang.Boolean visit(Variable d) throws RuntimeException {
+			return d.type.accept(this);
+		}
+
 		@Override
 		public Type visit(True e) throws RuntimeException {
 			return new Boolean();
