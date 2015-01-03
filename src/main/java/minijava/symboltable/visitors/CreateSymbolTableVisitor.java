@@ -4,11 +4,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 
-import minijava.ast.rules.DeclClass;
-import minijava.ast.rules.DeclMain;
-import minijava.ast.rules.DeclMeth;
-import minijava.ast.rules.DeclVar;
-import minijava.ast.rules.DeclVisitor;
+import minijava.ast.rules.declarations.DeclClass;
+import minijava.ast.rules.declarations.DeclMain;
+import minijava.ast.rules.declarations.DeclMeth;
+import minijava.ast.rules.declarations.DeclVar;
+import minijava.ast.rules.declarations.DeclVisitor;
 import minijava.ast.rules.Parameter;
 import minijava.ast.rules.ParameterVisitor;
 import minijava.ast.rules.Prg;

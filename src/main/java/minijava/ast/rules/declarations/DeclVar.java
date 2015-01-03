@@ -1,4 +1,4 @@
-package minijava.ast.rules;
+package minijava.ast.rules.declarations;
 
 import minijava.ast.rules.types.Ty;
 
