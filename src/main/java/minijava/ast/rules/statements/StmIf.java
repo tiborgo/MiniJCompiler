@@ -1,14 +1,14 @@
 package minijava.ast.rules.statements;
 
-import minijava.ast.rules.expressions.Exp;
+import minijava.ast.rules.expressions.Expression;
 
 public class StmIf extends Stm {
 
-  final public Exp cond;
+  final public Expression cond;
   final public Stm bodyTrue;
   final public Stm bodyFalse;
 
-  public StmIf(Exp cond, Stm bodyTrue, Stm bodyFalse) {
+  public StmIf(Expression cond, Stm bodyTrue, Stm bodyFalse) {
     this.cond = cond;
     this.bodyTrue = bodyTrue;
     this.bodyFalse = bodyFalse;

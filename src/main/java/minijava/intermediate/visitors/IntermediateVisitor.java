@@ -16,20 +16,20 @@ import minijava.ast.rules.declarations.DeclarationVisitor;
 import minijava.ast.rules.Parameter;
 import minijava.ast.rules.Prg;
 import minijava.ast.rules.PrgVisitor;
-import minijava.ast.rules.expressions.Exp;
-import minijava.ast.rules.expressions.ExpArrayGet;
-import minijava.ast.rules.expressions.ExpArrayLength;
-import minijava.ast.rules.expressions.ExpBinOp;
-import minijava.ast.rules.expressions.ExpFalse;
-import minijava.ast.rules.expressions.ExpId;
-import minijava.ast.rules.expressions.ExpIntConst;
-import minijava.ast.rules.expressions.ExpInvoke;
-import minijava.ast.rules.expressions.ExpNeg;
-import minijava.ast.rules.expressions.ExpNew;
-import minijava.ast.rules.expressions.ExpNewIntArray;
-import minijava.ast.rules.expressions.ExpThis;
-import minijava.ast.rules.expressions.ExpTrue;
-import minijava.ast.rules.expressions.ExpVisitor;
+import minijava.ast.rules.expressions.Expression;
+import minijava.ast.rules.expressions.ArrayGet;
+import minijava.ast.rules.expressions.ArrayLength;
+import minijava.ast.rules.expressions.BinOp;
+import minijava.ast.rules.expressions.False;
+import minijava.ast.rules.expressions.Id;
+import minijava.ast.rules.expressions.IntConstant;
+import minijava.ast.rules.expressions.Invoke;
+import minijava.ast.rules.expressions.Negate;
+import minijava.ast.rules.expressions.New;
+import minijava.ast.rules.expressions.NewIntArray;
+import minijava.ast.rules.expressions.This;
+import minijava.ast.rules.expressions.True;
+import minijava.ast.rules.expressions.ExpressionVisitor;
 import minijava.ast.rules.statements.Stm;
 import minijava.ast.rules.statements.StmArrayAssign;
 import minijava.ast.rules.statements.StmAssign;
@@ -125,7 +125,7 @@ public class IntermediateVisitor implements
 			Arrays.asList(new Parameter(d.mainArg, new TyArr(new TyInt()))),
 			Collections.<Variable>emptyList(),
 			d.mainBody,
-			new ExpIntConst(0)
+			new IntConstant(0)
 		);
 		
 		Class mainClass = new Class(
@@ -169,7 +169,7 @@ public class IntermediateVisitor implements
 		methodAndClassTemps.putAll(classTemps);
 		methodAndClassTemps.putAll(methodTemps);
 		TreeStm body = m.body.accept(new IntermediateVisitorExpStm(methodAndClassTemps, machineSpecifics, classContext, methodContext, memoryFootprint, symbolTable));
-		TreeExp returnExp = m.returnExp.accept(new IntermediateVisitorExpStm(methodAndClassTemps, machineSpecifics, classContext, methodContext, memoryFootprint, symbolTable));
+		TreeExp returnExp = m.returnExpression.accept(new IntermediateVisitorExpStm(methodAndClassTemps, machineSpecifics, classContext, methodContext, memoryFootprint, symbolTable));
 
 		TreeStm method = frame.makeProc(body, returnExp);
 
@@ -190,7 +190,7 @@ public class IntermediateVisitor implements
 	}
 
 	static public class IntermediateVisitorExpStm implements
-			ExpVisitor<TreeExp, RuntimeException>,
+			ExpressionVisitor<TreeExp, RuntimeException>,
 			StmVisitor<TreeStm, RuntimeException> {
 
 		private final Program symbolTable;
@@ -215,22 +215,22 @@ public class IntermediateVisitor implements
 		}
 
 		@Override
-		public TreeExp visit(ExpTrue e) throws RuntimeException {
+		public TreeExp visit(True e) throws RuntimeException {
 			return new TreeExpCONST(1);
 		}
 
 		@Override
-		public TreeExp visit(ExpFalse e) throws RuntimeException {
+		public TreeExp visit(False e) throws RuntimeException {
 			return new TreeExpCONST(0);
 		}
 
 		@Override
-		public TreeExp visit(ExpThis e) throws RuntimeException {
+		public TreeExp visit(This e) throws RuntimeException {
 			return temps.get("this");
 		}
 
 		@Override
-		public TreeExp visit(ExpNewIntArray e) throws RuntimeException {
+		public TreeExp visit(NewIntArray e) throws RuntimeException {
 			
 			TreeExp arraySize = e.size.accept(this);
 			
@@ -252,7 +252,7 @@ public class IntermediateVisitor implements
 		}
 
 		@Override
-		public TreeExp visit(ExpNew e) throws RuntimeException {
+		public TreeExp visit(New e) throws RuntimeException {
 			int classMemoryFootprint = memoryFootprint.get(e.className);
 
 			// Allocate space according to the size of the class
@@ -264,7 +264,7 @@ public class IntermediateVisitor implements
 		}
 
 		@Override
-		public TreeExp visit(ExpNeg e) throws RuntimeException {
+		public TreeExp visit(Negate e) throws RuntimeException {
 			TreeExp negatedExpression = e.body.accept(this);
 			return negateExpression(negatedExpression);
 		}
@@ -320,7 +320,7 @@ public class IntermediateVisitor implements
 		}
 
 		@Override
-		public TreeExp visit(ExpBinOp e) throws RuntimeException {
+		public TreeExp visit(BinOp e) throws RuntimeException {
 			Op operator = null;
 			switch (e.op) {
 				case PLUS:
@@ -375,7 +375,7 @@ public class IntermediateVisitor implements
 		}
 
 		@Override
-		public TreeExp visit(ExpArrayGet e) throws RuntimeException {
+		public TreeExp visit(ArrayGet e) throws RuntimeException {
 			TreeExp array = e.array.accept(this);
 			TreeExp index = e.index.accept(this);
 					
@@ -395,13 +395,13 @@ public class IntermediateVisitor implements
 		}
 
 		@Override
-		public TreeExp visit(ExpArrayLength e) throws RuntimeException {
+		public TreeExp visit(ArrayLength e) throws RuntimeException {
 			TreeExp array = e.array.accept(this);
 			return new TreeExpMEM(array);
 		}
 
 		@Override
-		public TreeExp visit(ExpInvoke e) throws RuntimeException {
+		public TreeExp visit(Invoke e) throws RuntimeException {
 			
 			TreeExp object = e.obj.accept(this);
 			minijava.symboltable.tree.Class clazz = symbolTable.classes.get(classContext.className);
@@ -413,20 +413,20 @@ public class IntermediateVisitor implements
 					methodName)));
 			List<TreeExp> arguments = new ArrayList<>(e.args.size() + 1);
 			arguments.add(object);
-			for (Exp exp : e.args) {
-				TreeExp iRExpression = exp.accept(this);
+			for (Expression expression : e.args) {
+				TreeExp iRExpression = expression.accept(this);
 				arguments.add(iRExpression);
 			}
 			return new TreeExpCALL(function, arguments);
 		}
 
 		@Override
-		public TreeExp visit(ExpIntConst e) throws RuntimeException {
+		public TreeExp visit(IntConstant e) throws RuntimeException {
 			return new TreeExpCONST(e.value);
 		}
 
 		@Override
-		public TreeExp visit(ExpId e) throws RuntimeException {
+		public TreeExp visit(Id e) throws RuntimeException {
 			return temps.get(e.id);
 		}
 

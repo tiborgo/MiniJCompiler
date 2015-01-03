@@ -3,7 +3,7 @@ package minijava.ast.rules.declarations;
 import java.util.List;
 
 import minijava.ast.rules.Parameter;
-import minijava.ast.rules.expressions.Exp;
+import minijava.ast.rules.expressions.Expression;
 import minijava.ast.rules.statements.Stm;
 import minijava.ast.rules.types.Ty;
 
@@ -14,16 +14,16 @@ public class Method extends Declaration {
 	final public List<Parameter> parameters;
 	final public List<Variable> localVars;
 	final public Stm body;
-	final public Exp returnExp;
+	final public Expression returnExpression;
 
 	public Method(Ty ty, String methodName, List<Parameter> parameters,
-	              List<Variable> localVars, Stm body, Exp returnExp) {
+	              List<Variable> localVars, Stm body, Expression returnExpression) {
 		this.ty = ty;
 		this.methodName = methodName;
 		this.parameters = parameters;
 		this.localVars = localVars;
 		this.body = body;
-		this.returnExp = returnExp;
+		this.returnExpression = returnExpression;
 	}
 
 	@Override

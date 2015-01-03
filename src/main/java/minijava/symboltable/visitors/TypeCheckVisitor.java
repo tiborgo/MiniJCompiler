@@ -7,19 +7,19 @@ import minijava.ast.rules.declarations.Variable;
 import minijava.ast.rules.declarations.DeclarationVisitor;
 import minijava.ast.rules.Prg;
 import minijava.ast.rules.PrgVisitor;
-import minijava.ast.rules.expressions.ExpArrayGet;
-import minijava.ast.rules.expressions.ExpArrayLength;
-import minijava.ast.rules.expressions.ExpBinOp;
-import minijava.ast.rules.expressions.ExpFalse;
-import minijava.ast.rules.expressions.ExpId;
-import minijava.ast.rules.expressions.ExpIntConst;
-import minijava.ast.rules.expressions.ExpInvoke;
-import minijava.ast.rules.expressions.ExpNeg;
-import minijava.ast.rules.expressions.ExpNew;
-import minijava.ast.rules.expressions.ExpNewIntArray;
-import minijava.ast.rules.expressions.ExpThis;
-import minijava.ast.rules.expressions.ExpTrue;
-import minijava.ast.rules.expressions.ExpVisitor;
+import minijava.ast.rules.expressions.ArrayGet;
+import minijava.ast.rules.expressions.ArrayLength;
+import minijava.ast.rules.expressions.BinOp;
+import minijava.ast.rules.expressions.False;
+import minijava.ast.rules.expressions.Id;
+import minijava.ast.rules.expressions.IntConstant;
+import minijava.ast.rules.expressions.Invoke;
+import minijava.ast.rules.expressions.Negate;
+import minijava.ast.rules.expressions.New;
+import minijava.ast.rules.expressions.NewIntArray;
+import minijava.ast.rules.expressions.This;
+import minijava.ast.rules.expressions.True;
+import minijava.ast.rules.expressions.ExpressionVisitor;
 import minijava.ast.rules.statements.Stm;
 import minijava.ast.rules.statements.StmArrayAssign;
 import minijava.ast.rules.statements.StmAssign;
@@ -94,7 +94,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		TypeCheckVisitorExpTyStm typeCheckVisitor = new TypeCheckVisitorExpTyStm(symbolTable, classContext, methodContext);
 		
 		ok = (m.body.accept(typeCheckVisitor)) ? ok : false;
-		ok = (m.returnExp.accept(typeCheckVisitor).equals(m.ty)) ? ok : false;
+		ok = (m.returnExpression.accept(typeCheckVisitor).equals(m.ty)) ? ok : false;
 		
 		methodContext = null;
 		
@@ -107,7 +107,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 	} 
 	
 	public static class TypeCheckVisitorExpTyStm implements
-			ExpVisitor<Ty, RuntimeException>,
+			ExpressionVisitor<Ty, RuntimeException>,
 			TyVisitor<Boolean, RuntimeException>,
 			StmVisitor<Boolean, RuntimeException> {
 		
@@ -123,22 +123,22 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		
 		
 		@Override
-		public Ty visit(ExpTrue e) throws RuntimeException {
+		public Ty visit(True e) throws RuntimeException {
 			return new TyBool();
 		}
 
 		@Override
-		public Ty visit(ExpFalse e) throws RuntimeException {
+		public Ty visit(False e) throws RuntimeException {
 			return new TyBool();
 		}
 
 		@Override
-		public Ty visit(ExpThis e) throws RuntimeException {
+		public Ty visit(This e) throws RuntimeException {
 			return new TyClass(classContext.name);
 		}
 
 		@Override
-		public Ty visit(ExpNewIntArray e) throws RuntimeException {
+		public Ty visit(NewIntArray e) throws RuntimeException {
 			
 			if (e.size.accept(this) instanceof TyInt) {
 				return new TyArr(new TyInt());
@@ -150,7 +150,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		}
 
 		@Override
-		public Ty visit(ExpNew e) throws RuntimeException {
+		public Ty visit(New e) throws RuntimeException {
 				
 			// Check if class exists
 			if (symbolTable.classes.containsKey(e.className)) {
@@ -163,7 +163,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		}
 
 		@Override
-		public Ty visit(ExpNeg e) throws RuntimeException {
+		public Ty visit(Negate e) throws RuntimeException {
 			if (e.body.accept(this) instanceof TyBool) {
 				return new TyBool();
 			}
@@ -174,7 +174,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		}
 
 		@Override
-		public Ty visit(ExpBinOp e) throws RuntimeException {
+		public Ty visit(BinOp e) throws RuntimeException {
 			
 			switch(e.op) {
 			case PLUS:
@@ -215,7 +215,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		}
 
 		@Override
-		public Ty visit(ExpArrayGet e) throws RuntimeException {
+		public Ty visit(ArrayGet e) throws RuntimeException {
 			
 			Ty indexType = e.index.accept(this);
 			Ty arrayType = e.array.accept(this);
@@ -231,7 +231,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		}
 
 		@Override
-		public Ty visit(ExpArrayLength e) throws RuntimeException {
+		public Ty visit(ArrayLength e) throws RuntimeException {
 			if (e.array.accept(this) instanceof TyArr) {
 				return new TyInt();
 			}
@@ -242,7 +242,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		}
 
 		@Override
-		public Ty visit(ExpInvoke e) throws RuntimeException {
+		public Ty visit(Invoke e) throws RuntimeException {
 			
 			TyClass object = (TyClass) e.obj.accept(this);
 			
@@ -286,12 +286,12 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		}
 
 		@Override
-		public Ty visit(ExpIntConst e) throws RuntimeException {
+		public Ty visit(IntConstant e) throws RuntimeException {
 			return new TyInt();
 		}
 
 		@Override
-		public Ty visit(ExpId e) throws RuntimeException {
+		public Ty visit(Id e) throws RuntimeException {
 			// TODO: Should be replaced with a lookup in an appropriate data structure that honours variable visibility
 			minijava.symboltable.tree.Variable object = methodContext.get(e.id);
 			if (object == null) {
@@ -383,7 +383,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 
 		@Override
 		public Boolean visit(StmAssign s) throws RuntimeException {
-			Ty idType     =  new ExpId(s.id).accept(this);
+			Ty idType     =  new Id(s.id).accept(this);
 			Ty assignType = s.rhs.accept(this);
 			
 			if (idType.equals(assignType)) {
@@ -396,7 +396,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 
 		@Override
 		public Boolean visit(StmArrayAssign s) throws RuntimeException {
-			Ty arrayType  = new ExpId(s.id).accept(this);
+			Ty arrayType  = new Id(s.id).accept(this);
 			Ty assignType = s.rhs.accept(this);
 			Ty indexType  = s.index.accept(this);
 			

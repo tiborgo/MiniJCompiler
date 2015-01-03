@@ -1,12 +1,12 @@
 package minijava.ast.rules.statements;
 
-import minijava.ast.rules.expressions.Exp;
+import minijava.ast.rules.expressions.Expression;
 
 public class StmPrintlnInt extends Stm {
 
-  final public Exp arg;
+  final public Expression arg;
 
-  public StmPrintlnInt(Exp arg) {
+  public StmPrintlnInt(Expression arg) {
     this.arg = arg;
   }
 
