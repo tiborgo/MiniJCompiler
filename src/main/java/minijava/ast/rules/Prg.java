@@ -2,6 +2,9 @@ package minijava.ast.rules;
 
 import java.util.List;
 
+import minijava.ast.rules.declarations.DeclClass;
+import minijava.ast.rules.declarations.DeclMain;
+
 public class Prg {
 
   final public DeclMain mainClass;

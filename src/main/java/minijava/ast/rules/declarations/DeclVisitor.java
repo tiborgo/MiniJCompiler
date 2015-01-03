@@ -1,4 +1,4 @@
-package minijava.ast.rules;
+package minijava.ast.rules.declarations;
 
 public interface DeclVisitor<A, T extends Throwable> {
 	A visit(DeclClass c) throws T;

@@ -1,7 +1,8 @@
-package minijava.ast.rules;
+package minijava.ast.rules.declarations;
 
 import java.util.List;
 
+import minijava.ast.rules.Parameter;
 import minijava.ast.rules.expressions.Exp;
 import minijava.ast.rules.statements.Stm;
 import minijava.ast.rules.types.Ty;
