@@ -11,6 +11,11 @@ public class ColoredNode {
 		this.temp = temp;
 	}
 	
+	public boolean isColored() {
+		return color != null;
+	}
+ 	
+	@Override
 	public String toString() {
 		return temp.toString() + " -> " + ((color != null) ? color.toString() : "<uncolored>");
 	}
