@@ -33,7 +33,7 @@ import minijava.intermediate.Temp;
 import minijava.intermediate.canon.Canon;
 import minijava.intermediate.tree.TreeStm;
 import minijava.intermediate.visitors.IntermediateVisitor;
-import minijava.symboltable.visitors.TypeCheckVisitor;
+import minijava.ast.visitors.TypeCheckVisitor;
 import minijava.util.Pair;
 import minijava.util.SimpleGraph;
 import org.antlr.v4.runtime.ANTLRFileStream;

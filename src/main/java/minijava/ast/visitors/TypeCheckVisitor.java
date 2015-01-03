@@ -1,4 +1,4 @@
-package minijava.symboltable.visitors;
+package minijava.ast.visitors;
 
 import minijava.ast.rules.Program;
 import minijava.ast.rules.ProgramVisitor;
