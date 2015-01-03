@@ -70,7 +70,7 @@ public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeEx
 			this.symbolTable = symbolTable;
 		}
 
-		// TOOD: Remove constructor
+		// TODO: Remove constructor
 		public TypeCheckVisitorExpTyStm(Program symbolTable, minijava.symboltable.tree.Class classContext, minijava.symboltable.tree.Method methodContext) {
 			this.symbolTable = symbolTable;
 			this.classContext = classContext;
@@ -124,58 +124,58 @@ public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeEx
 
 		@Override
 		public Type visit(True e) throws RuntimeException {
-			return new Boolean();
+			e.type = new Boolean();
+			return e.type;
 		}
 
 		@Override
 		public Type visit(False e) throws RuntimeException {
-			return new Boolean();
+			e.type = new Boolean();
+			return e.type;
 		}
 
 		@Override
 		public Type visit(This e) throws RuntimeException {
-			return new Class(classContext.name);
+			e.type = new Class(classContext.name);
+			return e.type;
 		}
 
 		@Override
 		public Type visit(NewIntArray e) throws RuntimeException {
-			
 			if (e.size.accept(this) instanceof Integer) {
-				return new Array(new Integer());
+				e.type = new Array(new Integer());
 			}
 			else {
 				// TODO: error
-				return null;
 			}
+			return e.type;
 		}
 
 		@Override
 		public Type visit(New e) throws RuntimeException {
-				
 			// Check if class exists
 			if (symbolTable.classes.containsKey(e.className)) {
-				return new Class(e.className);
+				e.type = new Class(e.className);
 			}
 			else {
 				// TODO: error
-				return null;
 			}
+			return e.type;
 		}
 
 		@Override
 		public Type visit(Negate e) throws RuntimeException {
 			if (e.body.accept(this) instanceof Boolean) {
-				return new Boolean();
+				e.type = new Boolean();
 			}
 			else {
 				System.err.println("Neg operator can only be applied to boolean expression");
-				return null;
 			}
+			return e.type;
 		}
 
 		@Override
 		public Type visit(BinOp e) throws RuntimeException {
-			
 			switch(e.op) {
 			case PLUS:
 			case MINUS:
@@ -183,71 +183,70 @@ public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeEx
 			case DIV:
 				if (e.left.accept(this) instanceof Integer &&
 						e.right.accept(this) instanceof Integer) {
-					return new Integer();
+					e.type = new Integer();
 				}
 				else {
 					System.err.println("Both operands of binary operation '" + e.op + "' must have type int");
-					return null;
 				}
-
+				break;
 			case LT:
 				if (e.left.accept(this) instanceof Integer &&
 						e.right.accept(this) instanceof Integer) {
-					return new Boolean();
+					e.type = new Boolean();
 				}
 				else {
 					System.err.println("Both operands of binary operation '" + e.op + "' must have type int");
-					return null;
 				}
+				break;
 
 			case AND:
 				if (e.left.accept(this) instanceof Boolean &&
 						e.right.accept(this) instanceof Boolean) {
-					return new Boolean();
+					e.type = new Boolean();
 				}
 				else {
 					System.err.println("Both operands of binary operation '" + e.op + "' must have type bool");
-					return null;
 				}
+				break;
 			default:
+				// TODO: Complain about unknown operator type
 				return null;
 			}
+			return e.type;
 		}
 
 		@Override
 		public Type visit(ArrayGet e) throws RuntimeException {
-			
 			Type indexType = e.index.accept(this);
 			Type arrayType = e.array.accept(this);
 			
 			if (indexType instanceof Integer &&
 					arrayType instanceof Array) {
-				return ((Array) arrayType).type;
+				e.type = ((Array) arrayType).type;
 			}
 			else {
 				System.err.println("Array get error");
-				return null;
 			}
+			return e.type;
 		}
 
 		@Override
 		public Type visit(ArrayLength e) throws RuntimeException {
 			if (e.array.accept(this) instanceof Array) {
-				return new Integer();
+				e.type = new Integer();
 			}
 			else {
 				System.err.println("'length' must be applied to array type");
-				return null;
 			}
+			return e.type;
 		}
 
 		@Override
 		public Type visit(Invoke e) throws RuntimeException {
-			
 			Class object = (Class) e.obj.accept(this);
 			
 			// Check class
-			minijava.symboltable.tree.Class clazz   = symbolTable.classes.get(object.c);
+			minijava.symboltable.tree.Class clazz = symbolTable.classes.get(object.c);
 			if (clazz == null) {
 				// TODO: error
 				return null;
@@ -273,7 +272,7 @@ public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeEx
 				}
 				
 				if (ok) {
-					return method.returnType;
+					e.type = method.returnType;
 				}
 				else {
 					return null;
@@ -283,11 +282,13 @@ public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeEx
 				// TODO: error
 				return null;
 			}
+			return e.type;
 		}
 
 		@Override
 		public Type visit(IntConstant e) throws RuntimeException {
-			return new Integer();
+			e.type = new Integer();
+			return e.type;
 		}
 
 		@Override
@@ -301,11 +302,10 @@ public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeEx
 			if (object == null) {
 				// TODO: error
 				System.err.println("Unknown variable \""+e.id+"\"");
-				return null;
+			} else {
+				e.type = object.type;
 			}
-			else {
-				return object.type;
-			}
+			return e.type;
 		}
 		
 		public java.lang.Boolean visit(Type t) {
