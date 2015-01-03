@@ -1,15 +1,15 @@
 package minijava.ast.rules;
 
-import minijava.ast.rules.types.Ty;
+import minijava.ast.rules.types.Type;
 
 public class Parameter {
 
 	final public String id;
-	final public Ty ty;
+	final public Type type;
 
-	public Parameter(String id, Ty ty) {
+	public Parameter(String id, Type type) {
 		this.id = id;
-		this.ty = ty;
+		this.type = type;
 	}
 
 	public <A, T extends Throwable> A accept(ParameterVisitor<A, T> v) throws T {

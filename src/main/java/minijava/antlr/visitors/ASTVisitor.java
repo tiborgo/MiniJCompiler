@@ -23,7 +23,6 @@ import minijava.MiniJavaParser.StatementContext;
 import minijava.MiniJavaParser.ThisExpressionContext;
 import minijava.MiniJavaParser.TrueExpressionContext;
 import minijava.MiniJavaParser.VarDeclarationContext;
-import minijava.ast.rules.declarations.Class;
 import minijava.ast.rules.declarations.Main;
 import minijava.ast.rules.declarations.Method;
 import minijava.ast.rules.declarations.Variable;
@@ -50,11 +49,11 @@ import minijava.ast.rules.statements.StatementList;
 import minijava.ast.rules.statements.PrintChar;
 import minijava.ast.rules.statements.PrintlnInt;
 import minijava.ast.rules.statements.While;
-import minijava.ast.rules.types.Ty;
-import minijava.ast.rules.types.TyArr;
-import minijava.ast.rules.types.TyBool;
-import minijava.ast.rules.types.TyClass;
-import minijava.ast.rules.types.TyInt;
+import minijava.ast.rules.types.Type;
+import minijava.ast.rules.types.Array;
+import minijava.ast.rules.types.Boolean;
+import minijava.ast.rules.types.Class;
+import minijava.ast.rules.types.Integer;
 import minijava.ast.rules.expressions.BinOp.Op;
 
 import org.antlr.v4.runtime.misc.NotNull;
@@ -65,9 +64,9 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 	public Object visitProg(@NotNull MiniJavaParser.ProgContext ctx) {
 
 		Main mainClass = (Main) visit(ctx.mainClass());
-		LinkedList<Class> classes = new LinkedList<>();
+		LinkedList<minijava.ast.rules.declarations.Class> classes = new LinkedList<>();
 		for (ClassDeclarationContext classDeclCtx : ctx.classDeclaration()) {
-			classes.add((Class) visit(classDeclCtx));
+			classes.add((minijava.ast.rules.declarations.Class) visit(classDeclCtx));
 		}
 
 		return new Prg(mainClass, classes);
@@ -81,15 +80,15 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 	@Override
 	public Object visitMethodDeclaration(@NotNull MiniJavaParser.MethodDeclarationContext ctx) {
 
-		Ty ty = (Ty) visit(ctx.returnType);
+		Type type = (Type) visit(ctx.returnType);
 		String methodName = (String) visit(ctx.methodName);
 
 		LinkedList<Parameter> parameters = new LinkedList<>();
 		if (ctx.firstParameterType != null) {
-			parameters.add(new Parameter((String) visit(ctx.firstParameterName), (Ty) visit(ctx.firstParameterType)));
+			parameters.add(new Parameter((String) visit(ctx.firstParameterName), (Type) visit(ctx.firstParameterType)));
 		}
 		for (int i = 2; i < ctx.type().size(); i++) {
-			parameters.add(new Parameter((String) visit(ctx.identifier().get(i)), (Ty) visit(ctx.type().get(i))));
+			parameters.add(new Parameter((String) visit(ctx.identifier().get(i)), (Type) visit(ctx.type().get(i))));
 		}
 
 		LinkedList<Variable> localVars = new LinkedList<>();
@@ -104,7 +103,7 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 
 		Expression returnExpression = (Expression) visit(ctx.returnExpression);
 
-		return new Method(ty, methodName, parameters, localVars, new StatementList(body), returnExpression);
+		return new Method(type, methodName, parameters, localVars, new StatementList(body), returnExpression);
 	}
 
 	@Override
@@ -119,24 +118,24 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 
 	@Override
 	public Object visitIntType(@NotNull MiniJavaParser.IntTypeContext ctx) {
-		return new TyInt();
+		return new Integer();
 	}
 
 	@Override
 	public Object visitIntArrayType(@NotNull MiniJavaParser.IntArrayTypeContext ctx) {
-		return new TyArr(new TyInt());
+		return new Array(new Integer());
 	}
 
 	@Override
 	public Object visitBooleanType(@NotNull MiniJavaParser.BooleanTypeContext ctx) {
-		return new TyBool();
+		return new Boolean();
 	}
 
 	@Override
 	public Object visitOtherType(@NotNull MiniJavaParser.OtherTypeContext ctx) {
 
 		String name = (String) visit(ctx.identifier());
-		return new TyClass(name);
+		return new Class(name);
 	}
 
 	/* ####### STATEMENTS ####### */
@@ -209,10 +208,10 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 	@Override
 	public Object visitVarDeclaration(@NotNull MiniJavaParser.VarDeclarationContext ctx) {
 
-		Ty ty = (Ty) visit(ctx.type());
+		Type type = (Type) visit(ctx.type());
 		String name = (String) visit(ctx.identifier());
 
-		return new Variable(ty, name);
+		return new Variable(type, name);
 	}
 
 	@Override
@@ -231,7 +230,7 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 			Method method = (Method) visit(methodRaw);
 			methods.add(method);
 		}
-		return new Class(className, superClassName, fields, methods);
+		return new minijava.ast.rules.declarations.Class(className, superClassName, fields, methods);
 	}
 
 	@Override
@@ -264,7 +263,7 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 
 	@Override
 	public Object visitIntegerLiteralExpression(IntegerLiteralExpressionContext ctx) {
-		Integer value = Integer.parseInt(ctx.INTEGER_LITERAL().getText());
+		java.lang.Integer value = java.lang.Integer.parseInt(ctx.INTEGER_LITERAL().getText());
 		return new IntConstant(value);
 	}
 

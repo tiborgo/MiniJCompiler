@@ -1,14 +1,14 @@
 package minijava.ast.rules.declarations;
 
-import minijava.ast.rules.types.Ty;
+import minijava.ast.rules.types.Type;
 
 public class Variable extends Declaration {
 
-	final public Ty ty;
+	final public Type type;
 	final public String name;
 
-	public Variable(Ty ty, String name) {
-		this.ty = ty;
+	public Variable(Type type, String name) {
+		this.type = type;
 		this.name = name;
 	}
 

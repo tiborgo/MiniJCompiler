@@ -1,8 +1,8 @@
 package minijava.ast.rules.types;
 
-public class TyBool extends Ty {
+public class Boolean extends Type {
 
-  public TyBool() {
+  public Boolean() {
   }
 
   @Override
@@ -12,11 +12,11 @@ public class TyBool extends Ty {
 
   @Override
   public boolean equals(Object obj) {
-    return (obj instanceof TyBool);
+    return (obj instanceof Boolean);
   }
 
   @Override
-  public <A, T extends Throwable> A accept(TyVisitor<A, T> v) throws T {
+  public <A, T extends Throwable> A accept(TypeVisitor<A, T> v) throws T {
     return v.visit(this);
   }
 

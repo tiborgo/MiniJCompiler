@@ -1,28 +1,28 @@
 package minijava.ast.rules.types;
 
-public class TyVoid extends Ty {
+public class Integer extends Type {
 
-  public TyVoid() {
+  public Integer() {
   }
 
   @Override
   public String toString() {
-    return "boolean";
+    return "int";
   }
 
   @Override
-  public <A, T extends Throwable> A accept(TyVisitor<A, T> v) throws T {
+  public <A, T extends Throwable> A accept(TypeVisitor<A, T> v) throws T {
     return v.visit(this);
   }
 
   @Override
   public boolean equals(Object obj) {
-    return (obj instanceof TyVoid);
+    return (obj instanceof Integer);
   }
 
   @Override
   public int hashCode() {
-    int hash = 7;
+    int hash = 5;
     return hash;
   }
 }

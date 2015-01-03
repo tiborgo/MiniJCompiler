@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import minijava.ast.rules.declarations.Class;
 import minijava.ast.rules.declarations.Main;
 import minijava.ast.rules.declarations.Method;
 import minijava.ast.rules.declarations.Variable;
@@ -39,9 +38,9 @@ import minijava.ast.rules.statements.PrintChar;
 import minijava.ast.rules.statements.PrintlnInt;
 import minijava.ast.rules.statements.StatementVisitor;
 import minijava.ast.rules.statements.While;
-import minijava.ast.rules.types.TyArr;
-import minijava.ast.rules.types.TyClass;
-import minijava.ast.rules.types.TyInt;
+import minijava.ast.rules.types.Array;
+import minijava.ast.rules.types.Class;
+import minijava.ast.rules.types.Integer;
 import minijava.symboltable.visitors.TypeCheckVisitor;
 import minijava.backend.MachineSpecifics;
 import minijava.intermediate.FragmentProc;
@@ -71,11 +70,11 @@ public class IntermediateVisitor implements
 		PrgVisitor<List<FragmentProc<TreeStm>>, RuntimeException>,
 		DeclarationVisitor<List<FragmentProc<TreeStm>>, RuntimeException> {
 	
-	private Class classContext;
+	private minijava.ast.rules.declarations.Class classContext;
 	private Method methodContext;
 	private final MachineSpecifics  machineSpecifics;
 	private final Map<String, TreeExp> classTemps;
-	private Map<String, Integer> memoryFootprint;
+	private Map<String, java.lang.Integer> memoryFootprint;
 	private final Program symbolTable;
 
 	public IntermediateVisitor(MachineSpecifics machineSpecifics, Program symbolTable) {
@@ -88,12 +87,12 @@ public class IntermediateVisitor implements
 	@Override
 	public List<FragmentProc<TreeStm>> visit(Prg p) throws RuntimeException {
 
-		for(Class clazz : p.classes) {
+		for(minijava.ast.rules.declarations.Class clazz : p.classes) {
 			memoryFootprint.put(clazz.className, clazz.fields.size() * machineSpecifics.getWordSize() + 4);
 		}
 
 		List<FragmentProc<TreeStm>> classes = new LinkedList<>();
-		for(Class clazz : p.classes) {
+		for(minijava.ast.rules.declarations.Class clazz : p.classes) {
 			classes.addAll(clazz.accept(this));
 		}
 
@@ -102,7 +101,7 @@ public class IntermediateVisitor implements
 	}
 
 	@Override
-	public List<FragmentProc<TreeStm>> visit(Class c) throws RuntimeException {
+	public List<FragmentProc<TreeStm>> visit(minijava.ast.rules.declarations.Class c) throws RuntimeException {
 		classContext = c;
 
 		// Methods
@@ -120,15 +119,15 @@ public class IntermediateVisitor implements
 	public List<FragmentProc<TreeStm>> visit(Main d) throws RuntimeException {
 
 		Method mainMethod = new Method(
-			new TyInt(),
+			new Integer(),
 			"lmain",
-			Arrays.asList(new Parameter(d.mainArg, new TyArr(new TyInt()))),
+			Arrays.asList(new Parameter(d.mainArg, new Array(new Integer()))),
 			Collections.<Variable>emptyList(),
 			d.mainBody,
 			new IntConstant(0)
 		);
 		
-		Class mainClass = new Class(
+		minijava.ast.rules.declarations.Class mainClass = new minijava.ast.rules.declarations.Class(
 			"",
 			null,
 			Collections.<Variable>emptyList(),
@@ -194,17 +193,17 @@ public class IntermediateVisitor implements
 			StatementVisitor<TreeStm, RuntimeException> {
 
 		private final Program symbolTable;
-		private final Class classContext;
+		private final minijava.ast.rules.declarations.Class classContext;
 		private final Method methodContext;
-		private final Map<String, Integer> memoryFootprint;
+		private final Map<String, java.lang.Integer> memoryFootprint;
 		private final Map<String, TreeExp> temps;
 		private final MachineSpecifics  machineSpecifics;
 
 		public IntermediateVisitorExpStm(Map<String, TreeExp> temps,
 				MachineSpecifics machineSpecifics,
-				Class classContext,
+				minijava.ast.rules.declarations.Class classContext,
 				Method methodContext,
-				Map<String, Integer> memoryFootprint,
+				Map<String, java.lang.Integer> memoryFootprint,
 				Program symbolTable) {
 			this.temps = temps;
 			this.machineSpecifics = machineSpecifics;
@@ -406,7 +405,7 @@ public class IntermediateVisitor implements
 			TreeExp object = e.obj.accept(this);
 			minijava.symboltable.tree.Class clazz = symbolTable.classes.get(classContext.className);
 			minijava.symboltable.tree.Method method = clazz.methods.get(methodContext.methodName);
-			String className = ((TyClass) e.obj.accept(new TypeCheckVisitor.TypeCheckVisitorExpTyStm(symbolTable, clazz, method))).c;
+			String className = ((Class) e.obj.accept(new TypeCheckVisitor.TypeCheckVisitorExpTyStm(symbolTable, clazz, method))).c;
 			String methodName = e.method;
 
 			TreeExp function = new TreeExpNAME(new Label(mangle(className,

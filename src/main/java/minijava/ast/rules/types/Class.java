@@ -1,10 +1,10 @@
 package minijava.ast.rules.types;
 
-public class TyClass extends Ty {
+public class Class extends Type {
 
   final public String c;
 
-  public TyClass(String c) {
+  public Class(String c) {
     this.c = c;
   }
 
@@ -14,13 +14,13 @@ public class TyClass extends Ty {
   }
 
   @Override
-  public <A, T extends Throwable> A accept(TyVisitor<A, T> v) throws T {
+  public <A, T extends Throwable> A accept(TypeVisitor<A, T> v) throws T {
     return v.visit(this);
   }
 
   @Override
   public boolean equals(Object obj) {
-    return (obj instanceof TyClass && c.equals(((TyClass) obj).c));
+    return (obj instanceof Class && c.equals(((Class) obj).c));
   }
 
   @Override
