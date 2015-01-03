@@ -12,7 +12,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import static org.junit.Assert.fail;
 import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Prg;
-import minijava.ast.visitors.CreateSymbolTableVisitor;
+import minijava.symboltable.visitors.CreateSymbolTableVisitor;
 import minijava.ast.visitors.TypeCheckVisitor;
 import minijava.symboltable.tree.Program;
 

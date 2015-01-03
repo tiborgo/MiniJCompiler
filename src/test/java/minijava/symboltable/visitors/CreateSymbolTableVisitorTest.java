@@ -1,4 +1,4 @@
-package minijava.ast.visitors;
+package minijava.symboltable.visitors;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;

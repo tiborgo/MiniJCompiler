@@ -1,4 +1,4 @@
-package minijava.ast.visitors;
+package minijava.symboltable.visitors;
 
 import java.util.Arrays;
 import java.util.Collections;
