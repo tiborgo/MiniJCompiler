@@ -93,12 +93,7 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 		@Override
 		public java.lang.Boolean visit(Method m) throws RuntimeException {
 
-			for (Method declaredMethod : classContext.methods) {
-				if (declaredMethod.methodName.equals(m.methodName)) {
-					methodContext = declaredMethod;
-					break;
-				}
-			}
+			methodContext = classContext.getMethod(m.methodName);
 
 			boolean ok = true;
 
