@@ -368,7 +368,7 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 
 		@Override
 		public java.lang.Boolean visit(Assignment s) throws RuntimeException {
-			Type idType     =  new Id(s.id).accept(this);
+			Type idType     =  s.id.accept(this);
 			Type assignType = s.rhs.accept(this);
 			
 			if (idType.equals(assignType)) {

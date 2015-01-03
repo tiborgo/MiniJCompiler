@@ -181,7 +181,8 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 	@Override
 	public Object visitAssignStatement(@NotNull MiniJavaParser.AssignStatementContext ctx) {
 
-		String id = (String) visit(ctx.identifier());
+		// FIXME: Change grammar so it yields an Id expression
+		Id id = new Id((String) visit(ctx.identifier()));
 		Expression rhs = (Expression) visit(ctx.expression());
 
 		return new Assignment(id, rhs);

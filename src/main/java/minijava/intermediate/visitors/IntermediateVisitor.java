@@ -486,7 +486,7 @@ public class IntermediateVisitor implements
 		@Override
 		public TreeStm visit(Assignment s) throws RuntimeException {
 
-			TreeExp dest = this.temps.get(s.id);
+			TreeExp dest = this.temps.get(s.id.id);
 			TreeExp assignValue = s.rhs.accept(this);
 
 			return new TreeStmMOVE(dest, assignValue);
