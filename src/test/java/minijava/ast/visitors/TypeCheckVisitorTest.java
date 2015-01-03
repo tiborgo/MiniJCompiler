@@ -40,7 +40,7 @@ public class TypeCheckVisitorTest {
 				ParseTree parseTree = parser.prog();
 				ASTVisitor astVisitor = new ASTVisitor();
 				Program ast = (Program) astVisitor.visit(parseTree);
-				TypeCheckVisitor visitor = new TypeCheckVisitor(ast);
+				TypeCheckVisitor visitor = new TypeCheckVisitor();
 				boolean typesCorrect = ast.accept(visitor);
 				assertTrue(typesCorrect);
 				return super.visitFile(file, attrs);

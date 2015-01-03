@@ -38,18 +38,15 @@ import minijava.ast.rules.types.Void;
 
 public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, RuntimeException> {
 	
-	private final Program symbolTable;
-
-	public TypeCheckVisitor(Program symbolTable) {
-		this.symbolTable = symbolTable;
+	public TypeCheckVisitor() {
 	}
 	
 	@Override
-	public java.lang.Boolean visit(Program p) throws RuntimeException {
+	public java.lang.Boolean visit(Program program) throws RuntimeException {
 		boolean ok = true;
-		TypeCheckVisitorExpTyStm expTyStmVisitor = new TypeCheckVisitorExpTyStm(symbolTable);
-		ok = p.mainClass.accept(expTyStmVisitor) ? ok : false;
-		for (minijava.ast.rules.declarations.Class clazz : p.getClasses()) {
+		TypeCheckVisitorExpTyStm expTyStmVisitor = new TypeCheckVisitorExpTyStm(program);
+		ok = program.mainClass.accept(expTyStmVisitor) ? ok : false;
+		for (minijava.ast.rules.declarations.Class clazz : program.getClasses()) {
 			ok = clazz.accept(expTyStmVisitor) ? ok : false;
 		}
 		return ok;
@@ -79,7 +76,7 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 		@Override
 		public java.lang.Boolean visit(minijava.ast.rules.declarations.Class c) throws RuntimeException {
 
-			classContext = symbolTable.get(c.className);
+			classContext = c;
 
 			boolean ok = true;
 			for (Variable variable : c.fields) {

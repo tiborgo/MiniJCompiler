@@ -88,7 +88,7 @@ public class MiniJavaParserTest {
 				ASTVisitor astVisitor = new ASTVisitor();
 				Program program = (Program) astVisitor.visit(tree);
 				
-				TypeCheckVisitor typeCheckVisitor = new TypeCheckVisitor(program);
+				TypeCheckVisitor typeCheckVisitor = new TypeCheckVisitor();
 				if (program.accept(typeCheckVisitor)) {
 					fail("The example "+file.toString()+" should have failed, but was accepted by the type checker.");
 				}
