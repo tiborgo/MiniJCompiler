@@ -28,7 +28,7 @@ import minijava.backend.Assem;
 import minijava.backend.MachineSpecifics;
 import minijava.backend.i386.I386MachineSpecifics;
 import minijava.backend.livenessanalysis.ControlFlowGraphBuilder;
-import minijava.backend.livenessanalysis.InferenceGraphBuilder;
+import minijava.backend.livenessanalysis.InterferenceGraphBuilder;
 import minijava.backend.livenessanalysis.LivenessSetsBuilder;
 import minijava.intermediate.Fragment;
 import minijava.intermediate.FragmentProc;
@@ -83,7 +83,7 @@ public class MiniJavaCompiler {
 	private String outputFile = "CC.out";
 	
 	@Option(name = "--verbose", usage = "Print additional information")
-	private boolean verbose = false;
+	private boolean verbose;
 	
 	@Option(name = "--print-source-code", usage = "Pretty print the input source code", depends = "--verbose")
 	private boolean printSourceCode;
@@ -94,8 +94,14 @@ public class MiniJavaCompiler {
 	@Option(name = "--print-control-flow-graphs", usage = "Prints the control flow graph", depends = "--verbose")
 	private boolean printControlFlowGraphs;
 	
+	@Option(name = "--print-interference-graphs", usage = "Prints the interference graphs", depends = "--verbose")
+	private boolean printInterferenceGraphs;
+	
 	@Option(name = "--run-executable", usage = "Runs the compiled executable")
-	private boolean runExecutable = false;
+	private boolean runExecutable;
+	
+	@Option(name = "--skip-type-check", usage = "Skips the type check")
+	private boolean skipTypeCheck;
 	
 	private void printDelimiter() {
 		System.out.println("-------------------------");
@@ -248,60 +254,12 @@ public class MiniJavaCompiler {
 				controlFlowGraphs.add(ControlFlowGraphBuilder.build((FragmentProc<List<Assem>>) frag));
 			}
 			
-			StringBuilder graphOutput = new StringBuilder();
+			String graphOutput = null;
 			if (printControlFlowGraphs) {
-				
-				for (int i = 0; i < controlFlowGraphs.size(); i++) {
-					String dotCode = controlFlowGraphs.get(i).getDot();
-					
-					graphOutput.append(System.lineSeparator());
-					graphOutput.append(((FragmentProc<List<Assem>>)assemFragments.get(i)).frame.getName() + System.lineSeparator());
-					graphOutput.append(System.lineSeparator());
-					
-					try {
-						ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "graph-easy --as boxart");
-						processBuilder.environment().put("PATH", "/usr/local/bin:" + processBuilder.environment().get("PATH"));
-						Process graphEasyCall = processBuilder.start();
-						OutputStream stdin = graphEasyCall.getOutputStream();
-						stdin.write(dotCode.getBytes());
-						stdin.close();
-			
-						graphEasyCall.waitFor();
-						
-						InputStream stdout = graphEasyCall.getInputStream();
-						BufferedReader bufferedStdout = new BufferedReader(new InputStreamReader(stdout));
-						String line;
-						while ((line = bufferedStdout.readLine()) != null) {
-							graphOutput.append(line + System.lineSeparator());
-						}
-						bufferedStdout.close();
-						stdout.close();
-						
-						if (graphEasyCall.exitValue() != 0) {
-						
-							StringBuilder errOutput = new StringBuilder();
-							InputStream stderr = graphEasyCall.getErrorStream();
-							BufferedReader bufferedStderr = new BufferedReader(new InputStreamReader(stderr));
-							while ((line = bufferedStderr.readLine()) != null) {
-								errOutput.append(line + System.lineSeparator());
-							}
-							bufferedStderr.close();
-							stderr.close();
-	
-							throw new CompilerException("Failed to create print of control flow graph: " + errOutput.toString());
-						}
-					}
-					catch (IOException e) {
-						throw new CompilerException("Failed to transfer dot code to graph-easy", e);
-					}
-					catch (InterruptedException e) {
-						throw new CompilerException("Failed to invoke graph-easy", e);
-					}
-				}
+				graphOutput = simpleGraphsToString(controlFlowGraphs);
 			}
 			
-			printVerbose("Successfully generated control flow graphs",
-					(printControlFlowGraphs) ? graphOutput.toString() : null);
+			printVerbose("Successfully generated control flow graphs", graphOutput);
 			
 			return controlFlowGraphs;
 		}
@@ -311,24 +269,84 @@ public class MiniJavaCompiler {
 		}
 	}
 	
-	private List<SimpleGraph<Temp>> generateInferenceGraphs(List<SimpleGraph<Assem>> controlFlowGraphs) throws CompilerException {
+	private List<SimpleGraph<Temp>> generateInterferenceGraphs(List<SimpleGraph<Assem>> controlFlowGraphs) throws CompilerException {
 		
 		try {
-			List<SimpleGraph<Temp>> inferenceGraphs = new LinkedList<>();
+			List<SimpleGraph<Temp>> interferenceGraphs = new LinkedList<>();
 			for (SimpleGraph<Assem> controlFlowGraph : controlFlowGraphs) {
 				Pair<Map<Assem, Set<Temp>>, Map<Assem, Set<Temp>>> livenessSets = LivenessSetsBuilder.build(controlFlowGraph);
-				SimpleGraph<Temp> inferenceGraph = InferenceGraphBuilder.build(controlFlowGraph, livenessSets.fst, livenessSets.snd);
-				inferenceGraphs.add(inferenceGraph);
+				SimpleGraph<Temp> interferenceGraph = InterferenceGraphBuilder.build(controlFlowGraph, livenessSets.fst, livenessSets.snd);
+				interferenceGraphs.add(interferenceGraph);
 			}
 			
-			printVerbose("Successfully generated inference graphs");
+			String graphOutput = null;
+			if (printInterferenceGraphs) {
+				graphOutput = simpleGraphsToString(interferenceGraphs);
+			}
 			
-			return inferenceGraphs;
+			printVerbose("Successfully generated interference graphs", graphOutput);
+			
+			return interferenceGraphs;
 		}
 		catch (Exception e) {
 			// TODO: proper exception
-			throw new CompilerException("Failed to generate inference graphs", e);
+			throw new CompilerException("Failed to generate interference graphs", e);
 		}
+	}
+	
+	private <T> String simpleGraphsToString (List<SimpleGraph<T>> graphs) throws CompilerException {
+		
+		StringBuilder graphOutput = new StringBuilder();
+		
+		for (SimpleGraph<T> graph : graphs) {
+			String dotCode = graph.getDot();
+			
+			graphOutput.append(System.lineSeparator());
+			graphOutput.append(graph.getName() + System.lineSeparator());
+			graphOutput.append(System.lineSeparator());
+			
+			try {
+				ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "graph-easy --as boxart");
+				processBuilder.environment().put("PATH", "/usr/local/bin:" + processBuilder.environment().get("PATH"));
+				Process graphEasyCall = processBuilder.start();
+				OutputStream stdin = graphEasyCall.getOutputStream();
+				stdin.write(dotCode.getBytes());
+				stdin.close();
+	
+				graphEasyCall.waitFor();
+				
+				InputStream stdout = graphEasyCall.getInputStream();
+				BufferedReader bufferedStdout = new BufferedReader(new InputStreamReader(stdout));
+				String line;
+				while ((line = bufferedStdout.readLine()) != null) {
+					graphOutput.append(line + System.lineSeparator());
+				}
+				bufferedStdout.close();
+				stdout.close();
+				
+				if (graphEasyCall.exitValue() != 0) {
+				
+					StringBuilder errOutput = new StringBuilder();
+					InputStream stderr = graphEasyCall.getErrorStream();
+					BufferedReader bufferedStderr = new BufferedReader(new InputStreamReader(stderr));
+					while ((line = bufferedStderr.readLine()) != null) {
+						errOutput.append(line + System.lineSeparator());
+					}
+					bufferedStderr.close();
+					stderr.close();
+
+					throw new CompilerException("Failed to create print of control flow graph: " + errOutput.toString());
+				}
+			}
+			catch (IOException e) {
+				throw new CompilerException("Failed to transfer dot code to graph-easy", e);
+			}
+			catch (InterruptedException e) {
+				throw new CompilerException("Failed to invoke graph-easy", e);
+			}
+		}
+		
+		return graphOutput.toString();
 	}
 	
 	private void compileAssembly (String gcc, String assembly) throws CompilerException {
@@ -375,8 +393,10 @@ public class MiniJavaCompiler {
 	private void runExecutable() throws CompilerException {
 		
 		try {
-			Runtime runtime = Runtime.getRuntime();
-			Process outCall = runtime.exec(outputFile.toString());
+			ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "./" + outputFile);
+			processBuilder.directory(RUNTIME_DIRECTORY.toFile());
+			Process outCall = processBuilder.start();
+
 			outCall.waitFor();
 
 			String line;
@@ -411,6 +431,9 @@ public class MiniJavaCompiler {
 			if (outCall.exitValue() != 0) {
 				throw new CompilerException("Failed to compile assembly:" + System.lineSeparator() + errOutput.toString());
 			}
+			else {
+				System.out.println(output.toString());
+			}
 
 		}
 		catch (IOException e) {
@@ -424,13 +447,15 @@ public class MiniJavaCompiler {
 	public void compile(String gcc) throws CompilerException {
 		Prg program = parse();
 		Program symbolTable = inferTypes(program);
-		checkTypes(program, symbolTable);
+		if (!skipTypeCheck) {
+			checkTypes(program, symbolTable);
+		}
 		List<FragmentProc<TreeStm>> intermediate = generateIntermediate(program, symbolTable);
 		List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = canonicalize(intermediate); 
 		List<Fragment<List<Assem>>> assemFragments = generateAssembly(intermediateCanonicalized);
 		String assembly = generateAssemblyCode(assemFragments);
 		List<SimpleGraph<Assem>> controlFlowGraphs = generateControlFlowGraphs(assemFragments);
-		List<SimpleGraph<Temp>> inferenceGraphs = generateInferenceGraphs(controlFlowGraphs);
+		List<SimpleGraph<Temp>> inferenceGraphs = generateInterferenceGraphs(controlFlowGraphs);
 		
 		// TODO Allocate registers
 		

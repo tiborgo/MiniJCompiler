@@ -2,6 +2,7 @@ package minijava.backend;
 
 import java.util.List;
 
+import minijava.backend.i386.visitors.AssemVisitor;
 import minijava.intermediate.Label;
 import minijava.intermediate.Temp;
 import minijava.util.Function;
