@@ -23,6 +23,7 @@ import minijava.ast.rules.expressions.ExpNew;
 import minijava.ast.rules.expressions.ExpNewIntArray;
 import minijava.ast.rules.expressions.ExpThis;
 import minijava.ast.rules.expressions.ExpTrue;
+import minijava.ast.rules.expressions.ExpVisitor;
 import minijava.ast.rules.statements.Stm;
 import minijava.ast.rules.statements.StmArrayAssign;
 import minijava.ast.rules.statements.StmAssign;
@@ -175,7 +176,7 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 	}
 
 	public static class PrettyPrintVisitorExp implements
-			ExpThis.ExpVisitor<String, RuntimeException> {
+			ExpVisitor<String, RuntimeException> {
 
 		@Override
 		public String visit(ExpTrue x) {

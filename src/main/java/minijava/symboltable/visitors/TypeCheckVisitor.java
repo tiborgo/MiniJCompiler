@@ -19,6 +19,7 @@ import minijava.ast.rules.expressions.ExpNew;
 import minijava.ast.rules.expressions.ExpNewIntArray;
 import minijava.ast.rules.expressions.ExpThis;
 import minijava.ast.rules.expressions.ExpTrue;
+import minijava.ast.rules.expressions.ExpVisitor;
 import minijava.ast.rules.statements.Stm;
 import minijava.ast.rules.statements.StmArrayAssign;
 import minijava.ast.rules.statements.StmAssign;
@@ -109,7 +110,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 	} 
 	
 	public static class TypeCheckVisitorExpTyStm implements
-			ExpThis.ExpVisitor<Ty, RuntimeException>,
+			ExpVisitor<Ty, RuntimeException>,
 			TyVisitor<Boolean, RuntimeException>,
 			StmVisitor<Boolean, RuntimeException> {
 		
