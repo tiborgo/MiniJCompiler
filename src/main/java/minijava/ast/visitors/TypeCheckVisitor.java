@@ -372,10 +372,10 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 		@Override
 		public java.lang.Boolean visit(PrintlnInt s) throws RuntimeException {
 			if (s.arg.type instanceof Integer) {
-				errors.add("Argument in println-statement \"" + s.arg.accept(expressionPrettyPrinter)
-						+ "\" is not of type integer.");
 				return java.lang.Boolean.TRUE;
 			}
+			errors.add("Argument \"" + s.arg.accept(expressionPrettyPrinter)
+					+ "\" in println-statement is not of type integer.");
 			return java.lang.Boolean.FALSE;
 		}
 
@@ -383,10 +383,10 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 		public java.lang.Boolean visit(PrintChar s) throws RuntimeException {
 			// TODO: No type class for type char?
 			if (s.arg.type instanceof Integer) {
-				errors.add("Argument in print-statement \"" + s.arg.accept(expressionPrettyPrinter)
-						+ "\" is not of type character.");
 				return java.lang.Boolean.TRUE;
 			}
+			errors.add("Argument \"" + s.arg.accept(expressionPrettyPrinter)
+					+ "\" in print-statement is not of type character.");
 			return java.lang.Boolean.FALSE;
 		}
 
