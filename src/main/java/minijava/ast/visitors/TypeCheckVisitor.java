@@ -1,5 +1,9 @@
 package minijava.ast.visitors;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import minijava.ast.rules.Program;
 import minijava.ast.rules.ProgramVisitor;
 import minijava.ast.rules.declarations.DeclarationVisitor;
@@ -37,19 +41,28 @@ import minijava.ast.rules.types.TypeVisitor;
 import minijava.ast.rules.types.Void;
 
 public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, RuntimeException> {
+	private TypeCheckVisitorExpTyStm expTyStmVisitor;
 	
 	public TypeCheckVisitor() {
 	}
 	
 	@Override
 	public java.lang.Boolean visit(Program program) throws RuntimeException {
+		expTyStmVisitor = new TypeCheckVisitorExpTyStm(program);
+
 		boolean ok = true;
-		TypeCheckVisitorExpTyStm expTyStmVisitor = new TypeCheckVisitorExpTyStm(program);
 		ok = program.mainClass.accept(expTyStmVisitor) ? ok : false;
 		for (minijava.ast.rules.declarations.Class clazz : program.getClasses()) {
 			ok = clazz.accept(expTyStmVisitor) ? ok : false;
 		}
 		return ok;
+	}
+
+	public List<String> getErrors() {
+		if (expTyStmVisitor != null) {
+			return expTyStmVisitor.getErrors();
+		}
+		return Collections.emptyList();
 	}
 
 	public static class TypeCheckVisitorExpTyStm implements
@@ -59,11 +72,15 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 			DeclarationVisitor<java.lang.Boolean, RuntimeException> {
 		
 		private final Program symbolTable;
+		private final List<String> errors;
+		private final PrettyPrintVisitor.PrettyPrintVisitorExp expressionPrettyPrinter;
 		private minijava.ast.rules.declarations.Class classContext;
 		private Method methodContext;
-		
+
 		public TypeCheckVisitorExpTyStm(Program symbolTable) {
 			this.symbolTable = symbolTable;
+			errors = new ArrayList<>();
+			expressionPrettyPrinter = new PrettyPrintVisitor.PrettyPrintVisitorExp();
 		}
 
 		@Override
@@ -335,6 +352,8 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 		@Override
 		public java.lang.Boolean visit(If s) throws RuntimeException {
 			if (!(s.cond.type instanceof Boolean)) {
+				errors.add("Condition in if-statement \"" + s.cond.accept(expressionPrettyPrinter)
+						+ "\" is no boolean expression.");
 				return java.lang.Boolean.FALSE;
 			}
 			return s.bodyTrue.accept(this).booleanValue() && s.bodyFalse.accept(this).booleanValue();
@@ -343,6 +362,8 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 		@Override
 		public java.lang.Boolean visit(While s) throws RuntimeException {
 			if (!(s.cond.type instanceof Boolean)) {
+				errors.add("Condition in while-statement \"" + s.cond.accept(expressionPrettyPrinter)
+						+ "\" is no boolean expression.");
 				return java.lang.Boolean.FALSE;
 			}
 			return s.body.accept(this);
@@ -351,6 +372,8 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 		@Override
 		public java.lang.Boolean visit(PrintlnInt s) throws RuntimeException {
 			if (s.arg.type instanceof Integer) {
+				errors.add("Argument in println-statement \"" + s.arg.accept(expressionPrettyPrinter)
+						+ "\" is not of type integer.");
 				return java.lang.Boolean.TRUE;
 			}
 			return java.lang.Boolean.FALSE;
@@ -360,6 +383,8 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 		public java.lang.Boolean visit(PrintChar s) throws RuntimeException {
 			// TODO: No type class for type char?
 			if (s.arg.type instanceof Integer) {
+				errors.add("Argument in print-statement \"" + s.arg.accept(expressionPrettyPrinter)
+						+ "\" is not of type character.");
 				return java.lang.Boolean.TRUE;
 			}
 			return java.lang.Boolean.FALSE;
@@ -373,6 +398,8 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 			if (idType.equals(assignType)) {
 				return java.lang.Boolean.TRUE;
 			}
+			errors.add("Assignment to variable \"" + s.id.id + "\" of type \"" + idType
+					+ "\" has the invalid type \"" + assignType + "\".");
 			return java.lang.Boolean.FALSE;
 		}
 
@@ -380,16 +407,27 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 		public java.lang.Boolean visit(ArrayAssignment s) throws RuntimeException {
 			Type arrayType  = s.id.type;
 			if (!(arrayType instanceof Array)) {
+				errors.add("Type \"" + arrayType + "\" of expression \"" + s.id.accept(expressionPrettyPrinter)
+						+ "\" is no array type.");
 				return java.lang.Boolean.FALSE;
 			}
 			Type assignType = s.rhs.type;
 			Type indexType  = s.index.type;
 			
-			if (assignType.equals(((Array) arrayType).type) &&
-					indexType instanceof Integer) {
-				return java.lang.Boolean.TRUE;
+			if (!assignType.equals(((Array) arrayType).type)) {
+				errors.add("Assignment to array \"" + s.id.id + "\" of type \"" + arrayType
+						+ "\" has the invalid type \"" + assignType + "\".");
+				return java.lang.Boolean.FALSE;
 			}
-			return java.lang.Boolean.FALSE;
+			if (!(indexType instanceof Integer)) {
+				errors.add("Index of array \"" + s.id.id + "\" is not of type integer.");
+				return java.lang.Boolean.FALSE;
+			}
+			return java.lang.Boolean.TRUE;
+		}
+
+		public List<String> getErrors() {
+			return Collections.unmodifiableList(errors);
 		}
 	}
 }
