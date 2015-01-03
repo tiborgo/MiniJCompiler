@@ -1,10 +1,13 @@
-package minijava.ast.rules;
+package minijava.ast.rules.expressions;
 
 import minijava.ast.visitors.ExpVisitor;
 
-public class ExpFalse extends Exp {
+public class ExpNewIntArray extends Exp {
 
-  public ExpFalse() {
+  final public Exp size;
+
+  public ExpNewIntArray(Exp size) {
+    this.size = size;
   }
 
   @Override

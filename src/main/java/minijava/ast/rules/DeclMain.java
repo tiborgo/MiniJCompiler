@@ -1,5 +1,6 @@
 package minijava.ast.rules;
 
+import minijava.ast.rules.statements.Stm;
 import minijava.ast.visitors.DeclVisitor;
 
 public class DeclMain extends Decl {

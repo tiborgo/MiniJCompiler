@@ -1,14 +1,14 @@
-package minijava.ast.rules;
+package minijava.ast.rules.expressions;
 
 import minijava.ast.visitors.ExpVisitor;
 
 
-public class ExpArrayLength extends Exp {
+public class ExpIntConst extends Exp {
 
-  final public Exp array;
+  final public int value;
 
-  public ExpArrayLength(Exp body) {
-    this.array = body;
+  public ExpIntConst(int value) {
+    this.value = value;
   }
 
   @Override

@@ -1,14 +1,10 @@
-package minijava.ast.rules;
+package minijava.ast.rules.expressions;
 
 import minijava.ast.visitors.ExpVisitor;
 
+public class ExpTrue extends Exp {
 
-public class ExpIntConst extends Exp {
-
-  final public int value;
-
-  public ExpIntConst(int value) {
-    this.value = value;
+  public ExpTrue() {
   }
 
   @Override

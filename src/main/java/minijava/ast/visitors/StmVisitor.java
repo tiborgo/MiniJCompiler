@@ -1,12 +1,12 @@
 package minijava.ast.visitors;
 
-import minijava.ast.rules.StmArrayAssign;
-import minijava.ast.rules.StmAssign;
-import minijava.ast.rules.StmIf;
-import minijava.ast.rules.StmList;
-import minijava.ast.rules.StmPrintChar;
-import minijava.ast.rules.StmPrintlnInt;
-import minijava.ast.rules.StmWhile;
+import minijava.ast.rules.statements.StmArrayAssign;
+import minijava.ast.rules.statements.StmAssign;
+import minijava.ast.rules.statements.StmIf;
+import minijava.ast.rules.statements.StmList;
+import minijava.ast.rules.statements.StmPrintChar;
+import minijava.ast.rules.statements.StmPrintlnInt;
+import minijava.ast.rules.statements.StmWhile;
 
 public interface StmVisitor<A, T extends Throwable> {
 
