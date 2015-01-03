@@ -139,7 +139,7 @@ public class PrettyPrintVisitor implements ProgramVisitor<String, RuntimeExcepti
 					+ "public static void main (String[] "
 					+ d.mainMethod.methodName
 					+ ") {\n"
-					+ d.mainBody.accept(new PrettyPrintVisitorStm(indent
+					+ d.mainMethod.body.accept(new PrettyPrintVisitorStm(indent
 							+ indentStep + indentStep)) + indent + indentStep
 					+ "}\n" + indent + "}\n";
 		}
