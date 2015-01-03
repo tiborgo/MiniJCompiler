@@ -16,6 +16,7 @@ import java.util.Set;
 import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Program;
 import minijava.ast.visitors.PrettyPrintVisitor;
+import minijava.ast.visitors.TypeInferenceVisitor;
 import minijava.ast.visitors.baseblocks.BaseBlock;
 import minijava.ast.visitors.baseblocks.Generator;
 import minijava.ast.visitors.baseblocks.ToTreeStmConverter;
@@ -145,11 +146,12 @@ public class MiniJavaCompiler {
 	private Program inferTypes(Program program) throws CompilerException {
 		
 		try {
-			Program symbolTable = program;
+			TypeInferenceVisitor typeInferenceVisitor = new TypeInferenceVisitor();
+			program.accept(typeInferenceVisitor);
 			
 			printVerbose("Successfully built symbol table");
 			
-			return symbolTable;
+			return program;
 		}
 		catch (Exception e) {
 			// TODO: Proper exceptions

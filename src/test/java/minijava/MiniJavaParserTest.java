@@ -14,6 +14,7 @@ import static org.junit.Assert.fail;
 import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Program;
 import minijava.ast.visitors.TypeCheckVisitor;
+import minijava.ast.visitors.TypeInferenceVisitor;
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -87,6 +88,8 @@ public class MiniJavaParserTest {
 				ParseTree tree = parser.prog();
 				ASTVisitor astVisitor = new ASTVisitor();
 				Program program = (Program) astVisitor.visit(tree);
+				TypeInferenceVisitor typeInferenceVisitor = new TypeInferenceVisitor();
+				program.accept(typeInferenceVisitor);
 				
 				TypeCheckVisitor typeCheckVisitor = new TypeCheckVisitor();
 				if (program.accept(typeCheckVisitor)) {
