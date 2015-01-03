@@ -3,7 +3,7 @@ class Main {
     public static void main(String[] a){
     	//System.out.println((new Test()).run());
     	//System.out.println(new int[12]);
-    	//System.out.println(1);
+    	System.out.println(1);
     	/*if ((new Test()).run() < 1) {
     		System.out.println(1);
     	}
@@ -12,36 +12,37 @@ class Main {
     	}*/
     	//System.out.print((char)100);
     	//System.out.println((new Test3()).test());
-    	if (1 < 0) {
+    	/*if (1 < 0) {
     		System.out.print((char)new Test().test());
     	}
     	else {
     		System.out.print((char)new Test().test());
-    	}
+    	}*/
     }
 }
 
-class Test {
+/*class Test {
 	public int test() {
 		return 100;
 	}
-}
+}*/
 
-/*class Test3 {
+class Test3 {
 	public int test() {
 		int[] a;
 		a = new int[10];
-		if (5 < a[0]) {
+		/*if (5 < a[0]) {
 			a[9] = 5;
 		}
 		else {
 			a[9] = 3;
-		}
+		}*/
+		a[2] = 4;
 		return a[9];
 	}
 }
 
-class Test2 {
+/*class Test2 {
 	int a;
 	
 	public int run() {

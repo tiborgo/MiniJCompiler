@@ -1,5 +1,7 @@
-package minijava.backend;
+package minijava.backend.i386.visitors;
 
+import minijava.backend.Directive;
+import minijava.backend.Instruction;
 import minijava.backend.i386.AssemBinaryOp;
 import minijava.backend.i386.AssemInstr;
 import minijava.backend.i386.AssemJump;

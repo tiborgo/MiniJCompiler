@@ -2,12 +2,14 @@ package minijava.backend.i386;
 
 import java.util.Iterator;
 
-import minijava.backend.AssemVisitor;
 import minijava.backend.Directive;
 import minijava.backend.Instruction;
+import minijava.backend.i386.visitors.AssemVisitor;
+import minijava.backend.i386.visitors.OperandVisitor;
 
 public class I386PrintAssemblyVisitor implements
-		AssemVisitor<String, RuntimeException> {
+		AssemVisitor<String, RuntimeException>,
+		OperandVisitor<String, RuntimeException> {
 
 	@Override
 	public String visit(AssemBinaryOp assem) {
@@ -78,14 +80,17 @@ public class I386PrintAssemblyVisitor implements
 
 	//-----
 
+	@Override
 	public String visit(Operand.Imm op) {
 		return Integer.toString(op.imm);
 	}
 
+	@Override
 	public String visit(Operand.Reg op) {
 		return "%" + op.reg.toString();
 	}
 
+	@Override
 	public String visit(Operand.Mem op) {
 		// base + index * size + displacement
 		StringBuilder operation = new StringBuilder();
@@ -119,6 +124,7 @@ public class I386PrintAssemblyVisitor implements
 		return operation.toString();
 	}
 
+	@Override
 	public String visit(Operand.Label op) {
 		return op.label.toString();
 	}
