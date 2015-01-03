@@ -3,7 +3,6 @@ package minijava.symboltable.visitors;
 import minijava.symboltable.tree.Class;
 import minijava.symboltable.tree.Method;
 import minijava.symboltable.tree.Program;
-import minijava.symboltable.tree.Variable;
 
 
 public class MethodVisitor implements SymbolTableVisitor<Method, RuntimeException> {
@@ -36,11 +35,6 @@ public class MethodVisitor implements SymbolTableVisitor<Method, RuntimeExceptio
 
 	@Override
 	public Method visit(Method method) throws RuntimeException {
-		return null;
-	}
-
-	@Override
-	public Method visit(Variable variable) throws RuntimeException {
 		return null;
 	}
 }

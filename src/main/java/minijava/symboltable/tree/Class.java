@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import minijava.ast.rules.declarations.Variable;
+
 public class Class implements Node {
 	public final String name;
 	public final Map<String, Variable> fields;
