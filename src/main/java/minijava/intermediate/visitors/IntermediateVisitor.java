@@ -29,6 +29,7 @@ import minijava.ast.rules.expressions.ExpNew;
 import minijava.ast.rules.expressions.ExpNewIntArray;
 import minijava.ast.rules.expressions.ExpThis;
 import minijava.ast.rules.expressions.ExpTrue;
+import minijava.ast.rules.expressions.ExpVisitor;
 import minijava.ast.rules.statements.Stm;
 import minijava.ast.rules.statements.StmArrayAssign;
 import minijava.ast.rules.statements.StmAssign;
@@ -191,7 +192,7 @@ public class IntermediateVisitor implements
 	}
 
 	static public class IntermediateVisitorExpStm implements
-			ExpThis.ExpVisitor<TreeExp, RuntimeException>,
+			ExpVisitor<TreeExp, RuntimeException>,
 			StmVisitor<TreeStm, RuntimeException> {
 
 		private final Program symbolTable;
