@@ -170,7 +170,7 @@ public class TypeInferenceVisitor implements ProgramVisitor<Void, RuntimeExcepti
 		public Void visit(ArrayGet e) throws RuntimeException {
 			e.index.accept(this);
 			e.array.accept(this);
-			e.type = e.array.type;
+			e.type = ((Array) e.array.type).type;
 			return null;
 		}
 
