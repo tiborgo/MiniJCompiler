@@ -32,21 +32,32 @@ public class InterferenceGraphBuilder {
 			if (moveInstruction == null) {
 				for (Temp t : n.info.def()) {
 					
-					SimpleGraph<Temp>.Node tNode = nodes.get(t);
-					
 					for (Temp u : out.get(n.info)) {
-						SimpleGraph<Temp>.Node uNode = nodes.get(u);
-						interferenceGraph.addEdge(tNode, uNode);
+						if (!u.equals(t)) {
+							SimpleGraph<Temp>.Node tNode = nodes.get(t);
+							SimpleGraph<Temp>.Node uNode = nodes.get(u);
+							if (tNode == null) {
+								tNode = interferenceGraph.new Node(t);
+								nodes.put(t, tNode);
+							}
+							if (uNode == null) {
+								throw new RuntimeException("Do not know temp '" + u + "'");
+							}
+							interferenceGraph.addEdge(tNode, uNode);
+						}
 					}
 				}
 			}
 			else {
-				SimpleGraph<Temp>.Node tNode = nodes.get(moveInstruction.fst);
 				
 				for (Temp u : out.get(n.info)) {
 					
-					if (!u.equals(moveInstruction.snd)) {
+					if (!u.equals(moveInstruction.snd) && !u.equals(moveInstruction.fst)) {
+						SimpleGraph<Temp>.Node tNode = nodes.get(moveInstruction.fst);
 						SimpleGraph<Temp>.Node uNode = nodes.get(u);
+						if (uNode == null) {
+							throw new RuntimeException("Do not know temp '" + u + "'");
+						}
 						interferenceGraph.addEdge(tNode, uNode);
 					}
 				}

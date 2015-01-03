@@ -43,6 +43,28 @@ public final class AssemBinaryOp extends DefaultInstruction {
 	}
 
 	@Override
+	public List<Temp> use() {
+		switch(kind) {
+		case MOV:
+		case ADD:
+		case SUB:
+		case SHL:
+		case SHR:
+		case SAL:
+		case SAR:
+		case AND:
+		case OR:
+		case XOR:
+		case LEA:
+			return src.getTemps();
+		case CMP:
+		case TEST:
+		default:
+			return Collections.<Temp>emptyList();
+		}
+	}
+	
+	@Override
 	public Pair<Temp, Temp> isMoveBetweenTemps() {
 		if (dst instanceof Operand.Reg && src instanceof Operand.Reg) {
 			return new Pair(((Operand.Reg) dst).reg, ((Operand.Reg) src).reg);
@@ -52,7 +74,7 @@ public final class AssemBinaryOp extends DefaultInstruction {
 
 	@Override
 	public String toString() {
-		return kind.toString();
+		return this.accept(new I386PrintAssemblyVisitor());
 	}
 
 	@Override

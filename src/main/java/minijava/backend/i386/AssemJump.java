@@ -84,4 +84,9 @@ public final class AssemJump extends DefaultInstruction {
 			throws T {
 		return visitor.visit(this);
 	}
+	
+	@Override
+	public String toString() {
+		return this.accept(new I386PrintAssemblyVisitor());
+	}
 }
