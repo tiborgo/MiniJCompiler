@@ -22,7 +22,7 @@ import minijava.MiniJavaLexer;
 import minijava.MiniJavaParser;
 import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Prg;
-import minijava.ast.visitors.SymbolTableVisitor;
+import minijava.ast.visitors.CreateSymbolTableVisitor;
 import minijava.backend.dummymachine.DummyMachineSpecifics;
 import minijava.backend.dummymachine.IntermediateToCmm;
 import minijava.intermediate.FragmentProc;
@@ -63,7 +63,7 @@ public class IntermediateVisitorTest {
 				ASTVisitor astVisitor = new ASTVisitor();
 				Prg ast = (Prg) astVisitor.visit(parseTree);
 
-				Program symbolTable = ast.accept(new SymbolTableVisitor());
+				Program symbolTable = ast.accept(new CreateSymbolTableVisitor());
 				visitor = new IntermediateVisitor(new DummyMachineSpecifics(), symbolTable);
 				List<FragmentProc<TreeStm>> fragmentList = ast.accept(visitor);
 				// TODO: Remove canonicalization step from test

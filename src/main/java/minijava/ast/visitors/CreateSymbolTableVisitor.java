@@ -20,14 +20,14 @@ import minijava.symboltable.tree.Node;
 import minijava.symboltable.tree.Program;
 import minijava.symboltable.tree.Variable;
 
-public class SymbolTableVisitor implements
+public class CreateSymbolTableVisitor implements
 		PrgVisitor<Program, RuntimeException>,
 		Parameter.DeclVisitor<Node, RuntimeException>,
 		ParameterVisitor<Variable, RuntimeException> {
 	
 	private LinkedList<String> types = new LinkedList<>();
 	
-	public SymbolTableVisitor() {
+	public CreateSymbolTableVisitor() {
 		types.add("int");
 		types.add("int[]");
 		types.add("boolean");

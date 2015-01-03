@@ -22,16 +22,16 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Before;
 import org.junit.Test;
 
-public class SymbolTableVisitorTest {
+public class CreateSymbolTableVisitorTest {
 	private static final Path EXAMPLE_PROGRAM_PATH_BASE = Paths.get("src/test/resources/minijava-examples");
 	private static final Path EXAMPLE_PROGRAM_PATH_WORKING = EXAMPLE_PROGRAM_PATH_BASE.resolve("working");
 	private static final Path EXAMPLE_PROGRAM_PATH_FAILING = EXAMPLE_PROGRAM_PATH_BASE.resolve("typeErrors");
 
-	private static SymbolTableVisitor visitor;
+	private static CreateSymbolTableVisitor visitor;
 
 	@Before
 	public void setUp() throws Exception {
-		visitor = new SymbolTableVisitor();
+		visitor = new CreateSymbolTableVisitor();
 	}
 
 	@Test
