@@ -2,14 +2,15 @@ package minijava.ast.rules;
 
 import java.util.List;
 
-import minijava.ast.visitors.PrgVisitor;
+import minijava.ast.rules.declarations.Class;
+import minijava.ast.rules.declarations.Main;
 
 public class Prg {
 
-  final public DeclMain mainClass;
-  final public List<DeclClass> classes;
+  final public Main mainClass;
+  final public List<Class> classes;
 
-  public Prg(DeclMain mainClass, List<DeclClass> classes) {
+  public Prg(Main mainClass, List<Class> classes) {
     this.mainClass = mainClass;
     this.classes = classes;
   }

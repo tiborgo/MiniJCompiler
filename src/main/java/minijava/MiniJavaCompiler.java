@@ -16,10 +16,10 @@ import java.util.Set;
 
 import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Prg;
-import minijava.ast.visitors.IntermediateVisitor;
+import minijava.intermediate.visitors.IntermediateVisitor;
 import minijava.ast.visitors.PrettyPrintVisitor;
-import minijava.ast.visitors.SymbolTableVisitor;
-import minijava.ast.visitors.TypeCheckVisitor;
+import minijava.symboltable.visitors.CreateSymbolTableVisitor;
+import minijava.symboltable.visitors.TypeCheckVisitor;
 import minijava.ast.visitors.baseblocks.BaseBlock;
 import minijava.ast.visitors.baseblocks.Generator;
 import minijava.ast.visitors.baseblocks.ToTreeStmConverter;
@@ -153,8 +153,8 @@ public class MiniJavaCompiler {
 	private Program inferTypes(Prg program) throws CompilerException {
 		
 		try {
-			SymbolTableVisitor symbolTableVisitor = new SymbolTableVisitor();
-			Program symbolTable = program.accept(symbolTableVisitor);
+			CreateSymbolTableVisitor createSymbolTableVisitor = new CreateSymbolTableVisitor();
+			Program symbolTable = program.accept(createSymbolTableVisitor);
 			
 			printVerbose("Successfully built symbol table");
 			

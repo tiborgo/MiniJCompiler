@@ -7,7 +7,6 @@ import java.util.List;
 import minijava.backend.Assem;
 import minijava.backend.DefaultInstruction;
 import minijava.backend.i386.visitors.AssemVisitor;
-import minijava.intermediate.Label;
 import minijava.intermediate.Temp;
 import minijava.util.Function;
 import minijava.util.Pair;
@@ -69,8 +68,7 @@ public final class AssemInstr extends DefaultInstruction {
 	}
 
 	@Override
-	public <A, T extends Throwable> A accept(AssemVisitor<A, T> visitor)
-			throws T {
+	public <A, T extends Throwable> A accept(AssemVisitor<A, T> visitor) throws T {
 		return visitor.visit(this);
 	}
 	

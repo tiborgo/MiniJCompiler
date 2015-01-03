@@ -4,18 +4,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import minijava.ast.rules.Ty;
+import minijava.ast.rules.types.Type;
 
 public class Method implements Node {
 	
 	public final String name;
-	public final Ty returnType;
+	public final Type returnType;
 	public final List<Variable> parametersList;
 	private final Map<String, Variable> parametersMap;
 	private final Map<String, Variable> localVariables;
 
 	public Method(String name,
-			Ty returnType,
+			Type returnType,
 			List<Variable> parameters,
 			List<Variable> localVariables) {
 		
