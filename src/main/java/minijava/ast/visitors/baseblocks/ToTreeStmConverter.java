@@ -80,7 +80,7 @@ public class ToTreeStmConverter {
 			if (labels.snd == null) {
 				
 				if ((remainingBaseBlocks.size() > 1 && labels.fst.equals(remainingBaseBlocks.get(1).label)) ||
-						(remainingBaseBlocks.size() == 0 && labels.fst.equals(endLabel))) {
+						(remainingBaseBlocks.size() == 1 && labels.fst.equals(endLabel))) {
 					
 					endIndex--;
 				}

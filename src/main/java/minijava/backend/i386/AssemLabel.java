@@ -18,7 +18,7 @@ public final class AssemLabel extends Directive {
 
 	@Override
 	public String toString() {
-		return label + ":\n";
+		return this.accept(new I386PrintAssemblyVisitor());
 	}
 
 	@Override

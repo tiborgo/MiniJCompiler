@@ -30,6 +30,9 @@ import minijava.backend.i386.I386MachineSpecifics;
 import minijava.backend.livenessanalysis.ControlFlowGraphBuilder;
 import minijava.backend.livenessanalysis.InterferenceGraphBuilder;
 import minijava.backend.livenessanalysis.LivenessSetsBuilder;
+import minijava.backend.livenessanalysis.ReverseOrderBuilder;
+import minijava.backend.registerallocation.Allocator;
+import minijava.backend.registerallocation.ColoredNode;
 import minijava.intermediate.Fragment;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.Label;
@@ -82,26 +85,29 @@ public class MiniJavaCompiler {
 	@Option(name = "--output", usage = "Output file")
 	private String outputFile = "CC.out";
 	
-	@Option(name = "--verbose", usage = "Print additional information")
+	@Option(name = "--verbose", aliases = {"-v"}, usage = "Print additional information")
 	private boolean verbose;
 	
 	@Option(name = "--print-source-code", usage = "Pretty print the input source code", depends = "--verbose")
 	private boolean printSourceCode;
 	
-	@Option(name = "--print-assembly", usage = "Prints the assembly", depends = "--verbose")
+	@Option(name = "--print-assembly", aliases = {"-a"}, usage = "Prints the assembly", depends = "--verbose")
 	private boolean printAssembly;
 	
-	@Option(name = "--print-control-flow-graphs", usage = "Prints the control flow graph", depends = "--verbose")
+	@Option(name = "--print-control-flow-graphs", aliases = {"-cfg"}, usage = "Prints the control flow graph", depends = "--verbose")
 	private boolean printControlFlowGraphs;
 	
-	@Option(name = "--print-interference-graphs", usage = "Prints the interference graphs", depends = "--verbose")
+	@Option(name = "--print-interference-graphs", aliases = {"-ig"}, usage = "Prints the interference graphs", depends = "--verbose")
 	private boolean printInterferenceGraphs;
 	
 	@Option(name = "--run-executable", usage = "Runs the compiled executable")
 	private boolean runExecutable;
 	
-	@Option(name = "--skip-type-check", usage = "Skips the type check")
+	@Option(name = "--skip-type-check", aliases = {"-st"}, usage = "Skips the type check")
 	private boolean skipTypeCheck;
+	
+	@Option(name = "--print-pre-colored-graphs", aliases = {"-pg"},  depends = "--verbose")
+	private boolean printPreColoredGraphs;
 	
 	private void printDelimiter() {
 		System.out.println("-------------------------");
@@ -294,6 +300,29 @@ public class MiniJavaCompiler {
 		}
 	}
 	
+	private void allocateRegisters(List<SimpleGraph<Temp>> interferenceGraphs) throws CompilerException {
+		
+		try {
+			List<SimpleGraph<ColoredNode>> colroedInterferenceGraphs = new LinkedList<>();
+			for (SimpleGraph<Temp> interferenceGraph : interferenceGraphs) {
+				colroedInterferenceGraphs.add(Allocator.allocate(interferenceGraph, machineSpecifics));
+			}
+			
+			String graphOutput = null;
+			if (printPreColoredGraphs) {
+				graphOutput = simpleGraphsToString(colroedInterferenceGraphs);
+			}
+			
+			printVerbose("Successfully generated interference graphs", graphOutput);
+
+		}
+		catch (Exception e) {
+			// TODO: proper exception
+			throw new CompilerException("Failed to generate interference graphs", e);
+		}
+		
+	}
+	
 	private <T> String simpleGraphsToString (List<SimpleGraph<T>> graphs) throws CompilerException {
 		
 		StringBuilder graphOutput = new StringBuilder();
@@ -457,6 +486,8 @@ public class MiniJavaCompiler {
 		List<SimpleGraph<Assem>> controlFlowGraphs = generateControlFlowGraphs(assemFragments);
 		List<SimpleGraph<Temp>> inferenceGraphs = generateInterferenceGraphs(controlFlowGraphs);
 		
+		allocateRegisters(inferenceGraphs);
+		
 		// TODO Allocate registers
 		
 		compileAssembly(gcc, assembly);
@@ -464,6 +495,8 @@ public class MiniJavaCompiler {
 			runExecutable();
 		}
 	}
+
+	
 
 	public static void main (String[] args) {
 

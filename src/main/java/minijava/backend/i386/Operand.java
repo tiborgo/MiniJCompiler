@@ -1,5 +1,10 @@
 package minijava.backend.i386;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
 import minijava.backend.i386.visitors.OperandVisitor;
 import minijava.intermediate.Temp;
 import minijava.util.Function;
@@ -7,7 +12,9 @@ import minijava.util.Function;
 public abstract class Operand {
 	
 	public abstract <A, T extends Throwable> A accept(OperandVisitor<A, T> visitor) throws T;
-
+	public abstract List<Temp> getTemps();
+	public abstract Operand rename(Function<Temp, Temp> sigma);
+	
 	public final static class Imm extends Operand {
 
 		public final int imm;
@@ -25,6 +32,11 @@ public abstract class Operand {
 		@Override
 		public <A, T extends Throwable> A accept(OperandVisitor<A, T> visitor) throws T {
 			return visitor.visit(this);
+		}
+
+		@Override
+		public List<Temp> getTemps() {
+			return Collections.emptyList();
 		}
 	}
 
@@ -45,6 +57,11 @@ public abstract class Operand {
 		@Override
 		public <A, T extends Throwable> A accept(OperandVisitor<A, T> visitor) throws T {
 			return visitor.visit(this);
+		}
+
+		@Override
+		public List<Temp> getTemps() {
+			return Arrays.asList(reg);
 		}
 	}
 
@@ -77,9 +94,15 @@ public abstract class Operand {
 		public <A, T extends Throwable> A accept(OperandVisitor<A, T> visitor) throws T {
 			return visitor.visit(this);
 		}
-	}
 
-	public abstract Operand rename(Function<Temp, Temp> sigma);
+		@Override
+		public List<Temp> getTemps() {
+			List<Temp> temps = new LinkedList<>();
+			if (base != null) temps.add(base);
+			if (index != null) temps.add(index);
+			return temps;
+		}
+	}
 
 	public static class Label extends Operand {
 		public final minijava.intermediate.Label label;
@@ -96,6 +119,11 @@ public abstract class Operand {
 		@Override
 		public <A, T extends Throwable> A accept(OperandVisitor<A, T> visitor) throws T {
 			return visitor.visit(this);
+		}
+
+		@Override
+		public List<Temp> getTemps() {
+			return Collections.emptyList();
 		}
 	}
 }

@@ -1,16 +1,18 @@
 package minijava.backend.i386;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import minijava.backend.Assem;
+import minijava.backend.DefaultInstruction;
 import minijava.backend.i386.visitors.AssemVisitor;
 import minijava.intermediate.Label;
 import minijava.intermediate.Temp;
 import minijava.util.Function;
 import minijava.util.Pair;
 
-public final class AssemInstr extends I386Assem {
+public final class AssemInstr extends DefaultInstruction {
 
 	public static enum Kind {
 
@@ -23,17 +25,19 @@ public final class AssemInstr extends I386Assem {
 		this.kind = kind;
 	}
 
+	@Override
 	public List<Temp> use() {
-		return Collections.emptyList();
-	}
-
-	public List<Temp> def() {
-		/*
-		 * Instructions like RET or LEAVE change esp and ebp.
-		 * Those registers do not need to be preserved, because they are saved
-		 * and restored by the function prologue and epilogue.
-		 */
-		return Collections.emptyList();
+		switch(kind) {
+		case LEAVE:
+			return Arrays.asList(I386MachineSpecifics.EBP.reg, I386MachineSpecifics.ESP.reg);
+		case RET:
+			// callee-save registers: ebx, esi, edi, ebp (ebp already restored by LEAVE)
+			// eax is the return value
+			return Arrays.asList(I386MachineSpecifics.EBX.reg, I386MachineSpecifics.ESI.reg, I386MachineSpecifics.EDI.reg, I386MachineSpecifics.EAX.reg);
+		case NOP:
+		default:
+			return Collections.emptyList();
+		}
 	}
 
 	public List<Label> jumps() {
@@ -47,18 +51,31 @@ public final class AssemInstr extends I386Assem {
 	public Pair<Temp, Temp> isMoveBetweenTemps() {
 		return (kind == Kind.LEAVE) ? new Pair<>(I386MachineSpecifics.EBP.reg, I386MachineSpecifics.ESP.reg) : null;
 	}
-
-	public Label isLabel() {
-		return null;
-	}
 	
 	public Assem rename(Function<Temp, Temp> sigma) {
 		throw new UnsupportedOperationException("Not supported yet.");
+	}
+	
+	@Override
+	public List<Temp> def() {
+		switch(kind) {
+		case LEAVE:
+			return Arrays.asList(I386MachineSpecifics.EBP.reg, I386MachineSpecifics.ESP.reg);
+		case RET:
+		case NOP:
+		default:
+			return Collections.emptyList();
+		}
 	}
 
 	@Override
 	public <A, T extends Throwable> A accept(AssemVisitor<A, T> visitor)
 			throws T {
 		return visitor.visit(this);
+	}
+	
+	@Override
+	public String toString() {
+		return this.accept(new I386PrintAssemblyVisitor());
 	}
 }

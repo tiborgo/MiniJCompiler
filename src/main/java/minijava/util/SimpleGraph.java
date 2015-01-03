@@ -62,6 +62,10 @@ public class SimpleGraph<NodeInfo> {
 		public String toString() {
 			return "Node: " + info.toString();
 		}
+		
+		public SimpleGraph<NodeInfo> getGraph() {
+			return SimpleGraph.this;
+		}
 	}
 
 	public SimpleGraph(String name) {
