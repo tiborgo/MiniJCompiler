@@ -40,7 +40,7 @@ import minijava.ast.rules.expressions.NewIntArray;
 import minijava.ast.rules.expressions.This;
 import minijava.ast.rules.expressions.True;
 import minijava.ast.rules.Parameter;
-import minijava.ast.rules.Prg;
+import minijava.ast.rules.Program;
 import minijava.ast.rules.statements.Statement;
 import minijava.ast.rules.statements.ArrayAssignment;
 import minijava.ast.rules.statements.Assignment;
@@ -69,7 +69,7 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 			classes.add((minijava.ast.rules.declarations.Class) visit(classDeclCtx));
 		}
 
-		return new Prg(mainClass, classes);
+		return new Program(mainClass, classes);
 	}
 
 	@Override

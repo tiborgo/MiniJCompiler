@@ -14,7 +14,7 @@ import static org.junit.Assert.assertTrue;
 import minijava.MiniJavaLexer;
 import minijava.MiniJavaParser;
 import minijava.antlr.visitors.ASTVisitor;
-import minijava.ast.rules.Prg;
+import minijava.ast.rules.Program;
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -39,7 +39,7 @@ public class TypeCheckVisitorTest {
 				MiniJavaParser parser = new MiniJavaParser(tokens);
 				ParseTree parseTree = parser.prog();
 				ASTVisitor astVisitor = new ASTVisitor();
-				Prg ast = (Prg) astVisitor.visit(parseTree);
+				Program ast = (Program) astVisitor.visit(parseTree);
 				TypeCheckVisitor visitor = new TypeCheckVisitor(ast);
 				boolean typesCorrect = ast.accept(visitor);
 				assertTrue(typesCorrect);

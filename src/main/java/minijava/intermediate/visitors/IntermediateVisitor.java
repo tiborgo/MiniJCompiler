@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 import minijava.ast.rules.Parameter;
-import minijava.ast.rules.Prg;
-import minijava.ast.rules.PrgVisitor;
+import minijava.ast.rules.Program;
+import minijava.ast.rules.ProgramVisitor;
 import minijava.ast.rules.declarations.DeclarationVisitor;
 import minijava.ast.rules.declarations.Main;
 import minijava.ast.rules.declarations.Method;
@@ -66,7 +66,7 @@ import minijava.intermediate.tree.TreeStmSEQ;
 import minijava.symboltable.visitors.TypeCheckVisitor;
 
 public class IntermediateVisitor implements
-		PrgVisitor<List<FragmentProc<TreeStm>>, RuntimeException>,
+		ProgramVisitor<List<FragmentProc<TreeStm>>, RuntimeException>,
 		DeclarationVisitor<List<FragmentProc<TreeStm>>, RuntimeException> {
 	
 	private minijava.ast.rules.declarations.Class classContext;
@@ -74,9 +74,9 @@ public class IntermediateVisitor implements
 	private final MachineSpecifics  machineSpecifics;
 	private final Map<String, TreeExp> classTemps;
 	private Map<String, java.lang.Integer> memoryFootprint;
-	private final Prg symbolTable;
+	private final Program symbolTable;
 
-	public IntermediateVisitor(MachineSpecifics machineSpecifics, Prg symbolTable) {
+	public IntermediateVisitor(MachineSpecifics machineSpecifics, Program symbolTable) {
 		this.machineSpecifics = machineSpecifics;
 		classTemps = new HashMap<>();
 		this.symbolTable = symbolTable;
@@ -84,7 +84,7 @@ public class IntermediateVisitor implements
 	}
 
 	@Override
-	public List<FragmentProc<TreeStm>> visit(Prg p) throws RuntimeException {
+	public List<FragmentProc<TreeStm>> visit(Program p) throws RuntimeException {
 
 		for(minijava.ast.rules.declarations.Class clazz : p.getClasses()) {
 			memoryFootprint.put(clazz.className, clazz.fields.size() * machineSpecifics.getWordSize() + 4);
@@ -191,7 +191,7 @@ public class IntermediateVisitor implements
 			ExpressionVisitor<TreeExp, RuntimeException>,
 			StatementVisitor<TreeStm, RuntimeException> {
 
-		private final Prg symbolTable;
+		private final Program symbolTable;
 		private final minijava.ast.rules.declarations.Class classContext;
 		private final Method methodContext;
 		private final Map<String, java.lang.Integer> memoryFootprint;
@@ -203,7 +203,7 @@ public class IntermediateVisitor implements
 				minijava.ast.rules.declarations.Class classContext,
 				Method methodContext,
 				Map<String, java.lang.Integer> memoryFootprint,
-				Prg symbolTable) {
+				Program symbolTable) {
 			this.temps = temps;
 			this.machineSpecifics = machineSpecifics;
 			this.classContext = classContext;

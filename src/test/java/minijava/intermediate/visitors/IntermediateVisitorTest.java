@@ -21,7 +21,7 @@ import static org.junit.Assert.fail;
 import minijava.MiniJavaLexer;
 import minijava.MiniJavaParser;
 import minijava.antlr.visitors.ASTVisitor;
-import minijava.ast.rules.Prg;
+import minijava.ast.rules.Program;
 import minijava.backend.dummymachine.DummyMachineSpecifics;
 import minijava.backend.dummymachine.IntermediateToCmm;
 import minijava.intermediate.FragmentProc;
@@ -59,7 +59,7 @@ public class IntermediateVisitorTest {
 				MiniJavaParser parser = new MiniJavaParser(tokens);
 				ParseTree parseTree = parser.prog();
 				ASTVisitor astVisitor = new ASTVisitor();
-				Prg ast = (Prg) astVisitor.visit(parseTree);
+				Program ast = (Program) astVisitor.visit(parseTree);
 
 				visitor = new IntermediateVisitor(new DummyMachineSpecifics(), ast);
 				List<FragmentProc<TreeStm>> fragmentList = ast.accept(visitor);
