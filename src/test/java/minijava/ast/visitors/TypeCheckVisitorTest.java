@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import minijava.MiniJavaLexer;
@@ -25,14 +26,14 @@ import org.junit.Test;
 public class TypeCheckVisitorTest {
 	private static final Path EXAMPLE_PROGRAM_PATH_BASE = Paths.get("src/test/resources/minijava-examples");
 	private static final Path EXAMPLE_PROGRAM_PATH_WORKING = EXAMPLE_PROGRAM_PATH_BASE.resolve("working");
-	private static final Path EXAMPLE_PROGRAM_PATH_FAILING = EXAMPLE_PROGRAM_PATH_BASE.resolve("parseErrors");
+	private static final Path EXAMPLE_PROGRAM_PATH_FAILING = EXAMPLE_PROGRAM_PATH_BASE.resolve("typeErrors");
 
 	@Test
 	public void testVisitWorkingExamples() throws Exception {
 		FileVisitor<Path> workingFilesVisitior = new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				System.out.println("Testing creation of symbol table for file \""+file.toString()+"\"");
+				System.out.println("Testing type checker with file \""+file.toString()+"\"");
 				ANTLRFileStream reader = new ANTLRFileStream(file.toString());
 				MiniJavaLexer lexer = new MiniJavaLexer((CharStream) reader);
 				TokenStream tokens = new CommonTokenStream(lexer);
@@ -47,5 +48,27 @@ public class TypeCheckVisitorTest {
 			}
 		};
 		Files.walkFileTree(EXAMPLE_PROGRAM_PATH_WORKING, workingFilesVisitior);
+	}
+
+	@Test
+	public void testVisitTypeErrorExamples() throws Exception {
+		FileVisitor<Path> failingFilesVisitior = new SimpleFileVisitor<Path>() {
+			@Override
+			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+				System.out.println("Testing type checker with file \""+file.toString()+"\"");
+				ANTLRFileStream reader = new ANTLRFileStream(file.toString());
+				MiniJavaLexer lexer = new MiniJavaLexer((CharStream) reader);
+				TokenStream tokens = new CommonTokenStream(lexer);
+				MiniJavaParser parser = new MiniJavaParser(tokens);
+				ParseTree parseTree = parser.prog();
+				ASTVisitor astVisitor = new ASTVisitor();
+				Program ast = (Program) astVisitor.visit(parseTree);
+				TypeCheckVisitor visitor = new TypeCheckVisitor();
+				boolean typesCorrect = ast.accept(visitor);
+				assertFalse(typesCorrect);
+				return super.visitFile(file, attrs);
+			}
+		};
+		Files.walkFileTree(EXAMPLE_PROGRAM_PATH_FAILING, failingFilesVisitior);
 	}
 }
