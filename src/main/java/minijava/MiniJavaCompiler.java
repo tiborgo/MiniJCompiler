@@ -170,10 +170,10 @@ public class MiniJavaCompiler {
 		}
 	}
 	
-	private List<FragmentProc<TreeStm>> generateIntermediate(Program program, Program symbolTable) throws CompilerException {
+	private List<FragmentProc<TreeStm>> generateIntermediate(Program program) throws CompilerException {
 		
 		try {
-			IntermediateVisitor intermediateVisitor = new IntermediateVisitor(machineSpecifics, symbolTable);
+			IntermediateVisitor intermediateVisitor = new IntermediateVisitor(machineSpecifics, program);
 			List<FragmentProc<TreeStm>> procFragements = program.accept(intermediateVisitor);
 			
 			printVerbose("Successfully generated intermediate language");
@@ -447,7 +447,7 @@ public class MiniJavaCompiler {
 		if (!skipTypeCheck) {
 			checkTypes(program);
 		}
-		List<FragmentProc<TreeStm>> intermediate = generateIntermediate(program, symbolTable);
+		List<FragmentProc<TreeStm>> intermediate = generateIntermediate(program);
 		List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = canonicalize(intermediate); 
 		List<Fragment<List<Assem>>> assemFragments = generateAssembly(intermediateCanonicalized);
 		String assembly = generateAssemblyCode(assemFragments);
