@@ -1,10 +1,6 @@
 package minijava.symboltable.visitors;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
-import java.util.List;
 
 import minijava.ast.rules.Parameter;
 import minijava.ast.rules.ParameterVisitor;
@@ -15,8 +11,6 @@ import minijava.ast.rules.declarations.DeclarationVisitor;
 import minijava.ast.rules.declarations.Main;
 import minijava.ast.rules.declarations.Method;
 import minijava.ast.rules.declarations.Variable;
-import minijava.ast.rules.types.Array;
-import minijava.ast.rules.types.Integer;
 import minijava.symboltable.tree.Node;
 import minijava.symboltable.tree.Program;
 
@@ -36,49 +30,27 @@ public class CreateSymbolTableVisitor implements
 	@Override
 	public Program visit(Prg p) throws RuntimeException {
 		
-		LinkedList<minijava.symboltable.tree.Class> classes = new LinkedList<>();
-		
-		minijava.symboltable.tree.Class mainClass = visit(p.mainClass);
-		classes.add(mainClass);
-		types.add(mainClass.name);
-		
-		for (Class clazzDecl : p.getClasses()) {
-			minijava.symboltable.tree.Class clazz = visit(clazzDecl);
-			classes.add(clazz);
-			types.add(clazz.name);
+		LinkedList<Class> classes = new LinkedList<>(p.getClasses());
+
+		// TODO: Add main class
+
+		for (Class clazz : p.getClasses()) {
+			types.add(clazz.className);
 		}
 
 		return new Program(classes);
 	}
 
 	@Override
-	public minijava.symboltable.tree.Class visit(Class c) throws RuntimeException {
-
-		List<Variable> fields = new ArrayList<>(c.fields);
-
-		List<Method> methods = new ArrayList<>(c.methods);
-
-		if (types.contains(c.className)) {
-			System.err.println("Type '" + c.className + "' does already exist!");
-		}
-		
-		return new minijava.symboltable.tree.Class(c.className, fields, methods);
+	public Node visit(Class c) throws RuntimeException {
+		// TODO: obsolete
+		return null;
 	}
 
 	@Override
-	public minijava.symboltable.tree.Class visit(Main d) throws RuntimeException {
-		return new minijava.symboltable.tree.Class(
-			"",
-			Collections.<Variable>emptyList(),
-			Arrays.asList(new Method(
-				new Integer(),
-				"main",
-				Arrays.asList(new Parameter(d.mainArg, new Array(new Integer()))),
-				Collections.<Variable>emptyList(),
-				d.mainBody,
-				null
-			))
-		);
+	public Node visit(Main d) throws RuntimeException {
+		// TODO: obsolete
+		return null;
 	}
 
 	@Override

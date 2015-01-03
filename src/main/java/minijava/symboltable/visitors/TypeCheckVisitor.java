@@ -63,7 +63,7 @@ public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeEx
 			DeclarationVisitor<java.lang.Boolean, RuntimeException> {
 		
 		private final Program symbolTable;
-		private minijava.symboltable.tree.Class classContext;
+		private minijava.ast.rules.declarations.Class classContext;
 		private Method methodContext;
 		
 		public TypeCheckVisitorExpTyStm(Program symbolTable) {
@@ -71,7 +71,7 @@ public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeEx
 		}
 
 		// TODO: Remove constructor
-		public TypeCheckVisitorExpTyStm(Program symbolTable, minijava.symboltable.tree.Class classContext, Method methodContext) {
+		public TypeCheckVisitorExpTyStm(Program symbolTable, minijava.ast.rules.declarations.Class classContext, Method methodContext) {
 			this.symbolTable = symbolTable;
 			this.classContext = classContext;
 			this.methodContext = methodContext;
@@ -104,7 +104,12 @@ public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeEx
 		@Override
 		public java.lang.Boolean visit(Method m) throws RuntimeException {
 
-			methodContext = classContext.methods.get(m.methodName);
+			for (Method declaredMethod : classContext.methods) {
+				if (declaredMethod.methodName.equals(m.methodName)) {
+					methodContext = declaredMethod;
+					break;
+				}
+			}
 
 			boolean ok = true;
 
@@ -136,7 +141,7 @@ public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeEx
 
 		@Override
 		public Type visit(This e) throws RuntimeException {
-			e.type = new Class(classContext.name);
+			e.type = new Class(classContext.className);
 			return e.type;
 		}
 
@@ -246,14 +251,14 @@ public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeEx
 			Class object = (Class) e.obj.accept(this);
 			
 			// Check class
-			minijava.symboltable.tree.Class clazz = symbolTable.get(object.c);
+			minijava.ast.rules.declarations.Class clazz = symbolTable.get(object.c);
 			if (clazz == null) {
 				// TODO: error
 				return null;
 			}
 			
 			// Check method
-			Method method = new MethodVisitor(clazz, e.method).visit(symbolTable);
+			Method method = clazz.getMethod(e.method);
 			if (method == null) {
 				// TODO: error
 				return null;
@@ -296,7 +301,7 @@ public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeEx
 			// TODO: Should be replaced with a lookup in an appropriate data structure that honours variable visibility
 			Variable object = methodContext.get(e.id);
 			if (object == null) {
-				object = classContext.fields.get(e.id);
+				object = classContext.getField(e.id);
 			}
 
 			if (object == null) {
