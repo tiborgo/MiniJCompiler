@@ -66,13 +66,6 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 			this.symbolTable = symbolTable;
 		}
 
-		// TODO: Remove constructor
-		public TypeCheckVisitorExpTyStm(Program symbolTable, minijava.ast.rules.declarations.Class classContext, Method methodContext) {
-			this.symbolTable = symbolTable;
-			this.classContext = classContext;
-			this.methodContext = methodContext;
-		}
-
 		@Override
 		public java.lang.Boolean visit(minijava.ast.rules.declarations.Class c) throws RuntimeException {
 
