@@ -13,8 +13,8 @@ import minijava.ast.rules.Parameter;
 import minijava.ast.rules.ParameterVisitor;
 import minijava.ast.rules.Prg;
 import minijava.ast.rules.PrgVisitor;
-import minijava.ast.rules.types.TyArr;
-import minijava.ast.rules.types.TyInt;
+import minijava.ast.rules.types.Array;
+import minijava.ast.rules.types.Integer;
 import minijava.symboltable.tree.Node;
 import minijava.symboltable.tree.Program;
 
@@ -76,8 +76,8 @@ public class CreateSymbolTableVisitor implements
 			Collections.<minijava.symboltable.tree.Variable>emptyList(),
 			Arrays.asList(new minijava.symboltable.tree.Method(
 				"main",
-				new TyInt(),
-				Arrays.asList(new minijava.symboltable.tree.Variable(d.mainArg, new TyArr(new TyInt()))),
+				new Integer(),
+				Arrays.asList(new minijava.symboltable.tree.Variable(d.mainArg, new Array(new Integer()))),
 				Collections.<minijava.symboltable.tree.Variable>emptyList()
 			))
 		);
@@ -96,16 +96,16 @@ public class CreateSymbolTableVisitor implements
 			localVariables.add(visit(localVariable));
 		}
 
-		return new minijava.symboltable.tree.Method(m.methodName, m.ty, parameters, localVariables);
+		return new minijava.symboltable.tree.Method(m.methodName, m.type, parameters, localVariables);
 	}
 
 	@Override
 	public minijava.symboltable.tree.Variable visit(Variable d) throws RuntimeException {
-		return new minijava.symboltable.tree.Variable(d.name, d.ty);
+		return new minijava.symboltable.tree.Variable(d.name, d.type);
 	}
 
 	@Override
 	public minijava.symboltable.tree.Variable visit(Parameter p) throws RuntimeException {
-		return new minijava.symboltable.tree.Variable(p.id, p.ty);
+		return new minijava.symboltable.tree.Variable(p.id, p.type);
 	}
 }

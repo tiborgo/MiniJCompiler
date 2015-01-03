@@ -1,13 +1,13 @@
 package minijava.symboltable.tree;
 
-import minijava.ast.rules.types.Ty;
+import minijava.ast.rules.types.Type;
 
 public class Variable implements Node {
 
 	public final String name;
-	public final Ty type;
+	public final Type type;
 	
-	public Variable(String name, Ty type) {
+	public Variable(String name, Type type) {
 		this.name = name;
 		this.type = type;
 	}

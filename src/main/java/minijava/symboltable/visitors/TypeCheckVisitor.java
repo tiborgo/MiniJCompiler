@@ -1,6 +1,5 @@
 package minijava.symboltable.visitors;
 
-import minijava.ast.rules.declarations.Class;
 import minijava.ast.rules.declarations.Main;
 import minijava.ast.rules.declarations.Method;
 import minijava.ast.rules.declarations.Variable;
@@ -29,17 +28,17 @@ import minijava.ast.rules.statements.PrintChar;
 import minijava.ast.rules.statements.PrintlnInt;
 import minijava.ast.rules.statements.StatementVisitor;
 import minijava.ast.rules.statements.While;
-import minijava.ast.rules.types.Ty;
-import minijava.ast.rules.types.TyArr;
-import minijava.ast.rules.types.TyBool;
-import minijava.ast.rules.types.TyClass;
-import minijava.ast.rules.types.TyInt;
-import minijava.ast.rules.types.TyVisitor;
-import minijava.ast.rules.types.TyVoid;
+import minijava.ast.rules.types.Type;
+import minijava.ast.rules.types.Array;
+import minijava.ast.rules.types.Boolean;
+import minijava.ast.rules.types.Class;
+import minijava.ast.rules.types.Integer;
+import minijava.ast.rules.types.TypeVisitor;
+import minijava.ast.rules.types.Void;
 import minijava.symboltable.tree.Program;
 
-public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
-		DeclarationVisitor<Boolean, RuntimeException> {
+public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeException>,
+		DeclarationVisitor<java.lang.Boolean, RuntimeException> {
 	
 	private final Program symbolTable;
 	private minijava.symboltable.tree.Class classContext;
@@ -50,18 +49,18 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 	}
 	
 	@Override
-	public Boolean visit(Prg p) throws RuntimeException {
+	public java.lang.Boolean visit(Prg p) throws RuntimeException {
 
 		boolean ok = true;
 		ok = visit(p.mainClass) ? ok : false;
-		for (Class clazz : p.classes) {
+		for (minijava.ast.rules.declarations.Class clazz : p.classes) {
 			ok = clazz.accept(this) ? ok : false;
 		}
 		return ok;
 	}
 	
 	@Override
-	public Boolean visit(Class c) throws RuntimeException {
+	public java.lang.Boolean visit(minijava.ast.rules.declarations.Class c) throws RuntimeException {
 		
 		classContext = symbolTable.classes.get(c.className);
 		
@@ -80,12 +79,12 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 	}
 
 	@Override
-	public Boolean visit(Main d) throws RuntimeException {
+	public java.lang.Boolean visit(Main d) throws RuntimeException {
 		return true;
 	}
 
 	@Override
-	public Boolean visit(Method m) throws RuntimeException {
+	public java.lang.Boolean visit(Method m) throws RuntimeException {
 		
 		methodContext = classContext.methods.get(m.methodName);
 		
@@ -94,7 +93,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		TypeCheckVisitorExpTyStm typeCheckVisitor = new TypeCheckVisitorExpTyStm(symbolTable, classContext, methodContext);
 		
 		ok = (m.body.accept(typeCheckVisitor)) ? ok : false;
-		ok = (m.returnExpression.accept(typeCheckVisitor).equals(m.ty)) ? ok : false;
+		ok = (m.returnExpression.accept(typeCheckVisitor).equals(m.type)) ? ok : false;
 		
 		methodContext = null;
 		
@@ -102,14 +101,14 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 	}
 
 	@Override
-	public Boolean visit(Variable d) throws RuntimeException {
-		return d.ty.accept(new TypeCheckVisitorExpTyStm(symbolTable, classContext, methodContext));
+	public java.lang.Boolean visit(Variable d) throws RuntimeException {
+		return d.type.accept(new TypeCheckVisitorExpTyStm(symbolTable, classContext, methodContext));
 	} 
 	
 	public static class TypeCheckVisitorExpTyStm implements
-			ExpressionVisitor<Ty, RuntimeException>,
-			TyVisitor<Boolean, RuntimeException>,
-			StatementVisitor<Boolean, RuntimeException> {
+			ExpressionVisitor<Type, RuntimeException>,
+			TypeVisitor<java.lang.Boolean, RuntimeException>,
+			StatementVisitor<java.lang.Boolean, RuntimeException> {
 		
 		private final Program symbolTable;
 		private final minijava.symboltable.tree.Class classContext;
@@ -123,25 +122,25 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		
 		
 		@Override
-		public Ty visit(True e) throws RuntimeException {
-			return new TyBool();
+		public Type visit(True e) throws RuntimeException {
+			return new Boolean();
 		}
 
 		@Override
-		public Ty visit(False e) throws RuntimeException {
-			return new TyBool();
+		public Type visit(False e) throws RuntimeException {
+			return new Boolean();
 		}
 
 		@Override
-		public Ty visit(This e) throws RuntimeException {
-			return new TyClass(classContext.name);
+		public Type visit(This e) throws RuntimeException {
+			return new Class(classContext.name);
 		}
 
 		@Override
-		public Ty visit(NewIntArray e) throws RuntimeException {
+		public Type visit(NewIntArray e) throws RuntimeException {
 			
-			if (e.size.accept(this) instanceof TyInt) {
-				return new TyArr(new TyInt());
+			if (e.size.accept(this) instanceof Integer) {
+				return new Array(new Integer());
 			}
 			else {
 				// TODO: error
@@ -150,11 +149,11 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		}
 
 		@Override
-		public Ty visit(New e) throws RuntimeException {
+		public Type visit(New e) throws RuntimeException {
 				
 			// Check if class exists
 			if (symbolTable.classes.containsKey(e.className)) {
-				return new TyClass(e.className);
+				return new Class(e.className);
 			}
 			else {
 				// TODO: error
@@ -163,9 +162,9 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		}
 
 		@Override
-		public Ty visit(Negate e) throws RuntimeException {
-			if (e.body.accept(this) instanceof TyBool) {
-				return new TyBool();
+		public Type visit(Negate e) throws RuntimeException {
+			if (e.body.accept(this) instanceof Boolean) {
+				return new Boolean();
 			}
 			else {
 				System.err.println("Neg operator can only be applied to boolean expression");
@@ -174,16 +173,16 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		}
 
 		@Override
-		public Ty visit(BinOp e) throws RuntimeException {
+		public Type visit(BinOp e) throws RuntimeException {
 			
 			switch(e.op) {
 			case PLUS:
 			case MINUS:
 			case TIMES:
 			case DIV:
-				if (e.left.accept(this) instanceof TyInt &&
-						e.right.accept(this) instanceof TyInt) {
-					return new TyInt();
+				if (e.left.accept(this) instanceof Integer &&
+						e.right.accept(this) instanceof Integer) {
+					return new Integer();
 				}
 				else {
 					System.err.println("Both operands of binary operation '" + e.op + "' must have type int");
@@ -191,9 +190,9 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 				}
 
 			case LT:
-				if (e.left.accept(this) instanceof TyInt &&
-						e.right.accept(this) instanceof TyInt) {
-					return new TyBool();
+				if (e.left.accept(this) instanceof Integer &&
+						e.right.accept(this) instanceof Integer) {
+					return new Boolean();
 				}
 				else {
 					System.err.println("Both operands of binary operation '" + e.op + "' must have type int");
@@ -201,9 +200,9 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 				}
 
 			case AND:
-				if (e.left.accept(this) instanceof TyBool &&
-						e.right.accept(this) instanceof TyBool) {
-					return new TyBool();
+				if (e.left.accept(this) instanceof Boolean &&
+						e.right.accept(this) instanceof Boolean) {
+					return new Boolean();
 				}
 				else {
 					System.err.println("Both operands of binary operation '" + e.op + "' must have type bool");
@@ -215,14 +214,14 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		}
 
 		@Override
-		public Ty visit(ArrayGet e) throws RuntimeException {
+		public Type visit(ArrayGet e) throws RuntimeException {
 			
-			Ty indexType = e.index.accept(this);
-			Ty arrayType = e.array.accept(this);
+			Type indexType = e.index.accept(this);
+			Type arrayType = e.array.accept(this);
 			
-			if (indexType instanceof TyInt &&
-					arrayType instanceof TyArr) {
-				return ((TyArr) arrayType).ty;
+			if (indexType instanceof Integer &&
+					arrayType instanceof Array) {
+				return ((Array) arrayType).type;
 			}
 			else {
 				System.err.println("Array get error");
@@ -231,9 +230,9 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		}
 
 		@Override
-		public Ty visit(ArrayLength e) throws RuntimeException {
-			if (e.array.accept(this) instanceof TyArr) {
-				return new TyInt();
+		public Type visit(ArrayLength e) throws RuntimeException {
+			if (e.array.accept(this) instanceof Array) {
+				return new Integer();
 			}
 			else {
 				System.err.println("'length' must be applied to array type");
@@ -242,9 +241,9 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		}
 
 		@Override
-		public Ty visit(Invoke e) throws RuntimeException {
+		public Type visit(Invoke e) throws RuntimeException {
 			
-			TyClass object = (TyClass) e.obj.accept(this);
+			Class object = (Class) e.obj.accept(this);
 			
 			// Check class
 			minijava.symboltable.tree.Class clazz   = symbolTable.classes.get(object.c);
@@ -265,7 +264,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 				
 				boolean ok = true;
 				for (int i = 0; i < e.args.size(); i++) {
-					Ty argType = e.args.get(i).accept(this);
+					Type argType = e.args.get(i).accept(this);
 					if (!argType.equals(method.parametersList.get(i).type)) {
 						ok = false;
 						// TODO: error
@@ -286,12 +285,12 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		}
 
 		@Override
-		public Ty visit(IntConstant e) throws RuntimeException {
-			return new TyInt();
+		public Type visit(IntConstant e) throws RuntimeException {
+			return new Integer();
 		}
 
 		@Override
-		public Ty visit(Id e) throws RuntimeException {
+		public Type visit(Id e) throws RuntimeException {
 			// TODO: Should be replaced with a lookup in an appropriate data structure that honours variable visibility
 			minijava.symboltable.tree.Variable object = methodContext.get(e.id);
 			if (object == null) {
@@ -308,104 +307,104 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 			}
 		}
 		
-		public Boolean visit(Ty t) {
+		public java.lang.Boolean visit(Type t) {
 			return false;
 		}
 
 		@Override
-		public Boolean visit(TyVoid t) {
+		public java.lang.Boolean visit(Void t) {
 			return true;
 		}
 
 		@Override
-		public Boolean visit(TyBool t) {
+		public java.lang.Boolean visit(Boolean t) {
 			return true;
 		}
 
 		@Override
-		public Boolean visit(TyInt t) {
+		public java.lang.Boolean visit(Integer t) {
 			return true;
 		}
 
 		@Override
-		public Boolean visit(TyClass t) {
+		public java.lang.Boolean visit(Class t) {
 			return symbolTable.classes.containsKey(t.c);
 		}
 
 		@Override
-		public Boolean visit(TyArr t) {
-			return visit(t.ty);
+		public java.lang.Boolean visit(Array t) {
+			return visit(t.type);
 		}
 		
 		@Override
-		public Boolean visit(StatementList s) throws RuntimeException {
+		public java.lang.Boolean visit(StatementList s) throws RuntimeException {
 			for (Statement statement : s.statements) {
 				if (!statement.accept(this)) {
-					return Boolean.FALSE;
+					return java.lang.Boolean.FALSE;
 				}
 			}
-			return Boolean.TRUE;
+			return java.lang.Boolean.TRUE;
 		}
 
 		@Override
-		public Boolean visit(If s) throws RuntimeException {
-			Ty type = s.cond.accept(this);
-			if (!(type instanceof TyBool)) {
-				return Boolean.FALSE;
+		public java.lang.Boolean visit(If s) throws RuntimeException {
+			Type type = s.cond.accept(this);
+			if (!(type instanceof Boolean)) {
+				return java.lang.Boolean.FALSE;
 			}
 			return s.bodyTrue.accept(this).booleanValue() && s.bodyFalse.accept(this).booleanValue();
 		}
 
 		@Override
-		public Boolean visit(While s) throws RuntimeException {
-			Ty type = s.cond.accept(this);
-			if (!(type instanceof TyBool)) {
-				return Boolean.FALSE;
+		public java.lang.Boolean visit(While s) throws RuntimeException {
+			Type type = s.cond.accept(this);
+			if (!(type instanceof Boolean)) {
+				return java.lang.Boolean.FALSE;
 			}
 			return s.body.accept(this);
 		}
 
 		@Override
-		public Boolean visit(PrintlnInt s) throws RuntimeException {
-			Ty expressionType = s.arg.accept(this);
-			if (!(expressionType instanceof TyInt)) {
-				return Boolean.FALSE;
+		public java.lang.Boolean visit(PrintlnInt s) throws RuntimeException {
+			Type expressionType = s.arg.accept(this);
+			if (!(expressionType instanceof Integer)) {
+				return java.lang.Boolean.FALSE;
 			}
-			return Boolean.TRUE;
+			return java.lang.Boolean.TRUE;
 		}
 
 		@Override
-		public Boolean visit(PrintChar s) throws RuntimeException {
+		public java.lang.Boolean visit(PrintChar s) throws RuntimeException {
 			//Ty expressionType = s.arg.accept(this);
 			// TODO: No type class for type char?
-			return Boolean.TRUE;
+			return java.lang.Boolean.TRUE;
 		}
 
 		@Override
-		public Boolean visit(Assignment s) throws RuntimeException {
-			Ty idType     =  new Id(s.id).accept(this);
-			Ty assignType = s.rhs.accept(this);
+		public java.lang.Boolean visit(Assignment s) throws RuntimeException {
+			Type idType     =  new Id(s.id).accept(this);
+			Type assignType = s.rhs.accept(this);
 			
 			if (idType.equals(assignType)) {
-				return Boolean.TRUE;
+				return java.lang.Boolean.TRUE;
 			}
 			else {
-				return Boolean.FALSE;
+				return java.lang.Boolean.FALSE;
 			}
 		}
 
 		@Override
-		public Boolean visit(ArrayAssignment s) throws RuntimeException {
-			Ty arrayType  = new Id(s.id).accept(this);
-			Ty assignType = s.rhs.accept(this);
-			Ty indexType  = s.index.accept(this);
+		public java.lang.Boolean visit(ArrayAssignment s) throws RuntimeException {
+			Type arrayType  = new Id(s.id).accept(this);
+			Type assignType = s.rhs.accept(this);
+			Type indexType  = s.index.accept(this);
 			
 			if (assignType.equals(arrayType) &&
-					indexType.equals(new TyInt())) {
-				return Boolean.TRUE;
+					indexType.equals(new Integer())) {
+				return java.lang.Boolean.TRUE;
 			}
 			else {
-				return Boolean.FALSE;
+				return java.lang.Boolean.FALSE;
 			}
 		}
 	}

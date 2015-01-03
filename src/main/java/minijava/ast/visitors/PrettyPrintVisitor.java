@@ -2,7 +2,6 @@ package minijava.ast.visitors;
 
 import java.util.List;
 
-import minijava.ast.rules.declarations.Class;
 import minijava.ast.rules.declarations.Main;
 import minijava.ast.rules.declarations.Method;
 import minijava.ast.rules.declarations.Variable;
@@ -33,12 +32,12 @@ import minijava.ast.rules.statements.PrintChar;
 import minijava.ast.rules.statements.PrintlnInt;
 import minijava.ast.rules.statements.StatementVisitor;
 import minijava.ast.rules.statements.While;
-import minijava.ast.rules.types.TyArr;
-import minijava.ast.rules.types.TyBool;
-import minijava.ast.rules.types.TyClass;
-import minijava.ast.rules.types.TyInt;
-import minijava.ast.rules.types.TyVisitor;
-import minijava.ast.rules.types.TyVoid;
+import minijava.ast.rules.types.Array;
+import minijava.ast.rules.types.Boolean;
+import minijava.ast.rules.types.Class;
+import minijava.ast.rules.types.Integer;
+import minijava.ast.rules.types.TypeVisitor;
+import minijava.ast.rules.types.Void;
 
 public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> {
 
@@ -49,10 +48,10 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 		this.indent = indent;
 	}
 
-	private String prettyPrintClassList(List<Class> cl, String indent) {
+	private String prettyPrintClassList(List<minijava.ast.rules.declarations.Class> cl, String indent) {
 		StringBuffer classes = new StringBuffer();
 		String sep = "";
-		for (Class d : cl) {
+		for (minijava.ast.rules.declarations.Class d : cl) {
 			classes.append(sep);
 			classes.append(d.accept(new PrettyPrintVisitorDecl(indent)));
 			sep = "\n";
@@ -85,7 +84,7 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 		}
 
 		@Override
-		public String visit(Class c) {
+		public String visit(minijava.ast.rules.declarations.Class c) {
 			return indent
 					+ "class "
 					+ c.className
@@ -100,12 +99,12 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 		public String visit(Method m) {
 			String params = "", sep = "";
 			for (Parameter p : m.parameters) {
-				params += sep + p.ty.accept(new PrettyPrintVisitorTy()) + " "
+				params += sep + p.type.accept(new PrettyPrintVisitorTy()) + " "
 						+ p.id;
 				sep = ", ";
 			}
 
-			return indent + "public " + m.ty.accept(new PrettyPrintVisitorTy())
+			return indent + "public " + m.type.accept(new PrettyPrintVisitorTy())
 					+ " " + m.methodName + " (" + params + ") {\n"
 					+ prettyPrintVarList(m.localVars, indent + indentStep)
 					+ m.body.accept(new PrettyPrintVisitorStm(indent + indentStep)) + indent + indentStep
@@ -124,7 +123,7 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 
 		@Override
 		public String visit(Variable d) {
-			return indent + d.ty.accept(new PrettyPrintVisitorTy()) + " "
+			return indent + d.type.accept(new PrettyPrintVisitorTy()) + " "
 					+ d.name.toString() + ";";
 		}
 
@@ -147,31 +146,31 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 	}
 
 	public static class PrettyPrintVisitorTy implements
-			TyVisitor<String, RuntimeException> {
+			TypeVisitor<String, RuntimeException> {
 
 		@Override
-		public String visit(TyVoid b) {
+		public String visit(Void b) {
 			return "void";
 		}
 
 		@Override
-		public String visit(TyBool b) {
+		public String visit(Boolean b) {
 			return "boolean";
 		}
 
 		@Override
-		public String visit(TyInt i) {
+		public String visit(Integer i) {
 			return "int";
 		}
 
 		@Override
-		public String visit(TyClass x) {
+		public String visit(Class x) {
 			return x.c.toString();
 		}
 
 		@Override
-		public String visit(TyArr x) {
-			return x.ty.accept(this) + "[]";
+		public String visit(Array x) {
+			return x.type.accept(this) + "[]";
 		}
 	}
 
@@ -233,7 +232,7 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 
 		@Override
 		public String visit(IntConstant x) {
-			return (new Integer(x.value)).toString();
+			return (new java.lang.Integer(x.value)).toString();
 		}
 
 		@Override
