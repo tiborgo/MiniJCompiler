@@ -1,7 +1,7 @@
 package minijava.backend.i386;
 
-import minijava.backend.AssemVisitor;
 import minijava.backend.Directive;
+import minijava.backend.i386.visitors.AssemVisitor;
 import minijava.intermediate.Label;
 
 public final class AssemLabel extends Directive {

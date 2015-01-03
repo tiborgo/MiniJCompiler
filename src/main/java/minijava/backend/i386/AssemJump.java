@@ -5,8 +5,8 @@ import java.util.Collections;
 import java.util.List;
 
 import minijava.backend.Assem;
-import minijava.backend.AssemVisitor;
 import minijava.backend.DefaultInstruction;
+import minijava.backend.i386.visitors.AssemVisitor;
 import minijava.intermediate.Label;
 import minijava.intermediate.Temp;
 import minijava.util.Function;
@@ -35,7 +35,7 @@ public final class AssemJump extends DefaultInstruction {
 		super(dest);
 		assert (kind != Kind.J || cond != null) : "J needs condition argument";
 		assert (kind == Kind.CALL || dest instanceof Operand.Label) : "J and JMP need label as destination";
-		assert (dest == null || dest instanceof Operand.Reg) : "dynamic destination of CALL must be Reg";
+		//assert (dest == null || dest instanceof Operand.Reg) : "dynamic destination of CALL must be Reg";
 		this.kind = kind;
 		this.dest = dest;
 		this.cond = cond;

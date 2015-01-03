@@ -57,8 +57,7 @@ public class I386MachineSpecifics implements MachineSpecifics {
 	@Override
 	public Fragment<List<Assem>> codeGen(Fragment<List<TreeStm>> frag) {
 		AssemblerVisitor i386AssemblerVisitor = new AssemblerVisitor();
-		FragmentProc<List<Assem>> assemFragement = frag.accept(i386AssemblerVisitor);
-		return assemFragement;
+		return frag.accept(i386AssemblerVisitor);
 	}
 
 	@Override
@@ -67,57 +66,26 @@ public class I386MachineSpecifics implements MachineSpecifics {
 		StringBuilder stringBuilder = new StringBuilder();
 		
 		stringBuilder
-			.append("\t.intel_syntax\n")
-			.append("\t.globl " + new Label("lmain").toString() + "\n")
-			.append("\n");
+			.append("\t.intel_syntax" + System.lineSeparator())
+			.append("\t.globl " + new Label("lmain").toString() + System.lineSeparator())
+			.append(System.lineSeparator());
 
 		for (Fragment<List<Assem>> frag : frags) {
+			
 			// TODO: Treat FragmentProc as special case
 			FragmentProc<List<Assem>> procedure = (FragmentProc<List<Assem>>) frag;
-			List<Assem> procedureWithEntryExitCode = new LinkedList<>();
-
-			Assem functionLabel = new AssemLabel(procedure.frame.getName());
-			procedureWithEntryExitCode.add(functionLabel);
-
-			// TODO make prologue architecture dependent
-			
-			// Prologue
-			Assem saveFramePointer = new Push(EBP);
-			procedureWithEntryExitCode.add(saveFramePointer);
-			Assem moveFramePointer = new AssemBinaryOp(AssemBinaryOp.Kind.MOV, EBP, ESP);
-			procedureWithEntryExitCode.add(moveFramePointer);
-			// TODO: Allocate space on stack for local variables
-			int localVariableSize = 0;
-			// 4 (push ebp) + 4 (ret address) + localVariableSize
-			int padding = 16 - ((localVariableSize + 8) % 16);
-			Assem moveStackPointer = new AssemBinaryOp(AssemBinaryOp.Kind.SUB, ESP, new Operand.Imm(localVariableSize + padding));
-			procedureWithEntryExitCode.add(moveStackPointer);
-
-			// TODO: Save callee-safe registers
-
-			procedureWithEntryExitCode.addAll(procedure.body);
-
-			// remove padding
-			Assem leavePadding = new AssemBinaryOp(AssemBinaryOp.Kind.ADD, ESP, new Operand.Imm(padding));
-			procedureWithEntryExitCode.add(leavePadding);
-			
-			// Restore caller-safe registers
-			Assem leave = new AssemInstr(AssemInstr.Kind.LEAVE);
-			procedureWithEntryExitCode.add(leave);
-
-			Assem ret = new AssemInstr(AssemInstr.Kind.RET);
-			procedureWithEntryExitCode.add(ret);
 
 			// Print instructions
-			for (Assem assem : procedureWithEntryExitCode) {
+			for (Assem assem : procedure.body) {
 				if (!(assem instanceof AssemLabel)) {
 					stringBuilder.append(indentation);
 				}
 				stringBuilder.append(assem.accept(new I386PrintAssemblyVisitor()));
-				if (!(assem instanceof AssemLabel)) {
-					stringBuilder.append("\n");
+				if (!(assem instanceof AssemLabel) || ((AssemLabel)assem).label.equals(procedure.frame.getName())) {
+					stringBuilder.append(System.lineSeparator());
 				}
 			}
+			stringBuilder.append(System.lineSeparator());
 		}
 		return stringBuilder.toString();
 	}

@@ -1,12 +1,12 @@
 package minijava.backend.i386;
 
+import minijava.backend.i386.visitors.OperandVisitor;
 import minijava.intermediate.Temp;
 import minijava.util.Function;
 
 public abstract class Operand {
 	
-	// TODO: make generic
-	public abstract String accept(I386PrintAssemblyVisitor visitor);
+	public abstract <A, T extends Throwable> A accept(OperandVisitor<A, T> visitor) throws T;
 
 	public final static class Imm extends Operand {
 
@@ -23,7 +23,7 @@ public abstract class Operand {
 		}
 
 		@Override
-		public String accept(I386PrintAssemblyVisitor visitor) {
+		public <A, T extends Throwable> A accept(OperandVisitor<A, T> visitor) throws T {
 			return visitor.visit(this);
 		}
 	}
@@ -43,7 +43,7 @@ public abstract class Operand {
 		}
 		
 		@Override
-		public String accept(I386PrintAssemblyVisitor visitor) {
+		public <A, T extends Throwable> A accept(OperandVisitor<A, T> visitor) throws T {
 			return visitor.visit(this);
 		}
 	}
@@ -74,7 +74,7 @@ public abstract class Operand {
 		}
 		
 		@Override
-		public String accept(I386PrintAssemblyVisitor visitor) {
+		public <A, T extends Throwable> A accept(OperandVisitor<A, T> visitor) throws T {
 			return visitor.visit(this);
 		}
 	}
@@ -94,7 +94,7 @@ public abstract class Operand {
 		}
 		
 		@Override
-		public String accept(I386PrintAssemblyVisitor visitor) {
+		public <A, T extends Throwable> A accept(OperandVisitor<A, T> visitor) throws T {
 			return visitor.visit(this);
 		}
 	}

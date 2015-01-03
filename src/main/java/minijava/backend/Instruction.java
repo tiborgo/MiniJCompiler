@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import minijava.backend.i386.Operand;
+import minijava.backend.i386.visitors.AssemVisitor;
 import minijava.intermediate.Temp;
 
 /**

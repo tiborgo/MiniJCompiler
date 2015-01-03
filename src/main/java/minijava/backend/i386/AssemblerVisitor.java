@@ -8,7 +8,13 @@ import minijava.backend.Assem;
 import minijava.backend.Instruction;
 import minijava.backend.i386.instructions.Idiv;
 import minijava.backend.i386.instructions.Imul;
+import minijava.backend.i386.instructions.Push;
+import minijava.backend.i386.visitors.OperandVisitor;
 import minijava.backend.i386.AssemBinaryOp.Kind;
+import minijava.backend.i386.Operand.Imm;
+import minijava.backend.i386.Operand.Label;
+import minijava.backend.i386.Operand.Mem;
+import minijava.backend.i386.Operand.Reg;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.FragmentVisitor;
 import minijava.intermediate.Temp;
@@ -39,11 +45,33 @@ public class AssemblerVisitor implements
 	@Override
 	public FragmentProc<List<Assem>> visit(FragmentProc<List<TreeStm>> fragProc) {
 		List<Assem> instructions = new LinkedList<>();
+		
+		// Function label
+		instructions.add(new AssemLabel(fragProc.frame.getName()));
+		
+		// Prologue
+		instructions.add(new Push(I386MachineSpecifics.EBP));
+		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.MOV, I386MachineSpecifics.EBP, I386MachineSpecifics.ESP));
+
+		// TODO: Allocate space on stack for local variables
+		int localVariableSize = 0;
+		// 4 (push ebp) + 4 (ret address) + localVariableSize
+		int padding = 16 - ((localVariableSize + 8) % 16);
+		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.SUB, I386MachineSpecifics.ESP, new Operand.Imm(localVariableSize + padding)));
+		
 		for (TreeStm statement : fragProc.body) {
 			StatementExpressionVisitor visitor = new StatementExpressionVisitor();
 			statement.accept(visitor);
 			instructions.addAll(visitor.getInstructions());
 		}
+		
+		// Epilogue
+		Assem leave = new AssemInstr(AssemInstr.Kind.LEAVE);
+		instructions.add(leave);
+
+		Assem ret = new AssemInstr(AssemInstr.Kind.RET);
+		instructions.add(ret);
+		
 		// FIXME: Set correct frame?
 		return new FragmentProc<List<Assem>>(fragProc.frame, instructions);
 	}
@@ -82,7 +110,7 @@ public class AssemblerVisitor implements
 
 			// TODO: Restore Caller-Save registers?
 
-			return dest;
+			return I386MachineSpecifics.EAX;
 		}
 
 		@Override
@@ -98,7 +126,32 @@ public class AssemblerVisitor implements
 
 		@Override
 		public Operand visit(TreeExpMEM e) throws RuntimeException {
-			return e.addr.accept(this);
+			Operand address = e.addr.accept(this);
+			
+			OperandVisitor<Operand.Mem, RuntimeException> memVisitor = new OperandVisitor<Operand.Mem, RuntimeException>() {
+
+				@Override
+				public Mem visit(Imm operand) {
+					return new Operand.Mem(null, null, null, operand.imm);
+				}
+
+				@Override
+				public Mem visit(Label operand) {
+					throw new UnsupportedOperationException("Cannot convert label to address");
+				}
+
+				@Override
+				public Mem visit(Mem operand) {
+					return operand;
+				}
+
+				@Override
+				public Mem visit(Reg operand) {
+					return new Operand.Mem(operand.reg);
+				}
+			};
+			
+			return address.accept(memVisitor);
 		}
 
 		@Override
@@ -160,6 +213,11 @@ public class AssemblerVisitor implements
 			}
 
 			// Binary instructions
+			if (o1 instanceof Operand.Imm) {
+				Operand.Reg o1_ = new Operand.Reg(new Temp());
+				emit(new AssemBinaryOp(Kind.MOV, o1_, o1));
+				o1 = o1_;
+			}
 			AssemBinaryOp binaryOperation = new AssemBinaryOp(operatorBinary, o1, o2);
 			emit(binaryOperation);
 			return o1;
