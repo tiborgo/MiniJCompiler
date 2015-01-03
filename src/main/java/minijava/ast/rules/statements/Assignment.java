@@ -1,13 +1,14 @@
 package minijava.ast.rules.statements;
 
 import minijava.ast.rules.expressions.Expression;
+import minijava.ast.rules.expressions.Id;
 
 public class Assignment extends Statement {
 
-	public final String id;
+	public final Id id;
 	public final Expression rhs;
 
-	public Assignment(String id, Expression rhs) {
+	public Assignment(Id id, Expression rhs) {
 		this.id = id;
 		this.rhs = rhs;
 	}

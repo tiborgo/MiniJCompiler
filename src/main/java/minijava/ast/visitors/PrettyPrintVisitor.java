@@ -308,7 +308,7 @@ public class PrettyPrintVisitor implements ProgramVisitor<String, RuntimeExcepti
 
 		@Override
 		public String visit(Assignment s) {
-			return indent + s.id + " = "
+			return indent + s.id.id + " = "
 					+ s.rhs.accept(new PrettyPrintVisitorExp()) + ";\n";
 		}
 
