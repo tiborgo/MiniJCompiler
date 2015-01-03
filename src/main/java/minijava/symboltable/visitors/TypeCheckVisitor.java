@@ -50,7 +50,7 @@ public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeEx
 		boolean ok = true;
 		TypeCheckVisitorExpTyStm expTyStmVisitor = new TypeCheckVisitorExpTyStm(symbolTable);
 		ok = p.mainClass.accept(expTyStmVisitor) ? ok : false;
-		for (minijava.ast.rules.declarations.Class clazz : p.classes) {
+		for (minijava.ast.rules.declarations.Class clazz : p.getClasses()) {
 			ok = clazz.accept(expTyStmVisitor) ? ok : false;
 		}
 		return ok;
