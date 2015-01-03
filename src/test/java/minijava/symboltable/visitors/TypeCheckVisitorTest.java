@@ -1,4 +1,4 @@
-package minijava.ast.visitors;
+package minijava.symboltable.visitors;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -16,7 +16,6 @@ import minijava.MiniJavaParser;
 import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Prg;
 import minijava.symboltable.tree.Program;
-import minijava.symboltable.visitors.CreateSymbolTableVisitor;
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;

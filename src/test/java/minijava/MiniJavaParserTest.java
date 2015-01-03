@@ -13,7 +13,7 @@ import static org.junit.Assert.fail;
 import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Prg;
 import minijava.symboltable.visitors.CreateSymbolTableVisitor;
-import minijava.ast.visitors.TypeCheckVisitor;
+import minijava.symboltable.visitors.TypeCheckVisitor;
 import minijava.symboltable.tree.Program;
 
 import org.antlr.v4.runtime.ANTLRFileStream;

@@ -40,7 +40,7 @@ import minijava.ast.rules.statements.StmWhile;
 import minijava.ast.rules.types.TyArr;
 import minijava.ast.rules.types.TyClass;
 import minijava.ast.rules.types.TyInt;
-import minijava.ast.visitors.TypeCheckVisitor;
+import minijava.symboltable.visitors.TypeCheckVisitor;
 import minijava.backend.MachineSpecifics;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.Frame;
