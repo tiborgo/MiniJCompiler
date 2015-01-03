@@ -1,18 +1,20 @@
 package minijava.symboltable.visitors;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
-import minijava.ast.rules.declarations.Class;
-import minijava.ast.rules.declarations.Main;
-import minijava.ast.rules.declarations.Method;
-import minijava.ast.rules.declarations.Variable;
-import minijava.ast.rules.declarations.DeclarationVisitor;
 import minijava.ast.rules.Parameter;
 import minijava.ast.rules.ParameterVisitor;
 import minijava.ast.rules.Prg;
 import minijava.ast.rules.PrgVisitor;
+import minijava.ast.rules.declarations.Class;
+import minijava.ast.rules.declarations.DeclarationVisitor;
+import minijava.ast.rules.declarations.Main;
+import minijava.ast.rules.declarations.Method;
+import minijava.ast.rules.declarations.Variable;
 import minijava.ast.rules.types.Array;
 import minijava.ast.rules.types.Integer;
 import minijava.symboltable.tree.Node;
@@ -21,7 +23,7 @@ import minijava.symboltable.tree.Program;
 public class CreateSymbolTableVisitor implements
 		PrgVisitor<Program, RuntimeException>,
 		DeclarationVisitor<Node, RuntimeException>,
-		ParameterVisitor<minijava.symboltable.tree.Variable, RuntimeException> {
+		ParameterVisitor<Variable, RuntimeException> {
 	
 	private LinkedList<String> types = new LinkedList<>();
 	
@@ -52,10 +54,7 @@ public class CreateSymbolTableVisitor implements
 	@Override
 	public minijava.symboltable.tree.Class visit(Class c) throws RuntimeException {
 
-		LinkedList<minijava.symboltable.tree.Variable> fields = new LinkedList<>();
-		for (Variable field : c.fields) {
-			fields.add((minijava.symboltable.tree.Variable) visit(field));
-		}
+		List<Variable> fields = new ArrayList<>(c.fields);
 
 		LinkedList<minijava.symboltable.tree.Method> methods = new LinkedList<>();
 		for (Method field : c.methods) {
@@ -73,12 +72,12 @@ public class CreateSymbolTableVisitor implements
 	public minijava.symboltable.tree.Class visit(Main d) throws RuntimeException {
 		return new minijava.symboltable.tree.Class(
 			"",
-			Collections.<minijava.symboltable.tree.Variable>emptyList(),
+			Collections.<Variable>emptyList(),
 			Arrays.asList(new minijava.symboltable.tree.Method(
 				"main",
 				new Integer(),
-				Arrays.asList(new minijava.symboltable.tree.Variable(d.mainArg, new Array(new Integer()))),
-				Collections.<minijava.symboltable.tree.Variable>emptyList()
+				Arrays.asList(new Variable(new Array(new Integer()), d.mainArg)),
+				Collections.<Variable>emptyList()
 			))
 		);
 	}
@@ -86,26 +85,24 @@ public class CreateSymbolTableVisitor implements
 	@Override
 	public minijava.symboltable.tree.Method visit(Method m) throws RuntimeException {
 
-		LinkedList<minijava.symboltable.tree.Variable> parameters = new LinkedList<>();
+		LinkedList<Variable> parameters = new LinkedList<>();
 		for (Parameter parameter : m.parameters) {
 			parameters.add(visit(parameter));
 		}
 
-		LinkedList<minijava.symboltable.tree.Variable> localVariables = new LinkedList<>();
-		for (Variable localVariable : m.localVars) {
-			localVariables.add(visit(localVariable));
-		}
+		List<Variable> localVariables = new ArrayList<>(m.localVars);
 
 		return new minijava.symboltable.tree.Method(m.methodName, m.type, parameters, localVariables);
 	}
 
 	@Override
-	public minijava.symboltable.tree.Variable visit(Variable d) throws RuntimeException {
-		return new minijava.symboltable.tree.Variable(d.name, d.type);
+	public Node visit(Variable d) throws RuntimeException {
+		// TODO: obsolete
+		return null;
 	}
 
 	@Override
-	public minijava.symboltable.tree.Variable visit(Parameter p) throws RuntimeException {
-		return new minijava.symboltable.tree.Variable(p.id, p.type);
+	public Variable visit(Parameter p) throws RuntimeException {
+		return new Variable(p.type, p.id);
 	}
 }

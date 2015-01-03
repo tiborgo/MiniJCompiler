@@ -294,7 +294,7 @@ public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeEx
 		@Override
 		public Type visit(Id e) throws RuntimeException {
 			// TODO: Should be replaced with a lookup in an appropriate data structure that honours variable visibility
-			minijava.symboltable.tree.Variable object = methodContext.get(e.id);
+			Variable object = methodContext.get(e.id);
 			if (object == null) {
 				object = classContext.fields.get(e.id);
 			}
