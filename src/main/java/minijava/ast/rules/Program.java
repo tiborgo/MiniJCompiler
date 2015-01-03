@@ -15,7 +15,9 @@ public class Program {
 
 	public Program(Main mainClass, List<Class> classes) {
 		this.mainClass = mainClass;
+
 		this.classes = new HashMap<>(classes.size());
+		this.classes.put(mainClass.className, mainClass);
 		for (Class clazz : classes) {
 			this.classes.put(clazz.className, clazz);
 		}
@@ -30,9 +32,6 @@ public class Program {
 	}
 
 	public Class get(String className) {
-		/*if (mainClass.className.equals(className)) {
-			return mainClass;
-		}*/
 		return classes.get(className);
 	}
 
