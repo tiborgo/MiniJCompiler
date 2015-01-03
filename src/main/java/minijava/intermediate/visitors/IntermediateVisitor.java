@@ -39,7 +39,6 @@ import minijava.ast.rules.statements.StatementList;
 import minijava.ast.rules.statements.StatementVisitor;
 import minijava.ast.rules.statements.While;
 import minijava.ast.rules.types.Array;
-import minijava.ast.rules.types.Class;
 import minijava.ast.rules.types.Integer;
 import minijava.backend.MachineSpecifics;
 import minijava.intermediate.FragmentProc;
@@ -63,7 +62,6 @@ import minijava.intermediate.tree.TreeStmJUMP;
 import minijava.intermediate.tree.TreeStmLABEL;
 import minijava.intermediate.tree.TreeStmMOVE;
 import minijava.intermediate.tree.TreeStmSEQ;
-import minijava.ast.visitors.TypeCheckVisitor;
 
 public class IntermediateVisitor implements
 		ProgramVisitor<List<FragmentProc<TreeStm>>, RuntimeException>,
@@ -127,7 +125,7 @@ public class IntermediateVisitor implements
 		);
 		
 		minijava.ast.rules.declarations.Class mainClass = new minijava.ast.rules.declarations.Class(
-			"",
+			d.className,
 			null,
 			Collections.<Variable>emptyList(),
 			Arrays.asList(mainMethod)
@@ -403,8 +401,7 @@ public class IntermediateVisitor implements
 			
 			TreeExp object = e.obj.accept(this);
 			minijava.ast.rules.declarations.Class clazz = symbolTable.get(classContext.className);
-			Method method = clazz.getMethod(methodContext.methodName);
-			String className = ((Class) e.obj.accept(new TypeCheckVisitor.TypeCheckVisitorExpTyStm(symbolTable, clazz, method))).c;
+			String className = clazz.className;
 			String methodName = e.method;
 
 			TreeExp function = new TreeExpNAME(new Label(mangle(className,
