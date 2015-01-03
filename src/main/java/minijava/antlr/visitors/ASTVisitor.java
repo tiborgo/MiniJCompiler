@@ -27,19 +27,19 @@ import minijava.ast.rules.declarations.Class;
 import minijava.ast.rules.declarations.Main;
 import minijava.ast.rules.declarations.Method;
 import minijava.ast.rules.declarations.Variable;
-import minijava.ast.rules.expressions.Exp;
-import minijava.ast.rules.expressions.ExpArrayGet;
-import minijava.ast.rules.expressions.ExpArrayLength;
-import minijava.ast.rules.expressions.ExpBinOp;
-import minijava.ast.rules.expressions.ExpFalse;
-import minijava.ast.rules.expressions.ExpId;
-import minijava.ast.rules.expressions.ExpIntConst;
-import minijava.ast.rules.expressions.ExpInvoke;
-import minijava.ast.rules.expressions.ExpNeg;
-import minijava.ast.rules.expressions.ExpNew;
-import minijava.ast.rules.expressions.ExpNewIntArray;
-import minijava.ast.rules.expressions.ExpThis;
-import minijava.ast.rules.expressions.ExpTrue;
+import minijava.ast.rules.expressions.Expression;
+import minijava.ast.rules.expressions.ArrayGet;
+import minijava.ast.rules.expressions.ArrayLength;
+import minijava.ast.rules.expressions.BinOp;
+import minijava.ast.rules.expressions.False;
+import minijava.ast.rules.expressions.Id;
+import minijava.ast.rules.expressions.IntConstant;
+import minijava.ast.rules.expressions.Invoke;
+import minijava.ast.rules.expressions.Negate;
+import minijava.ast.rules.expressions.New;
+import minijava.ast.rules.expressions.NewIntArray;
+import minijava.ast.rules.expressions.This;
+import minijava.ast.rules.expressions.True;
 import minijava.ast.rules.Parameter;
 import minijava.ast.rules.Prg;
 import minijava.ast.rules.statements.Stm;
@@ -55,7 +55,7 @@ import minijava.ast.rules.types.TyArr;
 import minijava.ast.rules.types.TyBool;
 import minijava.ast.rules.types.TyClass;
 import minijava.ast.rules.types.TyInt;
-import minijava.ast.rules.expressions.ExpBinOp.Op;
+import minijava.ast.rules.expressions.BinOp.Op;
 
 import org.antlr.v4.runtime.misc.NotNull;
 
@@ -102,9 +102,9 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 			body.add((Stm) visit(stmDeclCtx));
 		}
 
-		Exp returnExp = (Exp) visit(ctx.returnExpression);
+		Expression returnExpression = (Expression) visit(ctx.returnExpression);
 
-		return new Method(ty, methodName, parameters, localVars, new StmList(body), returnExp);
+		return new Method(ty, methodName, parameters, localVars, new StmList(body), returnExpression);
 	}
 
 	@Override
@@ -155,7 +155,7 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 	@Override
 	public Object visitIfStatement(@NotNull MiniJavaParser.IfStatementContext ctx) {
 
-		Exp cond = (Exp) visit(ctx.condition);
+		Expression cond = (Expression) visit(ctx.condition);
 		Stm bodyTrue = (Stm) visit(ctx.trueStatement);
 		Stm bodyFalse = (Stm) visit(ctx.falseStatement);
 
@@ -165,7 +165,7 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 	@Override
 	public Object visitWhileStatement(@NotNull MiniJavaParser.WhileStatementContext ctx) {
 
-		Exp cond = (Exp) visit(ctx.expression());
+		Expression cond = (Expression) visit(ctx.expression());
 		Stm body = (Stm) visit(ctx.statement());
 
 		return new StmWhile(cond, body);
@@ -174,7 +174,7 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 	@Override
 	public Object visitSystemOutPrintlnStatement(@NotNull MiniJavaParser.SystemOutPrintlnStatementContext ctx) {
 
-		Exp arg = (Exp) visit(ctx.expression());
+		Expression arg = (Expression) visit(ctx.expression());
 
 		return new StmPrintlnInt(arg);
 	}
@@ -183,7 +183,7 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 	public Object visitAssignStatement(@NotNull MiniJavaParser.AssignStatementContext ctx) {
 
 		String id = (String) visit(ctx.identifier());
-		Exp rhs = (Exp) visit(ctx.expression());
+		Expression rhs = (Expression) visit(ctx.expression());
 
 		return new StmAssign(id, rhs);
 	}
@@ -191,7 +191,7 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 	@Override
 	public Object visitSystemOutPrintStatement(@NotNull MiniJavaParser.SystemOutPrintStatementContext ctx) {
 
-		Exp arg = (Exp) visit(ctx.expression());
+		Expression arg = (Expression) visit(ctx.expression());
 
 		return new StmPrintChar(arg);
 	}
@@ -200,8 +200,8 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 	public Object visitArrayAssignStatement(@NotNull MiniJavaParser.ArrayAssignStatementContext ctx) {
 
 		String id = (String) visit(ctx.identifier());
-		Exp index = (Exp) visit(ctx.index);
-		Exp rhs = (Exp) visit(ctx.rhs);
+		Expression index = (Expression) visit(ctx.index);
+		Expression rhs = (Expression) visit(ctx.rhs);
 
 		return new StmArrayAssign(id, index, rhs);
 	}
@@ -236,12 +236,12 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 
 	@Override
 	public Object visitThisExpression(ThisExpressionContext ctx) {
-		return new ExpThis();
+		return new This();
 	}
 
 	@Override
 	public Object visitBinOpExpression(BinOpExpressionContext ctx) {
-		ExpBinOp.Op binOp;
+		BinOp.Op binOp;
 		if (ctx.MINUS() != null) {
 			binOp = Op.MINUS;
 		} else if (ctx.PLUS() != null) {
@@ -257,75 +257,75 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 		} else {
 			throw new IllegalArgumentException("Unknown operator in: \n"+ctx.getText());
 		}
-		Exp expression0 = (Exp) visit(ctx.expression(0));
-		Exp expression1 = (Exp) visit(ctx.expression(1));
-		return new ExpBinOp(expression0, binOp, expression1);
+		Expression expression0 = (Expression) visit(ctx.expression(0));
+		Expression expression1 = (Expression) visit(ctx.expression(1));
+		return new BinOp(expression0, binOp, expression1);
 	}
 
 	@Override
 	public Object visitIntegerLiteralExpression(IntegerLiteralExpressionContext ctx) {
 		Integer value = Integer.parseInt(ctx.INTEGER_LITERAL().getText());
-		return new ExpIntConst(value);
+		return new IntConstant(value);
 	}
 
 	@Override
 	public Object visitArrayAccessExpression(ArrayAccessExpressionContext ctx) {
-		Exp arrayExpression = (Exp) visit(ctx.expression(0));
-		Exp indexExpression = (Exp) visit(ctx.expression(1));
-		return new ExpArrayGet(arrayExpression, indexExpression);
+		Expression arrayExpression = (Expression) visit(ctx.expression(0));
+		Expression indexExpression = (Expression) visit(ctx.expression(1));
+		return new ArrayGet(arrayExpression, indexExpression);
 	}
 
 	@Override
 	public Object visitTrueExpression(TrueExpressionContext ctx) {
-		return new ExpTrue();
+		return new True();
 	}
 
 	@Override
 	public Object visitInvokeExpression(InvokeExpressionContext ctx) {
-		Exp object = (Exp) visit(ctx.expression(0));
+		Expression object = (Expression) visit(ctx.expression(0));
 		String method = ctx.identifier().getText();
 		List<ExpressionContext> argumentsRaw = ctx.expression().subList(1, ctx.expression().size());
-		List<Exp> arguments = new ArrayList<>(argumentsRaw.size());
+		List<Expression> arguments = new ArrayList<>(argumentsRaw.size());
 		for (ExpressionContext argumentRaw : argumentsRaw) {
-			Exp argument = (Exp) visit(argumentRaw);
+			Expression argument = (Expression) visit(argumentRaw);
 			arguments.add(argument);
 		}
-		return new ExpInvoke(object, method, arguments);
+		return new Invoke(object, method, arguments);
 	}
 
 	@Override
 	public Object visitIdentifierExpression(IdentifierExpressionContext ctx) {
 		String id = ctx.identifier().getText();
-		return new ExpId(id);
+		return new Id(id);
 	}
 
 	@Override
 	public Object visitNotExpression(NotExpressionContext ctx) {
-		Exp negatedExpression = (Exp) visit(ctx.expression());
-		return new ExpNeg(negatedExpression);
+		Expression negatedExpression = (Expression) visit(ctx.expression());
+		return new Negate(negatedExpression);
 	}
 
 	@Override
 	public Object visitFalseExpression(FalseExpressionContext ctx) {
-		return new ExpFalse();
+		return new False();
 	}
 
 	@Override
 	public Object visitNewExpression(NewExpressionContext ctx) {
 		String className = ctx.identifier().getText();
-		return new ExpNew(className);
+		return new New(className);
 	}
 
 	@Override
 	public Object visitArrayLengthExpression(ArrayLengthExpressionContext ctx) {
-		Exp array = (Exp) visit(ctx.expression());
-		return new ExpArrayLength(array);
+		Expression array = (Expression) visit(ctx.expression());
+		return new ArrayLength(array);
 	}
 
 	@Override
 	public Object visitNewIntArrayExpression(NewIntArrayExpressionContext ctx) {
-		Exp arraySize = (Exp) visit(ctx.expression());
-		return new ExpNewIntArray(arraySize);
+		Expression arraySize = (Expression) visit(ctx.expression());
+		return new NewIntArray(arraySize);
 	}
 	
 	@Override

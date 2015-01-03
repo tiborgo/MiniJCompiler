@@ -1,13 +1,13 @@
 package minijava.ast.rules.statements;
 
-import minijava.ast.rules.expressions.Exp;
+import minijava.ast.rules.expressions.Expression;
 
 public class StmWhile extends Stm {
 
-  final public Exp cond;
+  final public Expression cond;
   final public Stm body;
 
-  public StmWhile(Exp cond, Stm body) {
+  public StmWhile(Expression cond, Stm body) {
     this.cond = cond;
     this.body = body;
   }

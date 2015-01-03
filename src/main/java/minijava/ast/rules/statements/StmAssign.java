@@ -1,13 +1,13 @@
 package minijava.ast.rules.statements;
 
-import minijava.ast.rules.expressions.Exp;
+import minijava.ast.rules.expressions.Expression;
 
 public class StmAssign extends Stm {
 
   final public String id;
-  final public Exp rhs;
+  final public Expression rhs;
 
-  public StmAssign(String id, Exp rhs) {
+  public StmAssign(String id, Expression rhs) {
     this.id = id;
     this.rhs = rhs;
   }

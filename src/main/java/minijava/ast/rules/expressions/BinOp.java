@@ -1,6 +1,6 @@
 package minijava.ast.rules.expressions;
 
-public class ExpBinOp extends Exp {
+public class BinOp extends Expression {
 
   public enum Op {
 
@@ -18,18 +18,18 @@ public class ExpBinOp extends Exp {
       return name;
     }
   };
-  final public Exp left;
+  final public Expression left;
   final public Op op;
-  final public Exp right;
+  final public Expression right;
 
-  public ExpBinOp(Exp e1, Op op, Exp e2) {
+  public BinOp(Expression e1, Op op, Expression e2) {
     this.left = e1;
     this.op = op;
     this.right = e2;
   }
 
   @Override
-  public <A, T extends Throwable> A accept(ExpVisitor<A, T> v) throws T{
+  public <A, T extends Throwable> A accept(ExpressionVisitor<A, T> v) throws T{
     return v.visit(this);
   }
 }

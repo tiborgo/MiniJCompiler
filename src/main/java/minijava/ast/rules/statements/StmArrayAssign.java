@@ -1,14 +1,14 @@
 package minijava.ast.rules.statements;
 
-import minijava.ast.rules.expressions.Exp;
+import minijava.ast.rules.expressions.Expression;
 
 public class StmArrayAssign extends Stm {
 
   final public String id;
-  final public Exp index;
-  final public Exp rhs;
+  final public Expression index;
+  final public Expression rhs;
 
-  public StmArrayAssign(String id, Exp index, Exp rhs) {
+  public StmArrayAssign(String id, Expression index, Expression rhs) {
     this.id = id;
     this.index = index;
     this.rhs = rhs;

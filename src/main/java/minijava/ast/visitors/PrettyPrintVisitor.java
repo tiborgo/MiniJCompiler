@@ -10,20 +10,20 @@ import minijava.ast.rules.declarations.DeclarationVisitor;
 import minijava.ast.rules.Parameter;
 import minijava.ast.rules.Prg;
 import minijava.ast.rules.PrgVisitor;
-import minijava.ast.rules.expressions.Exp;
-import minijava.ast.rules.expressions.ExpArrayGet;
-import minijava.ast.rules.expressions.ExpArrayLength;
-import minijava.ast.rules.expressions.ExpBinOp;
-import minijava.ast.rules.expressions.ExpFalse;
-import minijava.ast.rules.expressions.ExpId;
-import minijava.ast.rules.expressions.ExpIntConst;
-import minijava.ast.rules.expressions.ExpInvoke;
-import minijava.ast.rules.expressions.ExpNeg;
-import minijava.ast.rules.expressions.ExpNew;
-import minijava.ast.rules.expressions.ExpNewIntArray;
-import minijava.ast.rules.expressions.ExpThis;
-import minijava.ast.rules.expressions.ExpTrue;
-import minijava.ast.rules.expressions.ExpVisitor;
+import minijava.ast.rules.expressions.Expression;
+import minijava.ast.rules.expressions.ArrayGet;
+import minijava.ast.rules.expressions.ArrayLength;
+import minijava.ast.rules.expressions.BinOp;
+import minijava.ast.rules.expressions.False;
+import minijava.ast.rules.expressions.Id;
+import minijava.ast.rules.expressions.IntConstant;
+import minijava.ast.rules.expressions.Invoke;
+import minijava.ast.rules.expressions.Negate;
+import minijava.ast.rules.expressions.New;
+import minijava.ast.rules.expressions.NewIntArray;
+import minijava.ast.rules.expressions.This;
+import minijava.ast.rules.expressions.True;
+import minijava.ast.rules.expressions.ExpressionVisitor;
 import minijava.ast.rules.statements.Stm;
 import minijava.ast.rules.statements.StmArrayAssign;
 import minijava.ast.rules.statements.StmAssign;
@@ -109,7 +109,7 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 					+ " " + m.methodName + " (" + params + ") {\n"
 					+ prettyPrintVarList(m.localVars, indent + indentStep)
 					+ m.body.accept(new PrettyPrintVisitorStm(indent + indentStep)) + indent + indentStep
-		            + "return " + m.returnExp.accept(new PrettyPrintVisitorExp()) + ";\n"
+		            + "return " + m.returnExpression.accept(new PrettyPrintVisitorExp()) + ";\n"
 					+ indent + "}\n";
 		}
 
@@ -176,54 +176,54 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 	}
 
 	public static class PrettyPrintVisitorExp implements
-			ExpVisitor<String, RuntimeException> {
+			ExpressionVisitor<String, RuntimeException> {
 
 		@Override
-		public String visit(ExpTrue x) {
+		public String visit(True x) {
 			return "true";
 		}
 
 		@Override
-		public String visit(ExpFalse x) {
+		public String visit(False x) {
 			return "false";
 		}
 
 		@Override
-		public String visit(ExpThis x) {
+		public String visit(This x) {
 			return "this";
 		}
 
 		@Override
-		public String visit(ExpNewIntArray x) {
+		public String visit(NewIntArray x) {
 			return "new int [" + x.size.accept(this) + "]";
 		}
 
 		@Override
-		public String visit(ExpNew x) {
+		public String visit(New x) {
 			return "new " + x.className.toString() + "()";
 		}
 
 		@Override
-		public String visit(ExpBinOp e) {
+		public String visit(BinOp e) {
 			return "(" + e.left.accept(this) + e.op.toString()
 					+ e.right.accept(this) + ")";
 		}
 
 		@Override
-		public String visit(ExpArrayGet e) {
+		public String visit(ArrayGet e) {
 			return e.array.accept(this) + "[" + e.index.accept(this) + "]";
 		}
 
 		@Override
-		public String visit(ExpArrayLength e) {
+		public String visit(ArrayLength e) {
 			return e.array.accept(this) + ".length";
 		}
 
 		@Override
-		public String visit(ExpInvoke e) {
+		public String visit(Invoke e) {
 			String args = "";
 			String sep = "";
-			for (Exp ea : e.args) {
+			for (Expression ea : e.args) {
 				args += sep + ea.accept(new PrettyPrintVisitorExp());
 				sep = ", ";
 			}
@@ -232,17 +232,17 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 		}
 
 		@Override
-		public String visit(ExpIntConst x) {
+		public String visit(IntConstant x) {
 			return (new Integer(x.value)).toString();
 		}
 
 		@Override
-		public String visit(ExpId x) {
+		public String visit(Id x) {
 			return x.id;
 		}
 
 		@Override
-		public String visit(ExpNeg x) {
+		public String visit(Negate x) {
 			return "!(" + x.body.accept(this) + ")";
 		}
 	}
