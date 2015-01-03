@@ -1,4 +1,4 @@
-package minijava.ast.visitors;
+package minijava.intermediate.visitors;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -22,6 +22,7 @@ import minijava.MiniJavaLexer;
 import minijava.MiniJavaParser;
 import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Prg;
+import minijava.ast.visitors.SymbolTableVisitor;
 import minijava.backend.dummymachine.DummyMachineSpecifics;
 import minijava.backend.dummymachine.IntermediateToCmm;
 import minijava.intermediate.FragmentProc;

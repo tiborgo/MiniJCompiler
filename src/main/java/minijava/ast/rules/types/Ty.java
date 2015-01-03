@@ -1,7 +1,5 @@
 package minijava.ast.rules.types;
 
-import minijava.ast.visitors.TyVisitor;
-
 public abstract class Ty {
 
   @Override

@@ -14,7 +14,7 @@ import java.util.List;
 
 import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Prg;
-import minijava.ast.visitors.IntermediateVisitor;
+import minijava.intermediate.visitors.IntermediateVisitor;
 import minijava.ast.visitors.PrettyPrintVisitor;
 import minijava.ast.visitors.SymbolTableVisitor;
 import minijava.ast.visitors.TypeCheckVisitor;

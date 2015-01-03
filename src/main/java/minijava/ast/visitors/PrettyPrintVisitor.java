@@ -6,6 +6,9 @@ import minijava.ast.rules.DeclClass;
 import minijava.ast.rules.DeclMain;
 import minijava.ast.rules.DeclMeth;
 import minijava.ast.rules.DeclVar;
+import minijava.ast.rules.Parameter;
+import minijava.ast.rules.Prg;
+import minijava.ast.rules.PrgVisitor;
 import minijava.ast.rules.expressions.Exp;
 import minijava.ast.rules.expressions.ExpArrayGet;
 import minijava.ast.rules.expressions.ExpArrayLength;
@@ -19,8 +22,6 @@ import minijava.ast.rules.expressions.ExpNew;
 import minijava.ast.rules.expressions.ExpNewIntArray;
 import minijava.ast.rules.expressions.ExpThis;
 import minijava.ast.rules.expressions.ExpTrue;
-import minijava.ast.rules.Parameter;
-import minijava.ast.rules.Prg;
 import minijava.ast.rules.statements.Stm;
 import minijava.ast.rules.statements.StmArrayAssign;
 import minijava.ast.rules.statements.StmAssign;
@@ -28,11 +29,13 @@ import minijava.ast.rules.statements.StmIf;
 import minijava.ast.rules.statements.StmList;
 import minijava.ast.rules.statements.StmPrintChar;
 import minijava.ast.rules.statements.StmPrintlnInt;
+import minijava.ast.rules.statements.StmVisitor;
 import minijava.ast.rules.statements.StmWhile;
 import minijava.ast.rules.types.TyArr;
 import minijava.ast.rules.types.TyBool;
 import minijava.ast.rules.types.TyClass;
 import minijava.ast.rules.types.TyInt;
+import minijava.ast.rules.types.TyVisitor;
 import minijava.ast.rules.types.TyVoid;
 
 public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> {
@@ -62,7 +65,7 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 	}
 
 	public static class PrettyPrintVisitorDecl implements
-			DeclVisitor<String, RuntimeException> {
+			Parameter.DeclVisitor<String, RuntimeException> {
 
 		private final String indent;
 
@@ -171,7 +174,7 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 	}
 
 	public static class PrettyPrintVisitorExp implements
-			ExpVisitor<String, RuntimeException> {
+			ExpThis.ExpVisitor<String, RuntimeException> {
 
 		@Override
 		public String visit(ExpTrue x) {

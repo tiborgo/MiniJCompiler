@@ -1,7 +1,5 @@
 package minijava.ast.rules.types;
 
-import minijava.ast.visitors.TyVisitor;
-
 public class TyArr extends Ty {
 
   final public Ty ty;

@@ -1,7 +1,5 @@
 package minijava.ast.rules.types;
 
-import minijava.ast.visitors.TyVisitor;
-
 public class TyClass extends Ty {
 
   final public String c;

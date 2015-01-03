@@ -2,8 +2,6 @@ package minijava.ast.rules.statements;
 
 import java.util.List;
 
-import minijava.ast.visitors.StmVisitor;
-
 public class StmList extends Stm {
 
   final public List<Stm> stms;

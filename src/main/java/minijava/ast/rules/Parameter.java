@@ -1,7 +1,6 @@
 package minijava.ast.rules;
 
 import minijava.ast.rules.types.Ty;
-import minijava.ast.visitors.ParameterVisitor;
 
 public class Parameter {
 
@@ -15,5 +14,13 @@ public class Parameter {
 
 	public <A, T extends Throwable> A accept(ParameterVisitor<A, T> v) throws T {
 		return v.visit(this);
+	}
+
+	public static interface DeclVisitor<A, T extends Throwable> {
+
+		public A visit(DeclClass c) throws T;
+		public A visit(DeclMain d)  throws T;
+		public A visit(DeclMeth m)  throws T;
+		public A visit(DeclVar d)   throws T;
 	}
 }
