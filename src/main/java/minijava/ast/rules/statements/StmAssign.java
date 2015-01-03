@@ -1,16 +1,15 @@
-package minijava.ast.rules;
+package minijava.ast.rules.statements;
 
+import minijava.ast.rules.expressions.Exp;
 import minijava.ast.visitors.StmVisitor;
 
-public class StmArrayAssign extends Stm {
+public class StmAssign extends Stm {
 
   final public String id;
-  final public Exp index;
   final public Exp rhs;
 
-  public StmArrayAssign(String id, Exp index, Exp rhs) {
+  public StmAssign(String id, Exp rhs) {
     this.id = id;
-    this.index = index;
     this.rhs = rhs;
   }
 

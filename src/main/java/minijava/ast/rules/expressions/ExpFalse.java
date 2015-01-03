@@ -1,13 +1,10 @@
-package minijava.ast.rules;
+package minijava.ast.rules.expressions;
 
 import minijava.ast.visitors.ExpVisitor;
 
-public class ExpNeg extends Exp {
+public class ExpFalse extends Exp {
 
-  final public Exp body;
-
-  public ExpNeg(Exp body) {
-    this.body = body;
+  public ExpFalse() {
   }
 
   @Override

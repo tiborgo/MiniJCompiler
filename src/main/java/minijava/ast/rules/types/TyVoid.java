@@ -1,18 +1,15 @@
-package minijava.ast.rules;
+package minijava.ast.rules.types;
 
 import minijava.ast.visitors.TyVisitor;
 
-public class TyClass extends Ty {
+public class TyVoid extends Ty {
 
-  final public String c;
-
-  public TyClass(String c) {
-    this.c = c;
+  public TyVoid() {
   }
 
   @Override
   public String toString() {
-    return c;
+    return "boolean";
   }
 
   @Override
@@ -22,13 +19,12 @@ public class TyClass extends Ty {
 
   @Override
   public boolean equals(Object obj) {
-    return (obj instanceof TyClass && c.equals(((TyClass) obj).c));
+    return (obj instanceof TyVoid);
   }
 
   @Override
   public int hashCode() {
     int hash = 7;
-    hash = 29 * hash + (this.c != null ? this.c.hashCode() : 0);
     return hash;
   }
 }

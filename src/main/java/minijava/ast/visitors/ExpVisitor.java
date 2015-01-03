@@ -1,17 +1,17 @@
 package minijava.ast.visitors;
 
-import minijava.ast.rules.ExpArrayGet;
-import minijava.ast.rules.ExpArrayLength;
-import minijava.ast.rules.ExpBinOp;
-import minijava.ast.rules.ExpFalse;
-import minijava.ast.rules.ExpId;
-import minijava.ast.rules.ExpIntConst;
-import minijava.ast.rules.ExpInvoke;
-import minijava.ast.rules.ExpNeg;
-import minijava.ast.rules.ExpNew;
-import minijava.ast.rules.ExpNewIntArray;
-import minijava.ast.rules.ExpThis;
-import minijava.ast.rules.ExpTrue;
+import minijava.ast.rules.expressions.ExpArrayGet;
+import minijava.ast.rules.expressions.ExpArrayLength;
+import minijava.ast.rules.expressions.ExpBinOp;
+import minijava.ast.rules.expressions.ExpFalse;
+import minijava.ast.rules.expressions.ExpId;
+import minijava.ast.rules.expressions.ExpIntConst;
+import minijava.ast.rules.expressions.ExpInvoke;
+import minijava.ast.rules.expressions.ExpNeg;
+import minijava.ast.rules.expressions.ExpNew;
+import minijava.ast.rules.expressions.ExpNewIntArray;
+import minijava.ast.rules.expressions.ExpThis;
+import minijava.ast.rules.expressions.ExpTrue;
 
 
 public interface ExpVisitor<A, T extends Throwable> {

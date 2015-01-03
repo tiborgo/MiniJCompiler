@@ -1,4 +1,4 @@
-package minijava.ast.rules;
+package minijava.ast.rules.types;
 
 import minijava.ast.visitors.TyVisitor;
 

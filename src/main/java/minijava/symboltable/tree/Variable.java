@@ -1,6 +1,6 @@
 package minijava.symboltable.tree;
 
-import minijava.ast.rules.Ty;
+import minijava.ast.rules.types.Ty;
 
 public class Variable implements Node {
 

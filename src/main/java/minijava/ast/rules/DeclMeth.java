@@ -2,6 +2,9 @@ package minijava.ast.rules;
 
 import java.util.List;
 
+import minijava.ast.rules.expressions.Exp;
+import minijava.ast.rules.statements.Stm;
+import minijava.ast.rules.types.Ty;
 import minijava.ast.visitors.DeclVisitor;
 
 public class DeclMeth extends Decl {

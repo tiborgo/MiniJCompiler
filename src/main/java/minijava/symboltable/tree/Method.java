@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import minijava.ast.rules.Ty;
+import minijava.ast.rules.types.Ty;
 
 public class Method implements Node {
 	

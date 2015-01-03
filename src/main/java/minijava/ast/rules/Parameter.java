@@ -1,5 +1,6 @@
 package minijava.ast.rules;
 
+import minijava.ast.rules.types.Ty;
 import minijava.ast.visitors.ParameterVisitor;
 
 public class Parameter {

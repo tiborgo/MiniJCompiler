@@ -1,4 +1,4 @@
-package minijava.ast.rules;
+package minijava.ast.rules.statements;
 
 import minijava.ast.visitors.StmVisitor;
 
