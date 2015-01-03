@@ -22,13 +22,11 @@ import minijava.MiniJavaLexer;
 import minijava.MiniJavaParser;
 import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Prg;
-import minijava.symboltable.visitors.CreateSymbolTableVisitor;
 import minijava.backend.dummymachine.DummyMachineSpecifics;
 import minijava.backend.dummymachine.IntermediateToCmm;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.canon.Canon;
 import minijava.intermediate.tree.TreeStm;
-import minijava.symboltable.tree.Program;
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -63,8 +61,7 @@ public class IntermediateVisitorTest {
 				ASTVisitor astVisitor = new ASTVisitor();
 				Prg ast = (Prg) astVisitor.visit(parseTree);
 
-				Program symbolTable = ast.accept(new CreateSymbolTableVisitor());
-				visitor = new IntermediateVisitor(new DummyMachineSpecifics(), symbolTable);
+				visitor = new IntermediateVisitor(new DummyMachineSpecifics(), ast);
 				List<FragmentProc<TreeStm>> fragmentList = ast.accept(visitor);
 				// TODO: Remove canonicalization step from test
 				List<FragmentProc<List<TreeStm>>> fragmentListCanonicalized = new ArrayList<>(fragmentList.size());

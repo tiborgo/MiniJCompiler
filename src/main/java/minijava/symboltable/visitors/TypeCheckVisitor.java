@@ -35,13 +35,12 @@ import minijava.ast.rules.types.Integer;
 import minijava.ast.rules.types.Type;
 import minijava.ast.rules.types.TypeVisitor;
 import minijava.ast.rules.types.Void;
-import minijava.symboltable.tree.Program;
 
 public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeException> {
 	
-	private final Program symbolTable;
+	private final Prg symbolTable;
 
-	public TypeCheckVisitor(Program symbolTable) {
+	public TypeCheckVisitor(Prg symbolTable) {
 		this.symbolTable = symbolTable;
 	}
 	
@@ -62,16 +61,16 @@ public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeEx
 			StatementVisitor<java.lang.Boolean, RuntimeException>,
 			DeclarationVisitor<java.lang.Boolean, RuntimeException> {
 		
-		private final Program symbolTable;
+		private final Prg symbolTable;
 		private minijava.ast.rules.declarations.Class classContext;
 		private Method methodContext;
 		
-		public TypeCheckVisitorExpTyStm(Program symbolTable) {
+		public TypeCheckVisitorExpTyStm(Prg symbolTable) {
 			this.symbolTable = symbolTable;
 		}
 
 		// TODO: Remove constructor
-		public TypeCheckVisitorExpTyStm(Program symbolTable, minijava.ast.rules.declarations.Class classContext, Method methodContext) {
+		public TypeCheckVisitorExpTyStm(Prg symbolTable, minijava.ast.rules.declarations.Class classContext, Method methodContext) {
 			this.symbolTable = symbolTable;
 			this.classContext = classContext;
 			this.methodContext = methodContext;

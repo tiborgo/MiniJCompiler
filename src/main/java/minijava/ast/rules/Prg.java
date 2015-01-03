@@ -28,4 +28,12 @@ public class Prg {
 	public Collection<Class> getClasses() {
 		return Collections.unmodifiableCollection(classes.values());
 	}
+
+	public Class get(String className) {
+		return classes.get(className);
+	}
+
+	public boolean contains(String className) {
+		return classes.containsKey(className);
+	}
 }

@@ -8,17 +8,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import minijava.ast.rules.declarations.Main;
-import minijava.ast.rules.declarations.Method;
-import minijava.ast.rules.declarations.Variable;
-import minijava.ast.rules.declarations.DeclarationVisitor;
 import minijava.ast.rules.Parameter;
 import minijava.ast.rules.Prg;
 import minijava.ast.rules.PrgVisitor;
-import minijava.ast.rules.expressions.Expression;
+import minijava.ast.rules.declarations.DeclarationVisitor;
+import minijava.ast.rules.declarations.Main;
+import minijava.ast.rules.declarations.Method;
+import minijava.ast.rules.declarations.Variable;
 import minijava.ast.rules.expressions.ArrayGet;
 import minijava.ast.rules.expressions.ArrayLength;
 import minijava.ast.rules.expressions.BinOp;
+import minijava.ast.rules.expressions.Expression;
+import minijava.ast.rules.expressions.ExpressionVisitor;
 import minijava.ast.rules.expressions.False;
 import minijava.ast.rules.expressions.Id;
 import minijava.ast.rules.expressions.IntConstant;
@@ -28,20 +29,18 @@ import minijava.ast.rules.expressions.New;
 import minijava.ast.rules.expressions.NewIntArray;
 import minijava.ast.rules.expressions.This;
 import minijava.ast.rules.expressions.True;
-import minijava.ast.rules.expressions.ExpressionVisitor;
-import minijava.ast.rules.statements.Statement;
 import minijava.ast.rules.statements.ArrayAssignment;
 import minijava.ast.rules.statements.Assignment;
 import minijava.ast.rules.statements.If;
-import minijava.ast.rules.statements.StatementList;
 import minijava.ast.rules.statements.PrintChar;
 import minijava.ast.rules.statements.PrintlnInt;
+import minijava.ast.rules.statements.Statement;
+import minijava.ast.rules.statements.StatementList;
 import minijava.ast.rules.statements.StatementVisitor;
 import minijava.ast.rules.statements.While;
 import minijava.ast.rules.types.Array;
 import minijava.ast.rules.types.Class;
 import minijava.ast.rules.types.Integer;
-import minijava.symboltable.visitors.TypeCheckVisitor;
 import minijava.backend.MachineSpecifics;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.Frame;
@@ -64,7 +63,7 @@ import minijava.intermediate.tree.TreeStmJUMP;
 import minijava.intermediate.tree.TreeStmLABEL;
 import minijava.intermediate.tree.TreeStmMOVE;
 import minijava.intermediate.tree.TreeStmSEQ;
-import minijava.symboltable.tree.Program;
+import minijava.symboltable.visitors.TypeCheckVisitor;
 
 public class IntermediateVisitor implements
 		PrgVisitor<List<FragmentProc<TreeStm>>, RuntimeException>,
@@ -75,9 +74,9 @@ public class IntermediateVisitor implements
 	private final MachineSpecifics  machineSpecifics;
 	private final Map<String, TreeExp> classTemps;
 	private Map<String, java.lang.Integer> memoryFootprint;
-	private final Program symbolTable;
+	private final Prg symbolTable;
 
-	public IntermediateVisitor(MachineSpecifics machineSpecifics, Program symbolTable) {
+	public IntermediateVisitor(MachineSpecifics machineSpecifics, Prg symbolTable) {
 		this.machineSpecifics = machineSpecifics;
 		classTemps = new HashMap<>();
 		this.symbolTable = symbolTable;
@@ -192,7 +191,7 @@ public class IntermediateVisitor implements
 			ExpressionVisitor<TreeExp, RuntimeException>,
 			StatementVisitor<TreeStm, RuntimeException> {
 
-		private final Program symbolTable;
+		private final Prg symbolTable;
 		private final minijava.ast.rules.declarations.Class classContext;
 		private final Method methodContext;
 		private final Map<String, java.lang.Integer> memoryFootprint;
@@ -204,7 +203,7 @@ public class IntermediateVisitor implements
 				minijava.ast.rules.declarations.Class classContext,
 				Method methodContext,
 				Map<String, java.lang.Integer> memoryFootprint,
-				Program symbolTable) {
+				Prg symbolTable) {
 			this.temps = temps;
 			this.machineSpecifics = machineSpecifics;
 			this.classContext = classContext;

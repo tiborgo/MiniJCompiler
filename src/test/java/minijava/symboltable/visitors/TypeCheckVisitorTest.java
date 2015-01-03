@@ -15,7 +15,6 @@ import minijava.MiniJavaLexer;
 import minijava.MiniJavaParser;
 import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Prg;
-import minijava.symboltable.tree.Program;
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -41,9 +40,7 @@ public class TypeCheckVisitorTest {
 				ParseTree parseTree = parser.prog();
 				ASTVisitor astVisitor = new ASTVisitor();
 				Prg ast = (Prg) astVisitor.visit(parseTree);
-				CreateSymbolTableVisitor createSymbolTableVisitor = new CreateSymbolTableVisitor();
-				Program symbolTable = createSymbolTableVisitor.visit(ast);
-				TypeCheckVisitor visitor = new TypeCheckVisitor(symbolTable);
+				TypeCheckVisitor visitor = new TypeCheckVisitor(ast);
 				boolean typesCorrect = ast.accept(visitor);
 				assertTrue(typesCorrect);
 				return super.visitFile(file, attrs);

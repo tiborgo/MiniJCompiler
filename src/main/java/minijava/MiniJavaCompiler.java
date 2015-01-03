@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-//import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -16,10 +15,7 @@ import java.util.Set;
 
 import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Prg;
-import minijava.intermediate.visitors.IntermediateVisitor;
 import minijava.ast.visitors.PrettyPrintVisitor;
-import minijava.symboltable.visitors.CreateSymbolTableVisitor;
-import minijava.symboltable.visitors.TypeCheckVisitor;
 import minijava.ast.visitors.baseblocks.BaseBlock;
 import minijava.ast.visitors.baseblocks.Generator;
 import minijava.ast.visitors.baseblocks.ToTreeStmConverter;
@@ -36,10 +32,10 @@ import minijava.intermediate.Label;
 import minijava.intermediate.Temp;
 import minijava.intermediate.canon.Canon;
 import minijava.intermediate.tree.TreeStm;
-import minijava.symboltable.tree.Program;
+import minijava.intermediate.visitors.IntermediateVisitor;
+import minijava.symboltable.visitors.TypeCheckVisitor;
 import minijava.util.Pair;
 import minijava.util.SimpleGraph;
-
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -49,6 +45,8 @@ import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+
+//import java.nio.file.Files;
 
 public class MiniJavaCompiler {
 	private static final Path RUNTIME_DIRECTORY = Paths.get("src/main/resources/minijava/runtime");
@@ -144,11 +142,10 @@ public class MiniJavaCompiler {
 		}
 	}
 	
-	private Program inferTypes(Prg program) throws CompilerException {
+	private Prg inferTypes(Prg program) throws CompilerException {
 		
 		try {
-			CreateSymbolTableVisitor createSymbolTableVisitor = new CreateSymbolTableVisitor();
-			Program symbolTable = program.accept(createSymbolTableVisitor);
+			Prg symbolTable = program;
 			
 			printVerbose("Successfully built symbol table");
 			
@@ -160,7 +157,7 @@ public class MiniJavaCompiler {
 		}
 	}
 	
-	private void checkTypes(Prg program, Program symbolTable) throws CompilerException {
+	private void checkTypes(Prg program, Prg symbolTable) throws CompilerException {
 
 		TypeCheckVisitor typeCheckVisitor = new TypeCheckVisitor(symbolTable);
 		if (program.accept(typeCheckVisitor)) {
@@ -173,7 +170,7 @@ public class MiniJavaCompiler {
 		}
 	}
 	
-	private List<FragmentProc<TreeStm>> generateIntermediate(Prg program, Program symbolTable) throws CompilerException {
+	private List<FragmentProc<TreeStm>> generateIntermediate(Prg program, Prg symbolTable) throws CompilerException {
 		
 		try {
 			IntermediateVisitor intermediateVisitor = new IntermediateVisitor(machineSpecifics, symbolTable);
@@ -446,7 +443,7 @@ public class MiniJavaCompiler {
 	
 	public void compile(String gcc) throws CompilerException {
 		Prg program = parse();
-		Program symbolTable = inferTypes(program);
+		Prg symbolTable = inferTypes(program);
 		if (!skipTypeCheck) {
 			checkTypes(program, symbolTable);
 		}
