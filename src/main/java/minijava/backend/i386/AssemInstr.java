@@ -53,7 +53,7 @@ public final class AssemInstr extends DefaultInstruction {
 	}
 	
 	public Assem rename(Function<Temp, Temp> sigma) {
-		throw new UnsupportedOperationException("Not supported yet.");
+		return this;
 	}
 	
 	@Override

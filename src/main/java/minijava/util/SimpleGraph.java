@@ -72,6 +72,13 @@ public class SimpleGraph<NodeInfo> {
 		this.name = name;
 	}
 	
+	public SimpleGraph(SimpleGraph<NodeInfo> toCopy) {
+		this.nodes.addAll(toCopy.nodes);
+		this.successors.putAll(toCopy.successors);
+		this.predecessors.putAll(toCopy.predecessors);
+		this.name = toCopy.name;
+	}
+
 	public String getName() {
 		return name;
 	}

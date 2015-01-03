@@ -79,7 +79,7 @@ public final class AssemBinaryOp extends DefaultInstruction {
 
 	@Override
 	public Assem rename(Function<Temp, Temp> sigma) {
-		throw new UnsupportedOperationException("Not supported yet.");
+		return new AssemBinaryOp(kind, dst.rename(sigma), src.rename(sigma));
 	}
 
 	@Override

@@ -76,7 +76,7 @@ public final class AssemJump extends DefaultInstruction {
 	}
 
 	public Assem rename(Function<Temp, Temp> sigma) {
-		throw new UnsupportedOperationException("Not supported yet.");
+		return new AssemJump(kind, dest.rename(sigma), cond);
 	}
 
 	@Override

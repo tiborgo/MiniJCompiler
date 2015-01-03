@@ -16,10 +16,7 @@ import java.util.Set;
 
 import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Prg;
-import minijava.intermediate.visitors.IntermediateVisitor;
 import minijava.ast.visitors.PrettyPrintVisitor;
-import minijava.symboltable.visitors.CreateSymbolTableVisitor;
-import minijava.symboltable.visitors.TypeCheckVisitor;
 import minijava.ast.visitors.baseblocks.BaseBlock;
 import minijava.ast.visitors.baseblocks.Generator;
 import minijava.ast.visitors.baseblocks.ToTreeStmConverter;
@@ -30,7 +27,6 @@ import minijava.backend.i386.I386MachineSpecifics;
 import minijava.backend.livenessanalysis.ControlFlowGraphBuilder;
 import minijava.backend.livenessanalysis.InterferenceGraphBuilder;
 import minijava.backend.livenessanalysis.LivenessSetsBuilder;
-import minijava.backend.livenessanalysis.ReverseOrderBuilder;
 import minijava.backend.registerallocation.Allocator;
 import minijava.backend.registerallocation.ColoredNode;
 import minijava.intermediate.Fragment;
@@ -39,7 +35,10 @@ import minijava.intermediate.Label;
 import minijava.intermediate.Temp;
 import minijava.intermediate.canon.Canon;
 import minijava.intermediate.tree.TreeStm;
+import minijava.intermediate.visitors.IntermediateVisitor;
 import minijava.symboltable.tree.Program;
+import minijava.symboltable.visitors.CreateSymbolTableVisitor;
+import minijava.symboltable.visitors.TypeCheckVisitor;
 import minijava.util.Pair;
 import minijava.util.SimpleGraph;
 
@@ -91,7 +90,10 @@ public class MiniJavaCompiler {
 	@Option(name = "--print-source-code", usage = "Pretty print the input source code", depends = "--verbose")
 	private boolean printSourceCode;
 	
-	@Option(name = "--print-assembly", aliases = {"-a"}, usage = "Prints the assembly", depends = "--verbose")
+	@Option(name = "--print-pre-assembly", aliases = {"-pa"}, usage = "Prints the assembly with temporiaries and unspecified frame size", depends = "--verbose")
+	private boolean printPreAssembly;
+	
+	@Option(name = "--print-assembly", aliases = {"-a"}, usage = "Prints the final assembly", depends = "--verbose")
 	private boolean printAssembly;
 	
 	@Option(name = "--print-control-flow-graphs", aliases = {"-cfg"}, usage = "Prints the control flow graph", depends = "--verbose")
@@ -218,7 +220,7 @@ public class MiniJavaCompiler {
 		}
 	}
 	
-	private List<Fragment<List<Assem>>> generateAssembly (List<FragmentProc<List<TreeStm>>> intermediateCanonicalized) throws CompilerException {
+	private List<Fragment<List<Assem>>> generatePreAssembly (List<FragmentProc<List<TreeStm>>> intermediateCanonicalized) throws CompilerException {
 		
 		try {
 			List<Fragment<List<Assem>>> assemFragments = new LinkedList<>();
@@ -226,29 +228,18 @@ public class MiniJavaCompiler {
 				assemFragments.add(machineSpecifics.codeGen(fragment));
 			}
 			
-			printVerbose("Successfully generated assembly");
+			String assembly = null;
+			if (printPreAssembly) {
+				assembly = machineSpecifics.printAssembly(assemFragments);
+			}
+			
+			printVerbose("Successfully generated assembly", assembly);
 			
 			return assemFragments;
 		}
 		catch (Exception e) {
 			// TODO: proper exception
 			throw new CompilerException("Failed to generate assembly", e);
-		}
-	}
-	
-	private String generateAssemblyCode (List<Fragment<List<Assem>>> assemFragments) throws CompilerException {
-		
-		try {
-			String assembly = machineSpecifics.printAssembly(assemFragments);
-			
-			printVerbose("Successfully generated assembly code",
-					(printAssembly) ? assembly : null);
-			
-			return assembly;
-		}
-		catch (Exception e) {
-			// TODO: proper exception
-			throw new CompilerException("Failed to generate assembly code", e);
 		}
 	}
 
@@ -300,12 +291,20 @@ public class MiniJavaCompiler {
 		}
 	}
 	
-	private void allocateRegisters(List<SimpleGraph<Temp>> interferenceGraphs) throws CompilerException {
+	private void allocateRegisters(List<SimpleGraph<Temp>> interferenceGraphs, List<Fragment<List<Assem>>> assemFragments) throws CompilerException {
 		
 		try {
 			List<SimpleGraph<ColoredNode>> colroedInterferenceGraphs = new LinkedList<>();
-			for (SimpleGraph<Temp> interferenceGraph : interferenceGraphs) {
-				colroedInterferenceGraphs.add(Allocator.allocate(interferenceGraph, machineSpecifics));
+			for (int i = 0; i < interferenceGraphs.size(); i++) {
+			//for (SimpleGraph<Temp> interferenceGraph : interferenceGraphs) {
+				SimpleGraph<Temp> interferenceGraph = interferenceGraphs.get(i);
+				try {
+					FragmentProc<List<Assem>> assemFragment = (FragmentProc<List<Assem>>)assemFragments.get(i);
+					colroedInterferenceGraphs.add(Allocator.allocate(interferenceGraph, assemFragment, machineSpecifics));
+				}
+				catch (ClassCastException e) {
+					throw new CompilerException("Can only alocate registers for FragementProc");
+				}
 			}
 			
 			String graphOutput = null;
@@ -376,6 +375,21 @@ public class MiniJavaCompiler {
 		}
 		
 		return graphOutput.toString();
+	}
+	
+	private String generateAssembly (List<Fragment<List<Assem>>> assemFragments) throws CompilerException {
+		try {
+			
+			String assembly = machineSpecifics.printAssembly(assemFragments);;
+			
+			printVerbose("Successfully generated assembly", (printAssembly) ? assembly : null);
+			
+			return assembly;
+		}
+		catch (Exception e) {
+			// TODO: proper exception
+			throw new CompilerException("Failed to generate assembly", e);
+		}
 	}
 	
 	private void compileAssembly (String gcc, String assembly) throws CompilerException {
@@ -481,14 +495,13 @@ public class MiniJavaCompiler {
 		}
 		List<FragmentProc<TreeStm>> intermediate = generateIntermediate(program, symbolTable);
 		List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = canonicalize(intermediate); 
-		List<Fragment<List<Assem>>> assemFragments = generateAssembly(intermediateCanonicalized);
-		String assembly = generateAssemblyCode(assemFragments);
+		List<Fragment<List<Assem>>> assemFragments = generatePreAssembly(intermediateCanonicalized);
 		List<SimpleGraph<Assem>> controlFlowGraphs = generateControlFlowGraphs(assemFragments);
 		List<SimpleGraph<Temp>> inferenceGraphs = generateInterferenceGraphs(controlFlowGraphs);
 		
-		allocateRegisters(inferenceGraphs);
-		
-		// TODO Allocate registers
+		allocateRegisters(inferenceGraphs, assemFragments);
+
+		String assembly = generateAssembly(assemFragments);
 		
 		compileAssembly(gcc, assembly);
 		if (runExecutable) {
