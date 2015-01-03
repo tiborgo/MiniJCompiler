@@ -63,7 +63,7 @@ import minijava.intermediate.tree.TreeStmJUMP;
 import minijava.intermediate.tree.TreeStmLABEL;
 import minijava.intermediate.tree.TreeStmMOVE;
 import minijava.intermediate.tree.TreeStmSEQ;
-import minijava.symboltable.visitors.TypeCheckVisitor;
+import minijava.ast.visitors.TypeCheckVisitor;
 
 public class IntermediateVisitor implements
 		ProgramVisitor<List<FragmentProc<TreeStm>>, RuntimeException>,
