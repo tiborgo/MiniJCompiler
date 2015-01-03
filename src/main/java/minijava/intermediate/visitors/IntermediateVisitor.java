@@ -1,4 +1,4 @@
-package minijava.ast.visitors;
+package minijava.intermediate.visitors;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,6 +12,9 @@ import minijava.ast.rules.DeclClass;
 import minijava.ast.rules.DeclMain;
 import minijava.ast.rules.DeclMeth;
 import minijava.ast.rules.DeclVar;
+import minijava.ast.rules.Parameter;
+import minijava.ast.rules.Prg;
+import minijava.ast.rules.PrgVisitor;
 import minijava.ast.rules.expressions.Exp;
 import minijava.ast.rules.expressions.ExpArrayGet;
 import minijava.ast.rules.expressions.ExpArrayLength;
@@ -25,8 +28,6 @@ import minijava.ast.rules.expressions.ExpNew;
 import minijava.ast.rules.expressions.ExpNewIntArray;
 import minijava.ast.rules.expressions.ExpThis;
 import minijava.ast.rules.expressions.ExpTrue;
-import minijava.ast.rules.Parameter;
-import minijava.ast.rules.Prg;
 import minijava.ast.rules.statements.Stm;
 import minijava.ast.rules.statements.StmArrayAssign;
 import minijava.ast.rules.statements.StmAssign;
@@ -34,10 +35,12 @@ import minijava.ast.rules.statements.StmIf;
 import minijava.ast.rules.statements.StmList;
 import minijava.ast.rules.statements.StmPrintChar;
 import minijava.ast.rules.statements.StmPrintlnInt;
+import minijava.ast.rules.statements.StmVisitor;
 import minijava.ast.rules.statements.StmWhile;
 import minijava.ast.rules.types.TyArr;
 import minijava.ast.rules.types.TyClass;
 import minijava.ast.rules.types.TyInt;
+import minijava.ast.visitors.TypeCheckVisitor;
 import minijava.backend.MachineSpecifics;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.Frame;
@@ -65,8 +68,8 @@ import minijava.symboltable.tree.Method;
 import minijava.symboltable.tree.Program;
 
 public class IntermediateVisitor implements
-	PrgVisitor<List<FragmentProc<TreeStm>>, RuntimeException>,
-	DeclVisitor<List<FragmentProc<TreeStm>>, RuntimeException> {
+		PrgVisitor<List<FragmentProc<TreeStm>>, RuntimeException>,
+		Parameter.DeclVisitor<List<FragmentProc<TreeStm>>, RuntimeException> {
 	
 	private DeclClass classContext;
 	private DeclMeth methodContext;
@@ -187,8 +190,8 @@ public class IntermediateVisitor implements
 	}
 
 	static public class IntermediateVisitorExpStm implements
-		ExpVisitor<TreeExp, RuntimeException>,
-		StmVisitor<TreeStm, RuntimeException> {
+			ExpThis.ExpVisitor<TreeExp, RuntimeException>,
+			StmVisitor<TreeStm, RuntimeException> {
 
 		private final Program symbolTable;
 		private final DeclClass classContext;

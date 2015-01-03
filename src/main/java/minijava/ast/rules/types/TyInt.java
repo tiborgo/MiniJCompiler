@@ -1,7 +1,5 @@
 package minijava.ast.rules.types;
 
-import minijava.ast.visitors.TyVisitor;
-
 public class TyInt extends Ty {
 
   public TyInt() {

@@ -2,8 +2,6 @@ package minijava.ast.rules;
 
 import java.util.List;
 
-import minijava.ast.visitors.PrgVisitor;
-
 public class Prg {
 
   final public DeclMain mainClass;

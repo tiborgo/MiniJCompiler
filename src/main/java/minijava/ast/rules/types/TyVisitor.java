@@ -1,10 +1,4 @@
-package minijava.ast.visitors;
-
-import minijava.ast.rules.types.TyArr;
-import minijava.ast.rules.types.TyBool;
-import minijava.ast.rules.types.TyClass;
-import minijava.ast.rules.types.TyInt;
-import minijava.ast.rules.types.TyVoid;
+package minijava.ast.rules.types;
 
 public interface TyVisitor<A, T extends Throwable> {
 

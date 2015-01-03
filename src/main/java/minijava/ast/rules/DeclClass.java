@@ -2,8 +2,6 @@ package minijava.ast.rules;
 
 import java.util.List;
 
-import minijava.ast.visitors.DeclVisitor;
-
 public class DeclClass extends Decl {
 
   final public String className;
@@ -20,7 +18,7 @@ public class DeclClass extends Decl {
   }
 
 	@Override
-	public <A, T extends Throwable> A accept(DeclVisitor<A, T> v) throws T {
+	public <A, T extends Throwable> A accept(Parameter.DeclVisitor<A, T> v) throws T {
 		return v.visit(this);
 	}
 }

@@ -12,14 +12,12 @@ import java.nio.file.attribute.BasicFileAttributes;
 import static org.junit.Assert.fail;
 import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Prg;
-import minijava.ast.visitors.PrettyPrintVisitor;
 import minijava.ast.visitors.SymbolTableVisitor;
 import minijava.ast.visitors.TypeCheckVisitor;
 import minijava.symboltable.tree.Program;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
-import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.misc.ParseCancellationException;

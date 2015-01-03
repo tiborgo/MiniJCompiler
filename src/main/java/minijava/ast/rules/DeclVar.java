@@ -1,7 +1,6 @@
 package minijava.ast.rules;
 
 import minijava.ast.rules.types.Ty;
-import minijava.ast.visitors.DeclVisitor;
 
 public class DeclVar extends Decl {
 
@@ -14,7 +13,7 @@ public class DeclVar extends Decl {
 	}
 
 	@Override
-	public <A, T extends Throwable> A accept(DeclVisitor<A, T> v) throws T {
+	public <A, T extends Throwable> A accept(Parameter.DeclVisitor<A, T> v) throws T {
 		return v.visit(this);
 	}
 }
