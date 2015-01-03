@@ -163,6 +163,9 @@ public class AssemblerVisitor implements
 		public Operand visit(TreeExpOP e) throws RuntimeException {
 			Operand o1 = e.left.accept(this);
 			Operand o2 = e.right.accept(this);
+			
+			assert(!(o1 instanceof Operand.Label));
+			
 			AssemBinaryOp.Kind operatorBinary = null;
 			switch (e.op) {
 				// Unary operators
@@ -212,12 +215,16 @@ public class AssemblerVisitor implements
 							"Unsupported operator \""+ e.op + "\"");
 			}
 
-			// Binary instructions
-			if (o1 instanceof Operand.Imm) {
+			// Destination of most arithmetical and some logical operations cannot be immediates
+			// (whenever the destination is changed by the operation it must be a register or memory location)
+			if (o1 instanceof Operand.Imm &&
+					(operatorBinary == Kind.ADD || operatorBinary == Kind.SUB || operatorBinary == Kind.SHL || operatorBinary == Kind.SHR || operatorBinary == Kind.SAR)) {
 				Operand.Reg o1_ = new Operand.Reg(new Temp());
 				emit(new AssemBinaryOp(Kind.MOV, o1_, o1));
 				o1 = o1_;
 			}
+			
+			// Binary instructions
 			AssemBinaryOp binaryOperation = new AssemBinaryOp(operatorBinary, o1, o2);
 			emit(binaryOperation);
 			return o1;
