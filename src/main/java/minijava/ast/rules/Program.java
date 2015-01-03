@@ -30,6 +30,9 @@ public class Program {
 	}
 
 	public Class get(String className) {
+		/*if (mainClass.className.equals(className)) {
+			return mainClass;
+		}*/
 		return classes.get(className);
 	}
 

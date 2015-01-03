@@ -137,7 +137,7 @@ public class PrettyPrintVisitor implements ProgramVisitor<String, RuntimeExcepti
 					+ indent
 					+ indentStep
 					+ "public static void main (String[] "
-					+ d.mainArg.toString()
+					+ d.mainMethod.methodName
 					+ ") {\n"
 					+ d.mainBody.accept(new PrettyPrintVisitorStm(indent
 							+ indentStep + indentStep)) + indent + indentStep
