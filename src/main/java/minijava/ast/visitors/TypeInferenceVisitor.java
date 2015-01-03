@@ -258,6 +258,7 @@ public class TypeInferenceVisitor implements ProgramVisitor<Void, RuntimeExcepti
 
 		@Override
 		public Void visit(Assignment s) throws RuntimeException {
+			s.id.accept(this);
 			s.rhs.accept(this);
 			return null;	
 		}

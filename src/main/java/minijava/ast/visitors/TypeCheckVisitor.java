@@ -99,7 +99,7 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 
 
 			ok = (m.body.accept(this)) ? ok : false;
-			ok = (m.returnExpression.accept(this).equals(m.type)) ? ok : false;
+			ok = (m.returnExpression.type.equals(m.type)) ? ok : false;
 
 			methodContext = null;
 
@@ -299,17 +299,17 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 		
 		@Override
 		public java.lang.Boolean visit(Void t) {
-			return true;
+			return java.lang.Boolean.TRUE;
 		}
 
 		@Override
 		public java.lang.Boolean visit(Boolean t) {
-			return true;
+			return java.lang.Boolean.TRUE;
 		}
 
 		@Override
 		public java.lang.Boolean visit(Integer t) {
-			return true;
+			return java.lang.Boolean.TRUE;
 		}
 
 		@Override
@@ -334,8 +334,7 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 
 		@Override
 		public java.lang.Boolean visit(If s) throws RuntimeException {
-			Type type = s.cond.accept(this);
-			if (!(type instanceof Boolean)) {
+			if (!(s.cond.type instanceof Boolean)) {
 				return java.lang.Boolean.FALSE;
 			}
 			return s.bodyTrue.accept(this).booleanValue() && s.bodyFalse.accept(this).booleanValue();
@@ -343,8 +342,7 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 
 		@Override
 		public java.lang.Boolean visit(While s) throws RuntimeException {
-			Type type = s.cond.accept(this);
-			if (!(type instanceof Boolean)) {
+			if (!(s.cond.type instanceof Boolean)) {
 				return java.lang.Boolean.FALSE;
 			}
 			return s.body.accept(this);
@@ -352,46 +350,46 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 
 		@Override
 		public java.lang.Boolean visit(PrintlnInt s) throws RuntimeException {
-			Type expressionType = s.arg.accept(this);
-			if (!(expressionType instanceof Integer)) {
-				return java.lang.Boolean.FALSE;
+			if (s.arg.type instanceof Integer) {
+				return java.lang.Boolean.TRUE;
 			}
-			return java.lang.Boolean.TRUE;
+			return java.lang.Boolean.FALSE;
 		}
 
 		@Override
 		public java.lang.Boolean visit(PrintChar s) throws RuntimeException {
-			//Ty expressionType = s.arg.accept(this);
 			// TODO: No type class for type char?
-			return java.lang.Boolean.TRUE;
+			if (s.arg.type instanceof Integer) {
+				return java.lang.Boolean.TRUE;
+			}
+			return java.lang.Boolean.FALSE;
 		}
 
 		@Override
 		public java.lang.Boolean visit(Assignment s) throws RuntimeException {
-			Type idType     =  s.id.accept(this);
-			Type assignType = s.rhs.accept(this);
+			Type idType     =  s.id.type;
+			Type assignType = s.rhs.type;
 			
 			if (idType.equals(assignType)) {
 				return java.lang.Boolean.TRUE;
 			}
-			else {
-				return java.lang.Boolean.FALSE;
-			}
+			return java.lang.Boolean.FALSE;
 		}
 
 		@Override
 		public java.lang.Boolean visit(ArrayAssignment s) throws RuntimeException {
-			Array arrayType  = (Array) s.id.accept(this);
-			Type assignType = s.rhs.accept(this);
-			Type indexType  = s.index.accept(this);
-			
-			if (assignType.equals(arrayType.type) &&
-					indexType.equals(new Integer())) {
-				return java.lang.Boolean.TRUE;
-			}
-			else {
+			Type arrayType  = s.id.type;
+			if (!(arrayType instanceof Array)) {
 				return java.lang.Boolean.FALSE;
 			}
+			Type assignType = s.rhs.type;
+			Type indexType  = s.index.type;
+			
+			if (assignType.equals(((Array) arrayType).type) &&
+					indexType instanceof Integer) {
+				return java.lang.Boolean.TRUE;
+			}
+			return java.lang.Boolean.FALSE;
 		}
 	}
 }
