@@ -10,10 +10,7 @@ import java.util.Map;
 
 import minijava.ast.rules.Program;
 import minijava.ast.rules.ProgramVisitor;
-import minijava.ast.rules.declarations.DeclarationVisitor;
-import minijava.ast.rules.declarations.Main;
-import minijava.ast.rules.declarations.Method;
-import minijava.ast.rules.declarations.Variable;
+import minijava.ast.rules.declarations.*;
 import minijava.ast.rules.expressions.ArrayGet;
 import minijava.ast.rules.expressions.ArrayLength;
 import minijava.ast.rules.expressions.BinOp;
@@ -111,17 +108,8 @@ public class IntermediateVisitor implements
 
 	@Override
 	public List<FragmentProc<TreeStm>> visit(Main d) throws RuntimeException {
-
-		Method mainMethod = d.mainMethod;
-		
-		minijava.ast.rules.declarations.Class mainClass = new minijava.ast.rules.declarations.Class(
-			d.className,
-			null,
-			Collections.<Variable>emptyList(),
-			Arrays.asList(mainMethod)
-		);
-
-		return mainClass.accept(this);
+		// Treat main class like a regular class
+		return visit((minijava.ast.rules.declarations.Class) d);
 	}
 
 	@Override
