@@ -24,15 +24,15 @@ import minijava.ast.rules.expressions.NewIntArray;
 import minijava.ast.rules.expressions.This;
 import minijava.ast.rules.expressions.True;
 import minijava.ast.rules.expressions.ExpressionVisitor;
-import minijava.ast.rules.statements.Stm;
-import minijava.ast.rules.statements.StmArrayAssign;
-import minijava.ast.rules.statements.StmAssign;
-import minijava.ast.rules.statements.StmIf;
-import minijava.ast.rules.statements.StmList;
-import minijava.ast.rules.statements.StmPrintChar;
-import minijava.ast.rules.statements.StmPrintlnInt;
-import minijava.ast.rules.statements.StmVisitor;
-import minijava.ast.rules.statements.StmWhile;
+import minijava.ast.rules.statements.Statement;
+import minijava.ast.rules.statements.ArrayAssignment;
+import minijava.ast.rules.statements.Assignment;
+import minijava.ast.rules.statements.If;
+import minijava.ast.rules.statements.StatementList;
+import minijava.ast.rules.statements.PrintChar;
+import minijava.ast.rules.statements.PrintlnInt;
+import minijava.ast.rules.statements.StatementVisitor;
+import minijava.ast.rules.statements.While;
 import minijava.ast.rules.types.TyArr;
 import minijava.ast.rules.types.TyBool;
 import minijava.ast.rules.types.TyClass;
@@ -248,7 +248,7 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 	}
 
 	public static class PrettyPrintVisitorStm implements
-			StmVisitor<String, RuntimeException> {
+			StatementVisitor<String, RuntimeException> {
 
 		final String indent;
 
@@ -261,16 +261,16 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 		}
 
 		@Override
-		public String visit(StmList slist) {
+		public String visit(StatementList slist) {
 			StringBuffer str = new StringBuffer();
-			for (Stm s : slist.stms) {
+			for (Statement s : slist.statements) {
 				str.append(s.accept(new PrettyPrintVisitorStm(indent)));
 			}
 			return str.toString();
 		}
 
 		@Override
-		public String visit(StmIf s) {
+		public String visit(If s) {
 			return indent
 					+ "if ("
 					+ s.cond.accept(new PrettyPrintVisitorExp())
@@ -284,7 +284,7 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 		}
 
 		@Override
-		public String visit(StmWhile s) {
+		public String visit(While s) {
 
 			return indent
 					+ "while ("
@@ -295,25 +295,25 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 		}
 
 		@Override
-		public String visit(StmPrintlnInt s) {
+		public String visit(PrintlnInt s) {
 			return indent + "System.out.println("
 					+ s.arg.accept(new PrettyPrintVisitorExp()) + ");\n";
 		}
 
 		@Override
-		public String visit(StmPrintChar s) {
+		public String visit(PrintChar s) {
 			return indent + "System.out.print((char)"
 					+ s.arg.accept(new PrettyPrintVisitorExp()) + ");\n";
 		}
 
 		@Override
-		public String visit(StmAssign s) {
+		public String visit(Assignment s) {
 			return indent + s.id + " = "
 					+ s.rhs.accept(new PrettyPrintVisitorExp()) + ";\n";
 		}
 
 		@Override
-		public String visit(StmArrayAssign s) {
+		public String visit(ArrayAssignment s) {
 			return indent + s.id + "["
 					+ s.index.accept(new PrettyPrintVisitorExp()) + "] = "
 					+ s.rhs.accept(new PrettyPrintVisitorExp()) + ";\n";

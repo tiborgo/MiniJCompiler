@@ -2,18 +2,18 @@ package minijava.ast.rules.statements;
 
 import minijava.ast.rules.expressions.Expression;
 
-public class StmWhile extends Stm {
+public class While extends Statement {
 
   final public Expression cond;
-  final public Stm body;
+  final public Statement body;
 
-  public StmWhile(Expression cond, Stm body) {
+  public While(Expression cond, Statement body) {
     this.cond = cond;
     this.body = body;
   }
 
   @Override
-  public <A, T extends Throwable> A accept(StmVisitor<A, T> v) throws T {
+  public <A, T extends Throwable> A accept(StatementVisitor<A, T> v) throws T {
     return v.visit(this);
   }
 }

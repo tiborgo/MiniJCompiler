@@ -20,15 +20,15 @@ import minijava.ast.rules.expressions.NewIntArray;
 import minijava.ast.rules.expressions.This;
 import minijava.ast.rules.expressions.True;
 import minijava.ast.rules.expressions.ExpressionVisitor;
-import minijava.ast.rules.statements.Stm;
-import minijava.ast.rules.statements.StmArrayAssign;
-import minijava.ast.rules.statements.StmAssign;
-import minijava.ast.rules.statements.StmIf;
-import minijava.ast.rules.statements.StmList;
-import minijava.ast.rules.statements.StmPrintChar;
-import minijava.ast.rules.statements.StmPrintlnInt;
-import minijava.ast.rules.statements.StmVisitor;
-import minijava.ast.rules.statements.StmWhile;
+import minijava.ast.rules.statements.Statement;
+import minijava.ast.rules.statements.ArrayAssignment;
+import minijava.ast.rules.statements.Assignment;
+import minijava.ast.rules.statements.If;
+import minijava.ast.rules.statements.StatementList;
+import minijava.ast.rules.statements.PrintChar;
+import minijava.ast.rules.statements.PrintlnInt;
+import minijava.ast.rules.statements.StatementVisitor;
+import minijava.ast.rules.statements.While;
 import minijava.ast.rules.types.Ty;
 import minijava.ast.rules.types.TyArr;
 import minijava.ast.rules.types.TyBool;
@@ -109,7 +109,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 	public static class TypeCheckVisitorExpTyStm implements
 			ExpressionVisitor<Ty, RuntimeException>,
 			TyVisitor<Boolean, RuntimeException>,
-			StmVisitor<Boolean, RuntimeException> {
+			StatementVisitor<Boolean, RuntimeException> {
 		
 		private final Program symbolTable;
 		private final minijava.symboltable.tree.Class classContext;
@@ -338,8 +338,8 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		}
 		
 		@Override
-		public Boolean visit(StmList s) throws RuntimeException {
-			for (Stm statement : s.stms) {
+		public Boolean visit(StatementList s) throws RuntimeException {
+			for (Statement statement : s.statements) {
 				if (!statement.accept(this)) {
 					return Boolean.FALSE;
 				}
@@ -348,7 +348,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		}
 
 		@Override
-		public Boolean visit(StmIf s) throws RuntimeException {
+		public Boolean visit(If s) throws RuntimeException {
 			Ty type = s.cond.accept(this);
 			if (!(type instanceof TyBool)) {
 				return Boolean.FALSE;
@@ -357,7 +357,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		}
 
 		@Override
-		public Boolean visit(StmWhile s) throws RuntimeException {
+		public Boolean visit(While s) throws RuntimeException {
 			Ty type = s.cond.accept(this);
 			if (!(type instanceof TyBool)) {
 				return Boolean.FALSE;
@@ -366,7 +366,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		}
 
 		@Override
-		public Boolean visit(StmPrintlnInt s) throws RuntimeException {
+		public Boolean visit(PrintlnInt s) throws RuntimeException {
 			Ty expressionType = s.arg.accept(this);
 			if (!(expressionType instanceof TyInt)) {
 				return Boolean.FALSE;
@@ -375,14 +375,14 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		}
 
 		@Override
-		public Boolean visit(StmPrintChar s) throws RuntimeException {
+		public Boolean visit(PrintChar s) throws RuntimeException {
 			//Ty expressionType = s.arg.accept(this);
 			// TODO: No type class for type char?
 			return Boolean.TRUE;
 		}
 
 		@Override
-		public Boolean visit(StmAssign s) throws RuntimeException {
+		public Boolean visit(Assignment s) throws RuntimeException {
 			Ty idType     =  new Id(s.id).accept(this);
 			Ty assignType = s.rhs.accept(this);
 			
@@ -395,7 +395,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		}
 
 		@Override
-		public Boolean visit(StmArrayAssign s) throws RuntimeException {
+		public Boolean visit(ArrayAssignment s) throws RuntimeException {
 			Ty arrayType  = new Id(s.id).accept(this);
 			Ty assignType = s.rhs.accept(this);
 			Ty indexType  = s.index.accept(this);

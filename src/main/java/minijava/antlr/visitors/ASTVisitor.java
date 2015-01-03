@@ -42,14 +42,14 @@ import minijava.ast.rules.expressions.This;
 import minijava.ast.rules.expressions.True;
 import minijava.ast.rules.Parameter;
 import minijava.ast.rules.Prg;
-import minijava.ast.rules.statements.Stm;
-import minijava.ast.rules.statements.StmArrayAssign;
-import minijava.ast.rules.statements.StmAssign;
-import minijava.ast.rules.statements.StmIf;
-import minijava.ast.rules.statements.StmList;
-import minijava.ast.rules.statements.StmPrintChar;
-import minijava.ast.rules.statements.StmPrintlnInt;
-import minijava.ast.rules.statements.StmWhile;
+import minijava.ast.rules.statements.Statement;
+import minijava.ast.rules.statements.ArrayAssignment;
+import minijava.ast.rules.statements.Assignment;
+import minijava.ast.rules.statements.If;
+import minijava.ast.rules.statements.StatementList;
+import minijava.ast.rules.statements.PrintChar;
+import minijava.ast.rules.statements.PrintlnInt;
+import minijava.ast.rules.statements.While;
 import minijava.ast.rules.types.Ty;
 import minijava.ast.rules.types.TyArr;
 import minijava.ast.rules.types.TyBool;
@@ -97,21 +97,21 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 			localVars.add((Variable) visit(varDeclarationCtx));
 		}
 
-		LinkedList<Stm> body = new LinkedList<>();
+		LinkedList<Statement> body = new LinkedList<>();
 		for (StatementContext stmDeclCtx : ctx.statement()) {
-			body.add((Stm) visit(stmDeclCtx));
+			body.add((Statement) visit(stmDeclCtx));
 		}
 
 		Expression returnExpression = (Expression) visit(ctx.returnExpression);
 
-		return new Method(ty, methodName, parameters, localVars, new StmList(body), returnExpression);
+		return new Method(ty, methodName, parameters, localVars, new StatementList(body), returnExpression);
 	}
 
 	@Override
 	public Object visitMainClass(@NotNull MiniJavaParser.MainClassContext ctx) {
 		String className = ctx.identifier(0).getText();
 		String mainMethodArgumentVariableName = ctx.identifier(1).getText();
-		Stm statement = (Stm) visit(ctx.statement());
+		Statement statement = (Statement) visit(ctx.statement());
 		return new Main(className, mainMethodArgumentVariableName, statement);
 	}
 
@@ -144,31 +144,31 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 	@Override
 	public Object visitBracketStatement(@NotNull MiniJavaParser.BracketStatementContext ctx) {
 
-		LinkedList<Stm> stms = new LinkedList<>();
+		LinkedList<Statement> statements = new LinkedList<>();
 		for (StatementContext stmCtx : ctx.statement()) {
-			stms.add((Stm) visit(stmCtx));
+			statements.add((Statement) visit(stmCtx));
 		}
 
-		return new StmList(stms);
+		return new StatementList(statements);
 	}
 
 	@Override
 	public Object visitIfStatement(@NotNull MiniJavaParser.IfStatementContext ctx) {
 
 		Expression cond = (Expression) visit(ctx.condition);
-		Stm bodyTrue = (Stm) visit(ctx.trueStatement);
-		Stm bodyFalse = (Stm) visit(ctx.falseStatement);
+		Statement bodyTrue = (Statement) visit(ctx.trueStatement);
+		Statement bodyFalse = (Statement) visit(ctx.falseStatement);
 
-		return new StmIf(cond, bodyTrue, bodyFalse);
+		return new If(cond, bodyTrue, bodyFalse);
 	}
 
 	@Override
 	public Object visitWhileStatement(@NotNull MiniJavaParser.WhileStatementContext ctx) {
 
 		Expression cond = (Expression) visit(ctx.expression());
-		Stm body = (Stm) visit(ctx.statement());
+		Statement body = (Statement) visit(ctx.statement());
 
-		return new StmWhile(cond, body);
+		return new While(cond, body);
 	}
 
 	@Override
@@ -176,7 +176,7 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 
 		Expression arg = (Expression) visit(ctx.expression());
 
-		return new StmPrintlnInt(arg);
+		return new PrintlnInt(arg);
 	}
 
 	@Override
@@ -185,7 +185,7 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 		String id = (String) visit(ctx.identifier());
 		Expression rhs = (Expression) visit(ctx.expression());
 
-		return new StmAssign(id, rhs);
+		return new Assignment(id, rhs);
 	}
 
 	@Override
@@ -193,7 +193,7 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 
 		Expression arg = (Expression) visit(ctx.expression());
 
-		return new StmPrintChar(arg);
+		return new PrintChar(arg);
 	}
 
 	@Override
@@ -203,7 +203,7 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 		Expression index = (Expression) visit(ctx.index);
 		Expression rhs = (Expression) visit(ctx.rhs);
 
-		return new StmArrayAssign(id, index, rhs);
+		return new ArrayAssignment(id, index, rhs);
 	}
 
 	@Override
