@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import minijava.ast.rules.declarations.Variable;
+import minijava.ast.rules.declarations.*;
 
 public class Class implements Node {
 	public final String name;
@@ -24,7 +24,7 @@ public class Class implements Node {
 		}
 		
 		for (Method method : methods) {
-			this.methods.put(method.name, method);
+			this.methods.put(method.methodName, method);
 		}
 	}
 }
