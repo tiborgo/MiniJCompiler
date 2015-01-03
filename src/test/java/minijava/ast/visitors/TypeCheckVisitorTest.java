@@ -41,8 +41,8 @@ public class TypeCheckVisitorTest {
 				ParseTree parseTree = parser.prog();
 				ASTVisitor astVisitor = new ASTVisitor();
 				Prg ast = (Prg) astVisitor.visit(parseTree);
-				SymbolTableVisitor symbolTableVisitor = new SymbolTableVisitor();
-				Program symbolTable = symbolTableVisitor.visit(ast);
+				CreateSymbolTableVisitor createSymbolTableVisitor = new CreateSymbolTableVisitor();
+				Program symbolTable = createSymbolTableVisitor.visit(ast);
 				TypeCheckVisitor visitor = new TypeCheckVisitor(symbolTable);
 				boolean typesCorrect = ast.accept(visitor);
 				assertTrue(typesCorrect);

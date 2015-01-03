@@ -12,7 +12,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import static org.junit.Assert.fail;
 import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Prg;
-import minijava.ast.visitors.SymbolTableVisitor;
+import minijava.ast.visitors.CreateSymbolTableVisitor;
 import minijava.ast.visitors.TypeCheckVisitor;
 import minijava.symboltable.tree.Program;
 
@@ -90,8 +90,8 @@ public class MiniJavaParserTest {
 				ASTVisitor astVisitor = new ASTVisitor();
 				Prg program = (Prg) astVisitor.visit(tree);
 				
-				SymbolTableVisitor symbolTableVisitor = new SymbolTableVisitor(); 
-				Program symbolTable = program.accept(symbolTableVisitor);
+				CreateSymbolTableVisitor createSymbolTableVisitor = new CreateSymbolTableVisitor();
+				Program symbolTable = program.accept(createSymbolTableVisitor);
 				
 				TypeCheckVisitor typeCheckVisitor = new TypeCheckVisitor(symbolTable);
 				if (program.accept(typeCheckVisitor)) {
