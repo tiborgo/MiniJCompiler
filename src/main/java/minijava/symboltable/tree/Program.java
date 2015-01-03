@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class Program implements Node {
 	
-	public final Map<String, Class> classes;
+	private final Map<String, Class> classes;
 
 	public Program(List<Class> classes) {
 		this.classes = new HashMap<>();
@@ -14,16 +14,12 @@ public class Program implements Node {
 			this.classes.put(clazz.name, clazz);
 		}
 	}
-	
-	/*boolean contains(String className) {
+
+	public boolean contains(String className) {
 		return classes.containsKey(className);
-	}*/
-	
-	/*boolean contains(String className, String methodName, List<String> arguments) {
-		
-	}*/
-	
-	/*boolean contains(Class clazz, Method method, List<Variable> arguments) {
-		
-	}*/
+	}
+
+	public Class get(String className) {
+		return classes.get(className);
+	}
 }

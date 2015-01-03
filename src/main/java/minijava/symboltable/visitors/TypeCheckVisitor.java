@@ -80,7 +80,7 @@ public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeEx
 		@Override
 		public java.lang.Boolean visit(minijava.ast.rules.declarations.Class c) throws RuntimeException {
 
-			classContext = symbolTable.classes.get(c.className);
+			classContext = symbolTable.get(c.className);
 
 			boolean ok = true;
 			for (Variable variable : c.fields) {
@@ -154,7 +154,7 @@ public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeEx
 		@Override
 		public Type visit(New e) throws RuntimeException {
 			// Check if class exists
-			if (symbolTable.classes.containsKey(e.className)) {
+			if (symbolTable.contains(e.className)) {
 				e.type = new Class(e.className);
 			}
 			else {
@@ -246,7 +246,7 @@ public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeEx
 			Class object = (Class) e.obj.accept(this);
 			
 			// Check class
-			minijava.symboltable.tree.Class clazz = symbolTable.classes.get(object.c);
+			minijava.symboltable.tree.Class clazz = symbolTable.get(object.c);
 			if (clazz == null) {
 				// TODO: error
 				return null;
@@ -329,7 +329,7 @@ public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeEx
 
 		@Override
 		public java.lang.Boolean visit(Class t) {
-			return symbolTable.classes.containsKey(t.c);
+			return symbolTable.contains(t.c);
 		}
 
 		@Override
