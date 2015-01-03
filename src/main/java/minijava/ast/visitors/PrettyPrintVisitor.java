@@ -1,5 +1,6 @@
 package minijava.ast.visitors;
 
+import java.util.Collection;
 import java.util.List;
 
 import minijava.ast.rules.declarations.Main;
@@ -48,7 +49,7 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 		this.indent = indent;
 	}
 
-	private String prettyPrintClassList(List<minijava.ast.rules.declarations.Class> cl, String indent) {
+	private String prettyPrintClassList(Collection<minijava.ast.rules.declarations.Class> cl, String indent) {
 		StringBuffer classes = new StringBuffer();
 		String sep = "";
 		for (minijava.ast.rules.declarations.Class d : cl) {
