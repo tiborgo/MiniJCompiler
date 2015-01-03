@@ -87,12 +87,12 @@ public class IntermediateVisitor implements
 	@Override
 	public List<FragmentProc<TreeStm>> visit(Prg p) throws RuntimeException {
 
-		for(minijava.ast.rules.declarations.Class clazz : p.classes) {
+		for(minijava.ast.rules.declarations.Class clazz : p.getClasses()) {
 			memoryFootprint.put(clazz.className, clazz.fields.size() * machineSpecifics.getWordSize() + 4);
 		}
 
 		List<FragmentProc<TreeStm>> classes = new LinkedList<>();
-		for(minijava.ast.rules.declarations.Class clazz : p.classes) {
+		for(minijava.ast.rules.declarations.Class clazz : p.getClasses()) {
 			classes.addAll(clazz.accept(this));
 		}
 

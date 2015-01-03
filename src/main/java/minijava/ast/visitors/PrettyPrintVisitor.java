@@ -62,7 +62,7 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 	@Override
 	public String visit(Prg p) {
 		return p.mainClass.accept(new PrettyPrintVisitorDecl(indent)) + "\n"
-				+ prettyPrintClassList(p.classes, indent);
+				+ prettyPrintClassList(p.getClasses(), indent);
 	}
 
 	public static class PrettyPrintVisitorDecl implements

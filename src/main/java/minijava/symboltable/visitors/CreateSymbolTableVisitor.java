@@ -40,7 +40,7 @@ public class CreateSymbolTableVisitor implements
 		classes.add(mainClass);
 		types.add(mainClass.name);
 		
-		for (Class clazzDecl : p.classes) {
+		for (Class clazzDecl : p.getClasses()) {
 			minijava.symboltable.tree.Class clazz = visit(clazzDecl);
 			classes.add(clazz);
 			types.add(clazz.name);
