@@ -30,7 +30,7 @@ public class ToTreeStmConverter {
 			}
 		}
 		else if (jump instanceof TreeStmCJUMP) {
-			return new Pair<>(((TreeStmCJUMP)jump).ltrue, ((TreeStmCJUMP)jump).lfalse);
+			return new Pair<>(((TreeStmCJUMP)jump).lfalse, ((TreeStmCJUMP)jump).ltrue);
 		}
 		else {
 			throw new IllegalArgumentException("'jump' must either be instance of TreeStmJUMP or TreeStmCJUMP");
@@ -50,47 +50,59 @@ public class ToTreeStmConverter {
 		));
 		
 		// Check how many jumps to each label are in the base blocks
-		Map<Label, Integer> jumpsCount = new HashMap<>();
+		Map<Label, Integer> jumpsCounts = new HashMap<>();
 		for (BaseBlock baseBlock : remainingBaseBlocks) {
 			Pair<Label, Label> labels = getJumpedToLabels(baseBlock.jump);
-			if (!jumpsCount.containsKey(labels.fst)) {
-				jumpsCount.put(labels.fst, 1);
+			if (!jumpsCounts.containsKey(labels.fst)) {
+				jumpsCounts.put(labels.fst, 1);
 			} else {
-				jumpsCount.put(labels.fst, jumpsCount.get(labels.fst)+1);
+				jumpsCounts.put(labels.fst, jumpsCounts.get(labels.fst)+1);
 			}
 			if (labels.snd != null) {
-				if (!jumpsCount.containsKey(labels.snd)) {
-					jumpsCount.put(labels.snd, 1);
+				if (!jumpsCounts.containsKey(labels.snd)) {
+					jumpsCounts.put(labels.snd, 1);
 				} else {
-					jumpsCount.put(labels.snd, jumpsCount.get(labels.snd)+1);
+					jumpsCounts.put(labels.snd, jumpsCounts.get(labels.snd)+1);
 				}
 			}
 		}
 		
+		Label previousJumpDestLabel = null;
+		
 		while (remainingBaseBlocks.size() > 0) {
 				
 			Pair<Label, Label> labels = getJumpedToLabels(remainingBaseBlocks.get(0).jump);
+			BaseBlock baseBlock = remainingBaseBlocks.get(0);
 			
-			if (remainingBaseBlocks.size() > 1 &&
-					labels.snd == null &&
-					labels.fst.equals(remainingBaseBlocks.get(1).label)) {
+			int startIndex = 0;
+			int endIndex = baseBlock.body.size();
+			
+			if (labels.snd == null) {
 				
-				result.addAll(remainingBaseBlocks.get(0).body.subList(0, remainingBaseBlocks.get(0).body.size()-1));
-				
-				if (jumpsCount.get(labels.fst) == 1) {
-					result.addAll(remainingBaseBlocks.get(1).body.subList(1, remainingBaseBlocks.get(1).body.size()));
-					remainingBaseBlocks.remove(0);
+				if ((remainingBaseBlocks.size() > 1 && labels.fst.equals(remainingBaseBlocks.get(1).label)) ||
+						(remainingBaseBlocks.size() == 0 && labels.fst.equals(endLabel))) {
+					
+					endIndex--;
 				}
+			}
+			
+			Integer jumpsCount = jumpsCounts.get(baseBlock.label);
+			if (jumpsCount == null || jumpsCount <= 1) {
+				if (previousJumpDestLabel == null || previousJumpDestLabel.equals(baseBlock.label)) {
+					startIndex++;
+				}
+			}
 				
-				remainingBaseBlocks.remove(0);
-			}
-			else {
-				result.addAll(remainingBaseBlocks.get(0).body);
-				remainingBaseBlocks.remove(0);
-			}
+			result.addAll(baseBlock.body.subList(startIndex, endIndex));
+			
+			remainingBaseBlocks.remove(0);
+			
+			previousJumpDestLabel = labels.fst;
 		}
 			
-		result.add(new TreeStmLABEL(endLabel));
+		if (jumpsCounts.get(endLabel) > 1 || !previousJumpDestLabel.equals(endLabel)) {
+			result.add(new TreeStmLABEL(endLabel));
+		}
 		
 		return result;
 	}

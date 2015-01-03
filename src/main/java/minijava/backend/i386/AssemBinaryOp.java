@@ -1,12 +1,13 @@
 package minijava.backend.i386;
 
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import minijava.backend.Assem;
-import minijava.backend.AssemVisitor;
 import minijava.backend.DefaultInstruction;
+import minijava.backend.i386.visitors.AssemVisitor;
 import minijava.intermediate.Temp;
 import minijava.util.Function;
 import minijava.util.Pair;
@@ -27,6 +28,7 @@ public final class AssemBinaryOp extends DefaultInstruction {
 		assert (kind != null && src != null && dst != null);
 		assert (!((src instanceof Operand.Mem) && (dst instanceof Operand.Mem)));
 		assert (kind != Kind.LEA || ((src instanceof Operand.Mem) && (dst instanceof Operand.Reg)));
+		assert (!((kind == Kind.ADD || kind == Kind.SUB) && (dst instanceof Operand.Imm || dst instanceof Operand.Label)));
 		this.src = src;
 		this.dst = dst;
 		this.kind = kind;
