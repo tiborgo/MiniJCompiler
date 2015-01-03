@@ -1,10 +1,10 @@
 package minijava.symboltable.visitors;
 
-import minijava.ast.rules.declarations.DeclClass;
-import minijava.ast.rules.declarations.DeclMain;
-import minijava.ast.rules.declarations.DeclMeth;
-import minijava.ast.rules.declarations.DeclVar;
-import minijava.ast.rules.declarations.DeclVisitor;
+import minijava.ast.rules.declarations.Class;
+import minijava.ast.rules.declarations.Main;
+import minijava.ast.rules.declarations.Method;
+import minijava.ast.rules.declarations.Variable;
+import minijava.ast.rules.declarations.DeclarationVisitor;
 import minijava.ast.rules.Prg;
 import minijava.ast.rules.PrgVisitor;
 import minijava.ast.rules.expressions.ExpArrayGet;
@@ -36,17 +36,14 @@ import minijava.ast.rules.types.TyClass;
 import minijava.ast.rules.types.TyInt;
 import minijava.ast.rules.types.TyVisitor;
 import minijava.ast.rules.types.TyVoid;
-import minijava.symboltable.tree.Class;
-import minijava.symboltable.tree.Method;
 import minijava.symboltable.tree.Program;
-import minijava.symboltable.tree.Variable;
 
 public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
-		DeclVisitor<Boolean, RuntimeException> {
+		DeclarationVisitor<Boolean, RuntimeException> {
 	
 	private final Program symbolTable;
-	private Class classContext;
-	private Method methodContext;
+	private minijava.symboltable.tree.Class classContext;
+	private minijava.symboltable.tree.Method methodContext;
 
 	public TypeCheckVisitor(Program symbolTable) {
 		this.symbolTable = symbolTable;
@@ -57,23 +54,23 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 
 		boolean ok = true;
 		ok = visit(p.mainClass) ? ok : false;
-		for (DeclClass clazz : p.classes) {
+		for (Class clazz : p.classes) {
 			ok = clazz.accept(this) ? ok : false;
 		}
 		return ok;
 	}
 	
 	@Override
-	public Boolean visit(DeclClass c) throws RuntimeException {
+	public Boolean visit(Class c) throws RuntimeException {
 		
 		classContext = symbolTable.classes.get(c.className);
 		
 		boolean ok = true;
-		for (DeclVar variable : c.fields) {
+		for (Variable variable : c.fields) {
 			ok = variable.accept(this) ? ok : false;
 		}
 		
-		for (DeclMeth method : c.methods) {
+		for (Method method : c.methods) {
 			ok = method.accept(this) ? ok : false;
 		}
 		
@@ -83,12 +80,12 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 	}
 
 	@Override
-	public Boolean visit(DeclMain d) throws RuntimeException {
+	public Boolean visit(Main d) throws RuntimeException {
 		return true;
 	}
 
 	@Override
-	public Boolean visit(DeclMeth m) throws RuntimeException {
+	public Boolean visit(Method m) throws RuntimeException {
 		
 		methodContext = classContext.methods.get(m.methodName);
 		
@@ -105,7 +102,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 	}
 
 	@Override
-	public Boolean visit(DeclVar d) throws RuntimeException {
+	public Boolean visit(Variable d) throws RuntimeException {
 		return d.ty.accept(new TypeCheckVisitorExpTyStm(symbolTable, classContext, methodContext));
 	} 
 	
@@ -115,10 +112,10 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 			StmVisitor<Boolean, RuntimeException> {
 		
 		private final Program symbolTable;
-		private final Class classContext;
-		private final Method methodContext;
+		private final minijava.symboltable.tree.Class classContext;
+		private final minijava.symboltable.tree.Method methodContext;
 		
-		public TypeCheckVisitorExpTyStm(Program symbolTable, Class classContext, Method methodContext) {
+		public TypeCheckVisitorExpTyStm(Program symbolTable, minijava.symboltable.tree.Class classContext, minijava.symboltable.tree.Method methodContext) {
 			this.symbolTable = symbolTable;
 			this.classContext = classContext;
 			this.methodContext = methodContext;
@@ -250,14 +247,14 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 			TyClass object = (TyClass) e.obj.accept(this);
 			
 			// Check class
-			Class clazz   = symbolTable.classes.get(object.c);
+			minijava.symboltable.tree.Class clazz   = symbolTable.classes.get(object.c);
 			if (clazz == null) {
 				// TODO: error
 				return null;
 			}
 			
 			// Check method
-			Method method = new MethodVisitor(clazz, e.method).visit(symbolTable);
+			minijava.symboltable.tree.Method method = new MethodVisitor(clazz, e.method).visit(symbolTable);
 			if (method == null) {
 				// TODO: error
 				return null;
@@ -296,7 +293,7 @@ public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
 		@Override
 		public Ty visit(ExpId e) throws RuntimeException {
 			// TODO: Should be replaced with a lookup in an appropriate data structure that honours variable visibility
-			Variable object = methodContext.get(e.id);
+			minijava.symboltable.tree.Variable object = methodContext.get(e.id);
 			if (object == null) {
 				object = classContext.fields.get(e.id);
 			}

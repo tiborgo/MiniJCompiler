@@ -7,17 +7,17 @@ import minijava.ast.rules.expressions.Exp;
 import minijava.ast.rules.statements.Stm;
 import minijava.ast.rules.types.Ty;
 
-public class DeclMeth extends Decl {
+public class Method extends Declaration {
 
 	final public Ty ty;
 	final public String methodName;
 	final public List<Parameter> parameters;
-	final public List<DeclVar> localVars;
+	final public List<Variable> localVars;
 	final public Stm body;
 	final public Exp returnExp;
 
-	public DeclMeth(Ty ty, String methodName, List<Parameter> parameters,
-			List<DeclVar> localVars, Stm body, Exp returnExp) {
+	public Method(Ty ty, String methodName, List<Parameter> parameters,
+	              List<Variable> localVars, Stm body, Exp returnExp) {
 		this.ty = ty;
 		this.methodName = methodName;
 		this.parameters = parameters;
@@ -27,7 +27,7 @@ public class DeclMeth extends Decl {
 	}
 
 	@Override
-	public <A, T extends Throwable> A accept(DeclVisitor<A, T> v) throws T {
+	public <A, T extends Throwable> A accept(DeclarationVisitor<A, T> v) throws T {
 		return v.visit(this);
 	}
 }

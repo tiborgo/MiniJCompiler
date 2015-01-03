@@ -2,11 +2,11 @@ package minijava.ast.visitors;
 
 import java.util.List;
 
-import minijava.ast.rules.declarations.DeclClass;
-import minijava.ast.rules.declarations.DeclMain;
-import minijava.ast.rules.declarations.DeclMeth;
-import minijava.ast.rules.declarations.DeclVar;
-import minijava.ast.rules.declarations.DeclVisitor;
+import minijava.ast.rules.declarations.Class;
+import minijava.ast.rules.declarations.Main;
+import minijava.ast.rules.declarations.Method;
+import minijava.ast.rules.declarations.Variable;
+import minijava.ast.rules.declarations.DeclarationVisitor;
 import minijava.ast.rules.Parameter;
 import minijava.ast.rules.Prg;
 import minijava.ast.rules.PrgVisitor;
@@ -49,10 +49,10 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 		this.indent = indent;
 	}
 
-	private String prettyPrintClassList(List<DeclClass> cl, String indent) {
+	private String prettyPrintClassList(List<Class> cl, String indent) {
 		StringBuffer classes = new StringBuffer();
 		String sep = "";
-		for (DeclClass d : cl) {
+		for (Class d : cl) {
 			classes.append(sep);
 			classes.append(d.accept(new PrettyPrintVisitorDecl(indent)));
 			sep = "\n";
@@ -67,7 +67,7 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 	}
 
 	public static class PrettyPrintVisitorDecl implements
-			DeclVisitor<String, RuntimeException> {
+			DeclarationVisitor<String, RuntimeException> {
 
 		private final String indent;
 
@@ -75,9 +75,9 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 			this.indent = indent;
 		}
 
-		private String prettyPrintMethList(List<DeclMeth> dm, String indent) {
+		private String prettyPrintMethList(List<Method> dm, String indent) {
 			StringBuffer meths = new StringBuffer();
-			for (DeclMeth m : dm) {
+			for (Method m : dm) {
 				meths.append("\n");
 				meths.append(m.accept(new PrettyPrintVisitorDecl(indent)));
 			}
@@ -85,7 +85,7 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 		}
 
 		@Override
-		public String visit(DeclClass c) {
+		public String visit(Class c) {
 			return indent
 					+ "class "
 					+ c.className
@@ -97,7 +97,7 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 		}
 
 		@Override
-		public String visit(DeclMeth m) {
+		public String visit(Method m) {
 			String params = "", sep = "";
 			for (Parameter p : m.parameters) {
 				params += sep + p.ty.accept(new PrettyPrintVisitorTy()) + " "
@@ -113,9 +113,9 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 					+ indent + "}\n";
 		}
 
-		private String prettyPrintVarList(List<DeclVar> dl, String indent) {
+		private String prettyPrintVarList(List<Variable> dl, String indent) {
 			StringBuffer decls = new StringBuffer();
-			for (DeclVar d : dl) {
+			for (Variable d : dl) {
 				decls.append(d.accept(new PrettyPrintVisitorDecl(indent)));
 				decls.append("\n");
 			}
@@ -123,13 +123,13 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 		}
 
 		@Override
-		public String visit(DeclVar d) {
+		public String visit(Variable d) {
 			return indent + d.ty.accept(new PrettyPrintVisitorTy()) + " "
 					+ d.name.toString() + ";";
 		}
 
 		@Override
-		public String visit(DeclMain d) {
+		public String visit(Main d) {
 			return indent
 					+ "class "
 					+ d.className.toString()

@@ -8,11 +8,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import minijava.ast.rules.declarations.DeclClass;
-import minijava.ast.rules.declarations.DeclMain;
-import minijava.ast.rules.declarations.DeclMeth;
-import minijava.ast.rules.declarations.DeclVar;
-import minijava.ast.rules.declarations.DeclVisitor;
+import minijava.ast.rules.declarations.Class;
+import minijava.ast.rules.declarations.Main;
+import minijava.ast.rules.declarations.Method;
+import minijava.ast.rules.declarations.Variable;
+import minijava.ast.rules.declarations.DeclarationVisitor;
 import minijava.ast.rules.Parameter;
 import minijava.ast.rules.Prg;
 import minijava.ast.rules.PrgVisitor;
@@ -65,16 +65,14 @@ import minijava.intermediate.tree.TreeStmJUMP;
 import minijava.intermediate.tree.TreeStmLABEL;
 import minijava.intermediate.tree.TreeStmMOVE;
 import minijava.intermediate.tree.TreeStmSEQ;
-import minijava.symboltable.tree.Class;
-import minijava.symboltable.tree.Method;
 import minijava.symboltable.tree.Program;
 
 public class IntermediateVisitor implements
 		PrgVisitor<List<FragmentProc<TreeStm>>, RuntimeException>,
-		DeclVisitor<List<FragmentProc<TreeStm>>, RuntimeException> {
+		DeclarationVisitor<List<FragmentProc<TreeStm>>, RuntimeException> {
 	
-	private DeclClass classContext;
-	private DeclMeth methodContext;
+	private Class classContext;
+	private Method methodContext;
 	private final MachineSpecifics  machineSpecifics;
 	private final Map<String, TreeExp> classTemps;
 	private Map<String, Integer> memoryFootprint;
@@ -90,12 +88,12 @@ public class IntermediateVisitor implements
 	@Override
 	public List<FragmentProc<TreeStm>> visit(Prg p) throws RuntimeException {
 
-		for(DeclClass clazz : p.classes) {
+		for(Class clazz : p.classes) {
 			memoryFootprint.put(clazz.className, clazz.fields.size() * machineSpecifics.getWordSize() + 4);
 		}
 
 		List<FragmentProc<TreeStm>> classes = new LinkedList<>();
-		for(DeclClass clazz : p.classes) {
+		for(Class clazz : p.classes) {
 			classes.addAll(clazz.accept(this));
 		}
 
@@ -104,12 +102,12 @@ public class IntermediateVisitor implements
 	}
 
 	@Override
-	public List<FragmentProc<TreeStm>> visit(DeclClass c) throws RuntimeException {
+	public List<FragmentProc<TreeStm>> visit(Class c) throws RuntimeException {
 		classContext = c;
 
 		// Methods
 		List<FragmentProc<TreeStm>> methods = new LinkedList<>();
-		for(DeclMeth method : c.methods) {
+		for(Method method : c.methods) {
 			methods.addAll(method.accept(this));
 		}
 
@@ -119,21 +117,21 @@ public class IntermediateVisitor implements
 	}
 
 	@Override
-	public List<FragmentProc<TreeStm>> visit(DeclMain d) throws RuntimeException {
+	public List<FragmentProc<TreeStm>> visit(Main d) throws RuntimeException {
 
-		DeclMeth mainMethod = new DeclMeth(
+		Method mainMethod = new Method(
 			new TyInt(),
 			"lmain",
 			Arrays.asList(new Parameter(d.mainArg, new TyArr(new TyInt()))),
-			Collections.<DeclVar>emptyList(),
+			Collections.<Variable>emptyList(),
 			d.mainBody,
 			new ExpIntConst(0)
 		);
 		
-		DeclClass mainClass = new DeclClass(
+		Class mainClass = new Class(
 			"",
 			null,
-			Collections.<DeclVar>emptyList(),
+			Collections.<Variable>emptyList(),
 			Arrays.asList(mainMethod)
 		);
 
@@ -141,7 +139,7 @@ public class IntermediateVisitor implements
 	}
 
 	@Override
-	public List<FragmentProc<TreeStm>> visit(DeclMeth m) throws RuntimeException {
+	public List<FragmentProc<TreeStm>> visit(Method m) throws RuntimeException {
 
 		methodContext = m;
 
@@ -155,7 +153,7 @@ public class IntermediateVisitor implements
 		for (int i = 1; i < m.parameters.size()+1; i++) {
 			methodTemps.put(m.parameters.get(i-1).id, frame.getParameter(i));
 		}
-		for (DeclVar var : m.localVars) {
+		for (Variable var : m.localVars) {
 			methodTemps.put(var.name, frame.addLocal(Frame.Location.ANYWHERE));
 		}
 		
@@ -183,7 +181,7 @@ public class IntermediateVisitor implements
 	}
 
 	@Override
-	public List<FragmentProc<TreeStm>> visit(DeclVar d) throws RuntimeException {
+	public List<FragmentProc<TreeStm>> visit(Variable d) throws RuntimeException {
 		throw new UnsupportedOperationException("Cannot generate fragment for var declaration");
 	}
 
@@ -196,16 +194,16 @@ public class IntermediateVisitor implements
 			StmVisitor<TreeStm, RuntimeException> {
 
 		private final Program symbolTable;
-		private final DeclClass classContext;
-		private final DeclMeth methodContext;
+		private final Class classContext;
+		private final Method methodContext;
 		private final Map<String, Integer> memoryFootprint;
 		private final Map<String, TreeExp> temps;
 		private final MachineSpecifics  machineSpecifics;
 
 		public IntermediateVisitorExpStm(Map<String, TreeExp> temps,
 				MachineSpecifics machineSpecifics,
-				DeclClass classContext,
-				DeclMeth methodContext,
+				Class classContext,
+				Method methodContext,
 				Map<String, Integer> memoryFootprint,
 				Program symbolTable) {
 			this.temps = temps;
@@ -406,8 +404,8 @@ public class IntermediateVisitor implements
 		public TreeExp visit(ExpInvoke e) throws RuntimeException {
 			
 			TreeExp object = e.obj.accept(this);
-			Class clazz = symbolTable.classes.get(classContext.className);
-			Method method = clazz.methods.get(methodContext.methodName);
+			minijava.symboltable.tree.Class clazz = symbolTable.classes.get(classContext.className);
+			minijava.symboltable.tree.Method method = clazz.methods.get(methodContext.methodName);
 			String className = ((TyClass) e.obj.accept(new TypeCheckVisitor.TypeCheckVisitorExpTyStm(symbolTable, clazz, method))).c;
 			String methodName = e.method;
 
