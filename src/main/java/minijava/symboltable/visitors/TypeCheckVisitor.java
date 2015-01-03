@@ -64,14 +64,14 @@ public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeEx
 		
 		private final Program symbolTable;
 		private minijava.symboltable.tree.Class classContext;
-		private minijava.symboltable.tree.Method methodContext;
+		private Method methodContext;
 		
 		public TypeCheckVisitorExpTyStm(Program symbolTable) {
 			this.symbolTable = symbolTable;
 		}
 
 		// TODO: Remove constructor
-		public TypeCheckVisitorExpTyStm(Program symbolTable, minijava.symboltable.tree.Class classContext, minijava.symboltable.tree.Method methodContext) {
+		public TypeCheckVisitorExpTyStm(Program symbolTable, minijava.symboltable.tree.Class classContext, Method methodContext) {
 			this.symbolTable = symbolTable;
 			this.classContext = classContext;
 			this.methodContext = methodContext;
@@ -253,26 +253,26 @@ public class TypeCheckVisitor implements PrgVisitor<java.lang.Boolean, RuntimeEx
 			}
 			
 			// Check method
-			minijava.symboltable.tree.Method method = new MethodVisitor(clazz, e.method).visit(symbolTable);
+			Method method = new MethodVisitor(clazz, e.method).visit(symbolTable);
 			if (method == null) {
 				// TODO: error
 				return null;
 			}
 			
 			// Check arguments
-			if (e.args.size() == method.parametersList.size()) {
+			if (e.args.size() == method.parameters.size()) {
 				
 				boolean ok = true;
 				for (int i = 0; i < e.args.size(); i++) {
 					Type argType = e.args.get(i).accept(this);
-					if (!argType.equals(method.parametersList.get(i).type)) {
+					if (!argType.equals(method.parameters.get(i).type)) {
 						ok = false;
 						// TODO: error
 					}
 				}
 				
 				if (ok) {
-					e.type = method.returnType;
+					e.type = method.type;
 				}
 				else {
 					return null;
