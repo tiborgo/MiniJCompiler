@@ -5,12 +5,11 @@ import java.util.List;
 
 import minijava.backend.Assem;
 import minijava.backend.AssemVisitor;
-import minijava.intermediate.Label;
+import minijava.backend.DefaultInstruction;
 import minijava.intermediate.Temp;
 import minijava.util.Function;
-import minijava.util.Pair;
 
-public final class AssemInstr extends I386Assem {
+public final class AssemInstr extends DefaultInstruction {
 
 	public static enum Kind {
 
@@ -36,22 +35,6 @@ public final class AssemInstr extends I386Assem {
 		return Collections.emptyList();
 	}
 
-	public List<Label> jumps() {
-		throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public boolean isFallThrough() {
-		return true;
-	}
-
-	public Pair<Temp, Temp> isMoveBetweenTemps() {
-		throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public Label isLabel() {
-		return null;
-	}
-	
 	public Assem rename(Function<Temp, Temp> sigma) {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
