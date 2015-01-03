@@ -157,9 +157,9 @@ public class MiniJavaCompiler {
 		}
 	}
 	
-	private void checkTypes(Program program, Program symbolTable) throws CompilerException {
+	private void checkTypes(Program program) throws CompilerException {
 
-		TypeCheckVisitor typeCheckVisitor = new TypeCheckVisitor(symbolTable);
+		TypeCheckVisitor typeCheckVisitor = new TypeCheckVisitor();
 		if (program.accept(typeCheckVisitor)) {
 			
 			printVerbose("Successfully checked types");
@@ -445,7 +445,7 @@ public class MiniJavaCompiler {
 		Program program = parse();
 		Program symbolTable = inferTypes(program);
 		if (!skipTypeCheck) {
-			checkTypes(program, symbolTable);
+			checkTypes(program);
 		}
 		List<FragmentProc<TreeStm>> intermediate = generateIntermediate(program, symbolTable);
 		List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = canonicalize(intermediate); 
