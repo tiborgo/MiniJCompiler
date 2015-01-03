@@ -2,15 +2,15 @@ package minijava.ast.rules.declarations;
 
 import java.util.List;
 
-public class DeclClass extends Decl {
+public class Class extends Declaration {
 
   final public String className;
   final public String superName; // null if no superclass
-  final public List<DeclVar> fields;
-  final public List<DeclMeth> methods;
+  final public List<Variable> fields;
+  final public List<Method> methods;
 
-  public DeclClass(String className, String superName,
-          List<DeclVar> fields, List<DeclMeth> methods) {
+  public Class(String className, String superName,
+               List<Variable> fields, List<Method> methods) {
     this.className = className;
     this.superName = superName;
     this.fields = fields;
@@ -18,7 +18,7 @@ public class DeclClass extends Decl {
   }
 
 	@Override
-	public <A, T extends Throwable> A accept(DeclVisitor<A, T> v) throws T {
+	public <A, T extends Throwable> A accept(DeclarationVisitor<A, T> v) throws T {
 		return v.visit(this);
 	}
 }

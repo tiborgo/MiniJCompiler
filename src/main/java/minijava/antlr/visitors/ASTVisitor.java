@@ -23,10 +23,10 @@ import minijava.MiniJavaParser.StatementContext;
 import minijava.MiniJavaParser.ThisExpressionContext;
 import minijava.MiniJavaParser.TrueExpressionContext;
 import minijava.MiniJavaParser.VarDeclarationContext;
-import minijava.ast.rules.declarations.DeclClass;
-import minijava.ast.rules.declarations.DeclMain;
-import minijava.ast.rules.declarations.DeclMeth;
-import minijava.ast.rules.declarations.DeclVar;
+import minijava.ast.rules.declarations.Class;
+import minijava.ast.rules.declarations.Main;
+import minijava.ast.rules.declarations.Method;
+import minijava.ast.rules.declarations.Variable;
 import minijava.ast.rules.expressions.Exp;
 import minijava.ast.rules.expressions.ExpArrayGet;
 import minijava.ast.rules.expressions.ExpArrayLength;
@@ -64,10 +64,10 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 	@Override
 	public Object visitProg(@NotNull MiniJavaParser.ProgContext ctx) {
 
-		DeclMain mainClass = (DeclMain) visit(ctx.mainClass());
-		LinkedList<DeclClass> classes = new LinkedList<>();
+		Main mainClass = (Main) visit(ctx.mainClass());
+		LinkedList<Class> classes = new LinkedList<>();
 		for (ClassDeclarationContext classDeclCtx : ctx.classDeclaration()) {
-			classes.add((DeclClass) visit(classDeclCtx));
+			classes.add((Class) visit(classDeclCtx));
 		}
 
 		return new Prg(mainClass, classes);
@@ -92,9 +92,9 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 			parameters.add(new Parameter((String) visit(ctx.identifier().get(i)), (Ty) visit(ctx.type().get(i))));
 		}
 
-		LinkedList<DeclVar> localVars = new LinkedList<>();
+		LinkedList<Variable> localVars = new LinkedList<>();
 		for (VarDeclarationContext varDeclarationCtx : ctx.varDeclaration()) {
-			localVars.add((DeclVar) visit(varDeclarationCtx));
+			localVars.add((Variable) visit(varDeclarationCtx));
 		}
 
 		LinkedList<Stm> body = new LinkedList<>();
@@ -104,7 +104,7 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 
 		Exp returnExp = (Exp) visit(ctx.returnExpression);
 
-		return new DeclMeth(ty, methodName, parameters, localVars, new StmList(body), returnExp);
+		return new Method(ty, methodName, parameters, localVars, new StmList(body), returnExp);
 	}
 
 	@Override
@@ -112,7 +112,7 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 		String className = ctx.identifier(0).getText();
 		String mainMethodArgumentVariableName = ctx.identifier(1).getText();
 		Stm statement = (Stm) visit(ctx.statement());
-		return new DeclMain(className, mainMethodArgumentVariableName, statement);
+		return new Main(className, mainMethodArgumentVariableName, statement);
 	}
 
 	/* ####### TYPES ####### */
@@ -212,7 +212,7 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 		Ty ty = (Ty) visit(ctx.type());
 		String name = (String) visit(ctx.identifier());
 
-		return new DeclVar(ty, name);
+		return new Variable(ty, name);
 	}
 
 	@Override
@@ -220,18 +220,18 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 		String className = ctx.className.getText();
 		String superClassName = ctx.superClassName != null ? ctx.superClassName.getText() : null;
 		List<VarDeclarationContext> fieldsRaw = ctx.varDeclaration();
-		List<DeclVar> fields = new ArrayList<>(fieldsRaw.size());
+		List<Variable> fields = new ArrayList<>(fieldsRaw.size());
 		for (VarDeclarationContext fieldRaw : fieldsRaw) {
-			DeclVar field = (DeclVar) visit(fieldRaw);
+			Variable field = (Variable) visit(fieldRaw);
 			fields.add(field);
 		}
 		List<MethodDeclarationContext> methodsRaw = ctx.methodDeclaration();
-		List<DeclMeth> methods = new ArrayList<>(methodsRaw.size());
+		List<Method> methods = new ArrayList<>(methodsRaw.size());
 		for (MethodDeclarationContext methodRaw : methodsRaw) {
-			DeclMeth method = (DeclMeth) visit(methodRaw);
+			Method method = (Method) visit(methodRaw);
 			methods.add(method);
 		}
-		return new DeclClass(className, superClassName, fields, methods);
+		return new Class(className, superClassName, fields, methods);
 	}
 
 	@Override
