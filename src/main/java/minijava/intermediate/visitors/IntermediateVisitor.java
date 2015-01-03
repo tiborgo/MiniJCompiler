@@ -12,6 +12,7 @@ import minijava.ast.rules.DeclClass;
 import minijava.ast.rules.DeclMain;
 import minijava.ast.rules.DeclMeth;
 import minijava.ast.rules.DeclVar;
+import minijava.ast.rules.DeclVisitor;
 import minijava.ast.rules.Parameter;
 import minijava.ast.rules.Prg;
 import minijava.ast.rules.PrgVisitor;
@@ -69,7 +70,7 @@ import minijava.symboltable.tree.Program;
 
 public class IntermediateVisitor implements
 		PrgVisitor<List<FragmentProc<TreeStm>>, RuntimeException>,
-		Parameter.DeclVisitor<List<FragmentProc<TreeStm>>, RuntimeException> {
+		DeclVisitor<List<FragmentProc<TreeStm>>, RuntimeException> {
 	
 	private DeclClass classContext;
 	private DeclMeth methodContext;

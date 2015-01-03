@@ -4,7 +4,7 @@ import minijava.ast.rules.DeclClass;
 import minijava.ast.rules.DeclMain;
 import minijava.ast.rules.DeclMeth;
 import minijava.ast.rules.DeclVar;
-import minijava.ast.rules.Parameter;
+import minijava.ast.rules.DeclVisitor;
 import minijava.ast.rules.Prg;
 import minijava.ast.rules.PrgVisitor;
 import minijava.ast.rules.expressions.ExpArrayGet;
@@ -39,10 +39,9 @@ import minijava.symboltable.tree.Class;
 import minijava.symboltable.tree.Method;
 import minijava.symboltable.tree.Program;
 import minijava.symboltable.tree.Variable;
-import minijava.symboltable.visitors.MethodVisitor;
 
 public class TypeCheckVisitor implements PrgVisitor<Boolean, RuntimeException>,
-		Parameter.DeclVisitor<Boolean, RuntimeException> {
+		DeclVisitor<Boolean, RuntimeException> {
 	
 	private final Program symbolTable;
 	private Class classContext;

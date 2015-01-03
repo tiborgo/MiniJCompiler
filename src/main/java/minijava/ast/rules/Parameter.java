@@ -16,11 +16,4 @@ public class Parameter {
 		return v.visit(this);
 	}
 
-	public static interface DeclVisitor<A, T extends Throwable> {
-
-		public A visit(DeclClass c) throws T;
-		public A visit(DeclMain d)  throws T;
-		public A visit(DeclMeth m)  throws T;
-		public A visit(DeclVar d)   throws T;
-	}
 }

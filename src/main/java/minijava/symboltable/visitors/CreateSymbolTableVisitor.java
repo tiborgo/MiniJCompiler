@@ -8,6 +8,7 @@ import minijava.ast.rules.DeclClass;
 import minijava.ast.rules.DeclMain;
 import minijava.ast.rules.DeclMeth;
 import minijava.ast.rules.DeclVar;
+import minijava.ast.rules.DeclVisitor;
 import minijava.ast.rules.Parameter;
 import minijava.ast.rules.ParameterVisitor;
 import minijava.ast.rules.Prg;
@@ -22,7 +23,7 @@ import minijava.symboltable.tree.Variable;
 
 public class CreateSymbolTableVisitor implements
 		PrgVisitor<Program, RuntimeException>,
-		Parameter.DeclVisitor<Node, RuntimeException>,
+		DeclVisitor<Node, RuntimeException>,
 		ParameterVisitor<Variable, RuntimeException> {
 	
 	private LinkedList<String> types = new LinkedList<>();
