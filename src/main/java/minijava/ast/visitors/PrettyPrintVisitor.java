@@ -6,6 +6,7 @@ import minijava.ast.rules.DeclClass;
 import minijava.ast.rules.DeclMain;
 import minijava.ast.rules.DeclMeth;
 import minijava.ast.rules.DeclVar;
+import minijava.ast.rules.DeclVisitor;
 import minijava.ast.rules.Parameter;
 import minijava.ast.rules.Prg;
 import minijava.ast.rules.PrgVisitor;
@@ -65,7 +66,7 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 	}
 
 	public static class PrettyPrintVisitorDecl implements
-			Parameter.DeclVisitor<String, RuntimeException> {
+			DeclVisitor<String, RuntimeException> {
 
 		private final String indent;
 

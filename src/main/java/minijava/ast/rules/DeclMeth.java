@@ -26,7 +26,7 @@ public class DeclMeth extends Decl {
 	}
 
 	@Override
-	public <A, T extends Throwable> A accept(Parameter.DeclVisitor<A, T> v) throws T {
+	public <A, T extends Throwable> A accept(DeclVisitor<A, T> v) throws T {
 		return v.visit(this);
 	}
 }
