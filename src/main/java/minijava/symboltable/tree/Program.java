@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import minijava.ast.rules.declarations.Class;
+
 public class Program implements Node {
 	
 	private final Map<String, Class> classes;
@@ -11,7 +13,7 @@ public class Program implements Node {
 	public Program(List<Class> classes) {
 		this.classes = new HashMap<>();
 		for (Class clazz : classes) {
-			this.classes.put(clazz.name, clazz);
+			this.classes.put(clazz.className, clazz);
 		}
 	}
 

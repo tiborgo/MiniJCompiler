@@ -403,8 +403,8 @@ public class IntermediateVisitor implements
 		public TreeExp visit(Invoke e) throws RuntimeException {
 			
 			TreeExp object = e.obj.accept(this);
-			minijava.symboltable.tree.Class clazz = symbolTable.get(classContext.className);
-			Method method = clazz.methods.get(methodContext.methodName);
+			minijava.ast.rules.declarations.Class clazz = symbolTable.get(classContext.className);
+			Method method = clazz.getMethod(methodContext.methodName);
 			String className = ((Class) e.obj.accept(new TypeCheckVisitor.TypeCheckVisitorExpTyStm(symbolTable, clazz, method))).c;
 			String methodName = e.method;
 
