@@ -87,7 +87,7 @@ public class MiniJavaCompiler {
 	@Option(name = "--verbose", aliases = {"-v"}, usage = "Print additional information")
 	private boolean verbose;
 	
-	@Option(name = "--print-source-code", usage = "Pretty print the input source code", depends = "--verbose")
+	@Option(name = "--print-source-code", aliases = {"-sc"}, usage = "Pretty print the input source code", depends = "--verbose")
 	private boolean printSourceCode;
 	
 	@Option(name = "--print-pre-assembly", aliases = {"-pa"}, usage = "Prints the assembly with temporiaries and unspecified frame size", depends = "--verbose")

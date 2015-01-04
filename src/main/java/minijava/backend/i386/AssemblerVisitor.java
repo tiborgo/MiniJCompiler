@@ -11,6 +11,10 @@ import minijava.backend.i386.AssemJump;
 import minijava.backend.i386.AssemLabel;
 import minijava.backend.i386.AssemUnaryOp;
 import minijava.backend.i386.Operand;
+import minijava.backend.i386.Operand.Imm;
+import minijava.backend.i386.Operand.Mem;
+import minijava.backend.i386.Operand.Reg;
+import minijava.backend.i386.visitors.OperandVisitor;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.FragmentVisitor;
 import minijava.intermediate.Label;
@@ -47,7 +51,7 @@ public class AssemblerVisitor implements
 		instructions.add(new AssemLabel(fragProc.frame.getName()));
 		
 		// Prologue
-		instructions.add(new Push(I386MachineSpecifics.EBP));
+		instructions.add(new AssemUnaryOp(AssemUnaryOp.Kind.PUSH, I386MachineSpecifics.EBP));
 		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.MOV, I386MachineSpecifics.EBP, I386MachineSpecifics.ESP));
 
 		// TODO: Allocate space on stack for local variables
@@ -128,22 +132,22 @@ public class AssemblerVisitor implements
 			OperandVisitor<Operand.Mem, RuntimeException> memVisitor = new OperandVisitor<Operand.Mem, RuntimeException>() {
 
 				@Override
-				public Mem visit(Imm operand) {
+				public Mem visit(Operand.Imm operand) {
 					return new Operand.Mem(null, null, null, operand.imm);
 				}
 
 				@Override
-				public Mem visit(Label operand) {
+				public Mem visit(Operand.Label operand) {
 					throw new UnsupportedOperationException("Cannot convert label to address");
 				}
 
 				@Override
-				public Mem visit(Mem operand) {
+				public Mem visit(Operand.Mem operand) {
 					return operand;
 				}
 
 				@Override
-				public Mem visit(Reg operand) {
+				public Mem visit(Operand.Reg operand) {
 					return new Operand.Mem(operand.reg);
 				}
 			};
@@ -205,44 +209,28 @@ public class AssemblerVisitor implements
 
 			// Unary instructions
 			if (operatorUnary != null) {
-				if (operatorUnary == AssemUnaryOp.Kind.IDIV) {
-					AssemBinaryOp moveToEAX = new AssemBinaryOp(Kind.MOV, eax, o1);
-					// TODO: Save register EDX?
-					Operand.Reg o2Temp = new Operand.Reg(new Temp());
-					AssemBinaryOp moveToO2Temp = new AssemBinaryOp(Kind.MOV, o2Temp, o2);
-					AssemUnaryOp division = new AssemUnaryOp(operatorUnary, o2);
-					emit(moveToEAX, moveToO2Temp, division);
-					return eax;
-				} else if (operatorUnary == AssemUnaryOp.Kind.IMUL) {
-					AssemBinaryOp moveToEAX = new AssemBinaryOp(Kind.MOV, eax, o1);
-					// TODO: Save register EDX?
-					Operand.Reg o2Temp = new Operand.Reg(new Temp());
-					AssemBinaryOp moveToO2Temp = new AssemBinaryOp(Kind.MOV, o2Temp, o2);
-					AssemUnaryOp division = new AssemUnaryOp(operatorUnary, o2Temp);
-					emit(moveToEAX, moveToO2Temp, division);
-					return eax;
-				} else {
-					throw new UnsupportedOperationException("Unsupported operator \"" + operatorUnary + "\"");
+				AssemBinaryOp moveToEAX = new AssemBinaryOp(Kind.MOV, I386MachineSpecifics.EAX, o1);
+				Operand.Reg o2Temp = new Operand.Reg(new Temp());
+				AssemBinaryOp moveToO2Temp = new AssemBinaryOp(Kind.MOV, o2Temp, o2);
+				AssemUnaryOp division = new AssemUnaryOp(operatorUnary, o2Temp);
+				emit(moveToEAX, moveToO2Temp, division);
+				return I386MachineSpecifics.EAX;
+			}
+			else {
+				// Destination of most arithmetical and some logical operations cannot be immediates
+				// (whenever the destination is changed by the operation it must be a register or memory location)
+				if (o1 instanceof Operand.Imm &&
+						(operatorBinary == Kind.ADD || operatorBinary == Kind.SUB || operatorBinary == Kind.SHL || operatorBinary == Kind.SHR || operatorBinary == Kind.SAR)) {
+					Operand.Reg o1_ = new Operand.Reg(new Temp());
+					emit(new AssemBinaryOp(Kind.MOV, o1_, o1));
+					o1 = o1_;
 				}
-			} else {
+				
 				// Binary instructions
 				AssemBinaryOp binaryOperation = new AssemBinaryOp(operatorBinary, o1, o2);
 				emit(binaryOperation);
 				return o1;
 			}
-			// Destination of most arithmetical and some logical operations cannot be immediates
-			// (whenever the destination is changed by the operation it must be a register or memory location)
-			if (o1 instanceof Operand.Imm &&
-					(operatorBinary == Kind.ADD || operatorBinary == Kind.SUB || operatorBinary == Kind.SHL || operatorBinary == Kind.SHR || operatorBinary == Kind.SAR)) {
-				Operand.Reg o1_ = new Operand.Reg(new Temp());
-				emit(new AssemBinaryOp(Kind.MOV, o1_, o1));
-				o1 = o1_;
-			}
-			
-			// Binary instructions
-			AssemBinaryOp binaryOperation = new AssemBinaryOp(operatorBinary, o1, o2);
-			emit(binaryOperation);
-			return o1;
 		}
 
 		@Override
@@ -308,11 +296,22 @@ public class AssemblerVisitor implements
 			default:
 				throw new UnsupportedOperationException("Unsigned conditions are not supported");
 			}
+			
+			Operand left  = stmCJUMP.left.accept(this);
+			Operand right = stmCJUMP.right.accept(this);
+			
+			// dst must not be an immediate
+			// TODO: maybe revert jump?
+			if (left instanceof Operand.Imm) {
+				Operand.Reg tLeft = new Operand.Reg(new Temp());
+				emit(new AssemBinaryOp(Kind.MOV, tLeft, left));
+				left = tLeft;
+			}
 
 			AssemBinaryOp cmpOp = new AssemBinaryOp(
 				AssemBinaryOp.Kind.CMP,
-				stmCJUMP.left.accept(this),
-				stmCJUMP.right.accept(this)
+				left,
+				right
 			);
 			AssemJump jump = new AssemJump(AssemJump.Kind.J, new Operand.Label(stmCJUMP.ltrue), cond);
 			emit(cmpOp, jump);

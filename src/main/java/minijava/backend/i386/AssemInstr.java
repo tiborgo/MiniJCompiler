@@ -35,8 +35,10 @@ public final class AssemInstr extends DefaultInstruction {
 			// eax is the return value
 			return Arrays.asList(I386MachineSpecifics.EBX.reg, I386MachineSpecifics.ESI.reg, I386MachineSpecifics.EDI.reg, I386MachineSpecifics.EAX.reg);
 		case NOP:
-		default:
 			return Collections.emptyList();
+		default:
+			throw new UnsupportedOperationException("Unknown operand " + kind);
+			
 		}
 	}
 
