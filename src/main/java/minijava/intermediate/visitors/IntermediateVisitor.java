@@ -34,6 +34,8 @@ import minijava.ast.rules.statements.Statement;
 import minijava.ast.rules.statements.StatementList;
 import minijava.ast.rules.statements.StatementVisitor;
 import minijava.ast.rules.statements.While;
+import minijava.ast.rules.types.Class;
+import minijava.ast.visitors.TypeCheckVisitor;
 import minijava.backend.MachineSpecifics;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.Frame;
@@ -378,8 +380,8 @@ public class IntermediateVisitor implements
 		public TreeExp visit(Invoke e) throws RuntimeException {
 			
 			TreeExp object = e.obj.accept(this);
-			minijava.ast.rules.declarations.Class clazz = symbolTable.get(classContext.className);
-			String className = clazz.className;
+			
+			String className = ((minijava.ast.rules.types.Class) e.obj.type).c;
 			String methodName = e.method;
 
 			TreeExp function = new TreeExpNAME(new Label(mangle(className,

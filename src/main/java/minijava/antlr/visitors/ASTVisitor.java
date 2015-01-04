@@ -63,13 +63,15 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 	@Override
 	public Object visitProg(@NotNull MiniJavaParser.ProgContext ctx) {
 
-		Main mainClass = (Main) visit(ctx.mainClass());
 		LinkedList<minijava.ast.rules.declarations.Class> classes = new LinkedList<>();
 		for (ClassDeclarationContext classDeclCtx : ctx.classDeclaration()) {
 			classes.add((minijava.ast.rules.declarations.Class) visit(classDeclCtx));
 		}
+		
+		Main mainClass = (Main) visit(ctx.mainClass());
+		classes.add(mainClass);
 
-		return new Program(mainClass, classes);
+		return new Program(classes);
 	}
 
 	@Override

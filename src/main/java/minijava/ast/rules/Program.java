@@ -7,17 +7,13 @@ import java.util.List;
 import java.util.Map;
 
 import minijava.ast.rules.declarations.Class;
-import minijava.ast.rules.declarations.Main;
 
 public class Program {
-	public final Main mainClass;
 	private final Map<String, Class> classes;
 
-	public Program(Main mainClass, List<Class> classes) {
-		this.mainClass = mainClass;
+	public Program(List<Class> classes) {
 
 		this.classes = new HashMap<>(classes.size());
-		this.classes.put(mainClass.className, mainClass);
 		for (Class clazz : classes) {
 			this.classes.put(clazz.className, clazz);
 		}
