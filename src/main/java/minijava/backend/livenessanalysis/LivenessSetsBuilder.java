@@ -16,7 +16,7 @@ public class LivenessSetsBuilder {
 	
 	public static Pair<Map<Assem, Set<Temp>>, Map<Assem, Set<Temp>>> build(SimpleGraph<Assem> controlFlowGraph) {
 		
-		List<SimpleGraph<Assem>.Node> nodes = ReverseOrderBuilder.build(controlFlowGraph);
+		final List<SimpleGraph<Assem>.Node> nodes = ReverseOrderBuilder.build(controlFlowGraph);
 		
 		boolean changed;
 		
@@ -46,30 +46,12 @@ public class LivenessSetsBuilder {
 			}
 		};
 		
-		/*Map<Assem, Set<Temp>> in = new HashMap<Assem, Set<Temp>>() {
-			private static final long serialVersionUID = -799825918762401592L;
-
-			@Override
-			public String toString() {
-				StringBuilder string = new StringBuilder();
-				string.append("{");
-				for (SimpleGraph<Assem>.Node n : nodes) {
-					string
-						.append(n.info.toString())
-						.append("=")
-						.append(get(n.info).toString())
-						.append(", ");
-				}
-				string.append("}");
-				return string.toString();
-			}
-		};*/
 		Map<Assem, Set<Temp>> in = new TreeMap<>(comparator);
 		Map<Assem, Set<Temp>> out = new TreeMap<>(comparator);
 		
 		for (int i = 0; i < nodes.size(); i++) {
-			in.put(nodes.get(i).info, new HashSet<>());
-			out.put(nodes.get(i).info, new HashSet<>());
+			in.put(nodes.get(i).info, new HashSet<Temp>());
+			out.put(nodes.get(i).info, new HashSet<Temp>());
 		}
 		
 		do {

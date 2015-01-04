@@ -3,9 +3,9 @@ package minijava.backend.livenessanalysis;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Function;
 
 import minijava.backend.Assem;
+import minijava.util.Function;
 import minijava.util.SimpleGraph;
 
 public class ReverseOrderBuilder {
@@ -15,7 +15,7 @@ public class ReverseOrderBuilder {
 		// Build reverse order
 		
 		List<SimpleGraph<Assem>.Node> nodes = new ArrayList<>(graph.nodeSet().size());
-		List<SimpleGraph<Assem>.Node> remainingNodes = new LinkedList<>(graph.nodeSet());
+		final List<SimpleGraph<Assem>.Node> remainingNodes = new LinkedList<>(graph.nodeSet());
 		
 		Function<SimpleGraph<Assem>.Node, List<SimpleGraph<Assem>.Node>> orderReversely = new Function<SimpleGraph<Assem>.Node, List<SimpleGraph<Assem>.Node>>() {
 			

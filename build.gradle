@@ -4,8 +4,8 @@ apply plugin: "java"
 apply plugin: "application"
 apply plugin: "eclipse"
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
 
 mainClassName = "minijava.MiniJavaCompiler"
 sourceSets.main.java.srcDir "src/generated-sources/java"
@@ -32,6 +32,13 @@ dependencies {
 repositories {
 	mavenLocal()
 	mavenCentral()
+}
+
+/* tried to exclude the resources folder, unsuccessfully */
+sourceSets {
+	test {
+		exclude 'resources/'
+	}
 }
 
 /*
