@@ -3,8 +3,8 @@ class Main {
     public static void main(String[] a){
     	//System.out.println((new Test()).run());
     	//System.out.println(new int[12]);
-    	System.out.println(100);
-    	//System.out.println((new Test3()).test());
+    	//System.out.println(100);
+    	System.out.println((new Test3()).test());
     	/*if ((new Test()).run() < 1) {
     		System.out.println(1);
     	}

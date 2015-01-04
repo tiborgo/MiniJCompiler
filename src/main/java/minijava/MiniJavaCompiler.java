@@ -104,9 +104,6 @@ public class MiniJavaCompiler {
 	@Option(name = "--run-executable", aliases = {"-re"}, usage = "Runs the compiled executable")
 	private boolean runExecutable;
 	
-	@Option(name = "--skip-type-check", aliases = {"-st"}, usage = "Skips the type check")
-	private boolean skipTypeCheck;
-	
 	@Option(name = "--print-pre-colored-graphs", aliases = {"-pg"},  depends = "--verbose")
 	private boolean printPreColoredGraphs;
 	
@@ -471,7 +468,7 @@ public class MiniJavaCompiler {
 			}
 			
 			if (outCall.exitValue() != 0) {
-				throw new CompilerException("Failed to compile assembly:" + System.lineSeparator() + errOutput.toString());
+				throw new CompilerException("Failed to run executable:" + System.lineSeparator() + errOutput.toString());
 			}
 			else {
 				System.out.println(output.toString());
@@ -489,9 +486,7 @@ public class MiniJavaCompiler {
 	public void compile(String gcc) throws CompilerException {
 		Program program = parse();
 		Program symbolTable = inferTypes(program);
-		if (!skipTypeCheck) {
-			checkTypes(program);
-		}
+		checkTypes(program);
 		List<FragmentProc<TreeStm>> intermediate = generateIntermediate(program);
 		List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = canonicalize(intermediate); 
 		List<Fragment<List<Assem>>> assemFragments = generatePreAssembly(intermediateCanonicalized);

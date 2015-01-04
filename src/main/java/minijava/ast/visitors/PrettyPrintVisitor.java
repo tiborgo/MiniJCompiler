@@ -1,19 +1,19 @@
 package minijava.ast.visitors;
 
-import java.util.Collection;
 import java.util.List;
 
-import minijava.ast.rules.declarations.Main;
-import minijava.ast.rules.declarations.Method;
-import minijava.ast.rules.declarations.Variable;
-import minijava.ast.rules.declarations.DeclarationVisitor;
 import minijava.ast.rules.Parameter;
 import minijava.ast.rules.Program;
 import minijava.ast.rules.ProgramVisitor;
-import minijava.ast.rules.expressions.Expression;
+import minijava.ast.rules.declarations.DeclarationVisitor;
+import minijava.ast.rules.declarations.Main;
+import minijava.ast.rules.declarations.Method;
+import minijava.ast.rules.declarations.Variable;
 import minijava.ast.rules.expressions.ArrayGet;
 import minijava.ast.rules.expressions.ArrayLength;
 import minijava.ast.rules.expressions.BinOp;
+import minijava.ast.rules.expressions.Expression;
+import minijava.ast.rules.expressions.ExpressionVisitor;
 import minijava.ast.rules.expressions.False;
 import minijava.ast.rules.expressions.Id;
 import minijava.ast.rules.expressions.IntConstant;
@@ -23,14 +23,13 @@ import minijava.ast.rules.expressions.New;
 import minijava.ast.rules.expressions.NewIntArray;
 import minijava.ast.rules.expressions.This;
 import minijava.ast.rules.expressions.True;
-import minijava.ast.rules.expressions.ExpressionVisitor;
-import minijava.ast.rules.statements.Statement;
 import minijava.ast.rules.statements.ArrayAssignment;
 import minijava.ast.rules.statements.Assignment;
 import minijava.ast.rules.statements.If;
-import minijava.ast.rules.statements.StatementList;
 import minijava.ast.rules.statements.PrintChar;
 import minijava.ast.rules.statements.PrintlnInt;
+import minijava.ast.rules.statements.Statement;
+import minijava.ast.rules.statements.StatementList;
 import minijava.ast.rules.statements.StatementVisitor;
 import minijava.ast.rules.statements.While;
 import minijava.ast.rules.types.Array;
@@ -49,21 +48,17 @@ public class PrettyPrintVisitor implements ProgramVisitor<String, RuntimeExcepti
 		this.indent = indent;
 	}
 
-	private String prettyPrintClassList(Collection<minijava.ast.rules.declarations.Class> cl, String indent) {
+	@Override
+	public String visit(Program p) {
+		
 		StringBuffer classes = new StringBuffer();
 		String sep = "";
-		for (minijava.ast.rules.declarations.Class d : cl) {
+		for (minijava.ast.rules.declarations.Class d : p.getClasses()) {
 			classes.append(sep);
 			classes.append(d.accept(new PrettyPrintVisitorDecl(indent)));
 			sep = "\n";
 		}
 		return classes.toString();
-	}
-
-	@Override
-	public String visit(Program p) {
-		return p.mainClass.accept(new PrettyPrintVisitorDecl(indent)) + "\n"
-				+ prettyPrintClassList(p.getClasses(), indent);
 	}
 
 	public static class PrettyPrintVisitorDecl implements

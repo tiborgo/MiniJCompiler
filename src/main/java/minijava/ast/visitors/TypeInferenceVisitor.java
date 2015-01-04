@@ -42,7 +42,6 @@ public class TypeInferenceVisitor implements ProgramVisitor<Void, RuntimeExcepti
 	@Override
 	public Void visit(Program program) throws RuntimeException {
 		TypeInferenceVisitorExpTyStm expTyStmVisitor = new TypeInferenceVisitorExpTyStm(program);
-		program.mainClass.accept(expTyStmVisitor);
 		for (minijava.ast.rules.declarations.Class clazz : program.getClasses()) {
 			clazz.accept(expTyStmVisitor);
 		}
@@ -82,7 +81,7 @@ public class TypeInferenceVisitor implements ProgramVisitor<Void, RuntimeExcepti
 
 		@Override
 		public Void visit(Main d) throws RuntimeException {
-			return null;
+			return visit((minijava.ast.rules.declarations.Class) d);
 		}
 
 		@Override

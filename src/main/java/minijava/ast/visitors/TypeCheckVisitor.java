@@ -51,7 +51,6 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 		expTyStmVisitor = new TypeCheckVisitorExpTyStm(program);
 
 		boolean ok = true;
-		ok = program.mainClass.accept(expTyStmVisitor) ? ok : false;
 		for (minijava.ast.rules.declarations.Class clazz : program.getClasses()) {
 			ok = clazz.accept(expTyStmVisitor) ? ok : false;
 		}
@@ -104,7 +103,8 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 
 		@Override
 		public java.lang.Boolean visit(Main d) throws RuntimeException {
-			return true;
+			// TODO: check main method
+			return true;//return visit((minijava.ast.rules.declarations.Class) d);
 		}
 
 		@Override
