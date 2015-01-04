@@ -3,7 +3,8 @@ class Main {
     public static void main(String[] a){
     	//System.out.println((new Test()).run());
     	//System.out.println(new int[12]);
-    	System.out.println(1);
+    	System.out.println(100);
+    	//System.out.println((new Test3()).test());
     	/*if ((new Test()).run() < 1) {
     		System.out.println(1);
     	}
@@ -11,7 +12,7 @@ class Main {
     		System.out.println(2);
     	}*/
     	//System.out.print((char)100);
-    	//System.out.println((new Test3()).test());
+    	
     	/*if (1 < 0) {
     		System.out.print((char)new Test().test());
     	}
@@ -37,8 +38,8 @@ class Test3 {
 		else {
 			a[9] = 3;
 		}*/
-		a[2] = 4;
-		return a[9];
+		a[2] = 50;
+		return a[2];
 	}
 }
 

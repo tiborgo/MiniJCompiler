@@ -46,7 +46,7 @@ public class Allocator {
 		List<SimpleGraph<ColoredNode>.Node> spillNodes = Selector.select(graph, simplifiedGraph, stack, colors);
 		
 		// Replace colored temps
-		Map<Temp, Temp> colorMap = new HashMap<>();
+		final Map<Temp, Temp> colorMap = new HashMap<>();
 		for (SimpleGraph<ColoredNode>.Node n : simplifiedGraph.nodeSet()) {
 			if (n.info.isColored()) {
 				colorMap.put(n.info.temp, n.info.color);
