@@ -51,6 +51,16 @@ public class I386PrintAssemblyVisitor implements
 	}
 
 	@Override
+	public String visit(AssemUnaryOp assem) {
+		StringBuilder operation = new StringBuilder()
+			.append(assem.kind.name())
+			.append("\t")
+			.append(assem.op.accept(this));
+
+		return operation.toString();
+	}
+
+	@Override
 	public String visit(Instruction instruction) throws RuntimeException {
 		StringBuilder instructionString = new StringBuilder()
 			.append(instruction.toString());
