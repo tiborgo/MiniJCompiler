@@ -98,8 +98,15 @@ public class AssemblerVisitor implements
 			int stackIncrement = parameterSize + padding;
 			emit(new AssemBinaryOp(Kind.SUB, I386MachineSpecifics.ESP, new Operand.Imm(stackIncrement)));
 			for (TreeExp arg : e.args) {
-				Operand dst = new Operand.Mem(I386MachineSpecifics.ESP.reg, null, null, I386MachineSpecifics.WORD_SIZE*e.args.indexOf(arg));
 				Operand src = arg.accept(this);
+				// The source operand is a memory location, it needs to be loaded into a temporary first,
+				// because i386 does not support a move operation between two memory locations.
+				if (src instanceof Operand.Mem) {
+					Operand temporary = new Operand.Reg(new Temp());
+					emit(new AssemBinaryOp(Kind.MOV, temporary, src));
+					src = temporary;
+				}
+				Operand dst = new Operand.Mem(I386MachineSpecifics.ESP.reg, null, null, I386MachineSpecifics.WORD_SIZE*e.args.indexOf(arg));
 				emit(new AssemBinaryOp(Kind.MOV, dst, src));
 			}
 

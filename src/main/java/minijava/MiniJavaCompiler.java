@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-//import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -15,8 +14,9 @@ import java.util.Map;
 import java.util.Set;
 
 import minijava.antlr.visitors.ASTVisitor;
-import minijava.ast.rules.Prg;
+import minijava.ast.rules.Program;
 import minijava.ast.visitors.PrettyPrintVisitor;
+import minijava.ast.visitors.TypeInferenceVisitor;
 import minijava.ast.visitors.baseblocks.BaseBlock;
 import minijava.ast.visitors.baseblocks.Generator;
 import minijava.ast.visitors.baseblocks.ToTreeStmConverter;
@@ -36,12 +36,9 @@ import minijava.intermediate.Temp;
 import minijava.intermediate.canon.Canon;
 import minijava.intermediate.tree.TreeStm;
 import minijava.intermediate.visitors.IntermediateVisitor;
-import minijava.symboltable.tree.Program;
-import minijava.symboltable.visitors.CreateSymbolTableVisitor;
-import minijava.symboltable.visitors.TypeCheckVisitor;
+import minijava.ast.visitors.TypeCheckVisitor;
 import minijava.util.Pair;
 import minijava.util.SimpleGraph;
-
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -51,6 +48,8 @@ import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+
+//import java.nio.file.Files;
 
 public class MiniJavaCompiler {
 	private static final Path RUNTIME_DIRECTORY = Paths.get("src/main/resources/minijava/runtime");
@@ -132,7 +131,7 @@ public class MiniJavaCompiler {
 
 	// Compiler pipeline
 	
-	private Prg parse() throws CompilerException {
+	private Program parse() throws CompilerException {
 		try {
 			ANTLRFileStream reader = new ANTLRFileStream(inputFile);
 			MiniJavaLexer lexer = new MiniJavaLexer((CharStream) reader);
@@ -140,7 +139,7 @@ public class MiniJavaCompiler {
 			MiniJavaParser parser = new MiniJavaParser(tokens);
 			ParseTree parseTree = parser.prog();
 			ASTVisitor astVisitor = new ASTVisitor();
-			Prg program = (Prg) astVisitor.visit(parseTree);
+			Program program = (Program) astVisitor.visit(parseTree);
 			
 			printVerbose("Successfully parsed input file",
 					(printSourceCode) ? program.accept(new PrettyPrintVisitor("")) : null);
@@ -152,15 +151,15 @@ public class MiniJavaCompiler {
 		}
 	}
 	
-	private Program inferTypes(Prg program) throws CompilerException {
+	private Program inferTypes(Program program) throws CompilerException {
 		
 		try {
-			CreateSymbolTableVisitor createSymbolTableVisitor = new CreateSymbolTableVisitor();
-			Program symbolTable = program.accept(createSymbolTableVisitor);
+			TypeInferenceVisitor typeInferenceVisitor = new TypeInferenceVisitor();
+			program.accept(typeInferenceVisitor);
 			
 			printVerbose("Successfully built symbol table");
 			
-			return symbolTable;
+			return program;
 		}
 		catch (Exception e) {
 			// TODO: Proper exceptions
@@ -168,9 +167,9 @@ public class MiniJavaCompiler {
 		}
 	}
 	
-	private void checkTypes(Prg program, Program symbolTable) throws CompilerException {
+	private void checkTypes(Program program) throws CompilerException {
 
-		TypeCheckVisitor typeCheckVisitor = new TypeCheckVisitor(symbolTable);
+		TypeCheckVisitor typeCheckVisitor = new TypeCheckVisitor();
 		if (program.accept(typeCheckVisitor)) {
 			
 			printVerbose("Successfully checked types");
@@ -181,10 +180,10 @@ public class MiniJavaCompiler {
 		}
 	}
 	
-	private List<FragmentProc<TreeStm>> generateIntermediate(Prg program, Program symbolTable) throws CompilerException {
+	private List<FragmentProc<TreeStm>> generateIntermediate(Program program) throws CompilerException {
 		
 		try {
-			IntermediateVisitor intermediateVisitor = new IntermediateVisitor(machineSpecifics, symbolTable);
+			IntermediateVisitor intermediateVisitor = new IntermediateVisitor(machineSpecifics, program);
 			List<FragmentProc<TreeStm>> procFragements = program.accept(intermediateVisitor);
 			
 			printVerbose("Successfully generated intermediate language");
@@ -488,12 +487,12 @@ public class MiniJavaCompiler {
 	}
 	
 	public void compile(String gcc) throws CompilerException {
-		Prg program = parse();
+		Program program = parse();
 		Program symbolTable = inferTypes(program);
 		if (!skipTypeCheck) {
-			checkTypes(program, symbolTable);
+			checkTypes(program);
 		}
-		List<FragmentProc<TreeStm>> intermediate = generateIntermediate(program, symbolTable);
+		List<FragmentProc<TreeStm>> intermediate = generateIntermediate(program);
 		List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = canonicalize(intermediate); 
 		List<Fragment<List<Assem>>> assemFragments = generatePreAssembly(intermediateCanonicalized);
 		List<SimpleGraph<Assem>> controlFlowGraphs = generateControlFlowGraphs(assemFragments);

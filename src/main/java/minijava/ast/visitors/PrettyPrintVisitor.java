@@ -1,5 +1,6 @@
 package minijava.ast.visitors;
 
+import java.util.Collection;
 import java.util.List;
 
 import minijava.ast.rules.declarations.Main;
@@ -7,8 +8,8 @@ import minijava.ast.rules.declarations.Method;
 import minijava.ast.rules.declarations.Variable;
 import minijava.ast.rules.declarations.DeclarationVisitor;
 import minijava.ast.rules.Parameter;
-import minijava.ast.rules.Prg;
-import minijava.ast.rules.PrgVisitor;
+import minijava.ast.rules.Program;
+import minijava.ast.rules.ProgramVisitor;
 import minijava.ast.rules.expressions.Expression;
 import minijava.ast.rules.expressions.ArrayGet;
 import minijava.ast.rules.expressions.ArrayLength;
@@ -39,7 +40,7 @@ import minijava.ast.rules.types.Integer;
 import minijava.ast.rules.types.TypeVisitor;
 import minijava.ast.rules.types.Void;
 
-public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> {
+public class PrettyPrintVisitor implements ProgramVisitor<String, RuntimeException> {
 
 	private static final String indentStep = "  ";
 	private final String indent;
@@ -48,7 +49,7 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 		this.indent = indent;
 	}
 
-	private String prettyPrintClassList(List<minijava.ast.rules.declarations.Class> cl, String indent) {
+	private String prettyPrintClassList(Collection<minijava.ast.rules.declarations.Class> cl, String indent) {
 		StringBuffer classes = new StringBuffer();
 		String sep = "";
 		for (minijava.ast.rules.declarations.Class d : cl) {
@@ -60,9 +61,9 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 	}
 
 	@Override
-	public String visit(Prg p) {
+	public String visit(Program p) {
 		return p.mainClass.accept(new PrettyPrintVisitorDecl(indent)) + "\n"
-				+ prettyPrintClassList(p.classes, indent);
+				+ prettyPrintClassList(p.getClasses(), indent);
 	}
 
 	public static class PrettyPrintVisitorDecl implements
@@ -136,9 +137,9 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 					+ indent
 					+ indentStep
 					+ "public static void main (String[] "
-					+ d.mainArg.toString()
+					+ d.mainMethod.methodName
 					+ ") {\n"
-					+ d.mainBody.accept(new PrettyPrintVisitorStm(indent
+					+ d.mainMethod.body.accept(new PrettyPrintVisitorStm(indent
 							+ indentStep + indentStep)) + indent + indentStep
 					+ "}\n" + indent + "}\n";
 		}
@@ -307,13 +308,13 @@ public class PrettyPrintVisitor implements PrgVisitor<String, RuntimeException> 
 
 		@Override
 		public String visit(Assignment s) {
-			return indent + s.id + " = "
+			return indent + s.id.id + " = "
 					+ s.rhs.accept(new PrettyPrintVisitorExp()) + ";\n";
 		}
 
 		@Override
 		public String visit(ArrayAssignment s) {
-			return indent + s.id + "["
+			return indent + s.id.id + "["
 					+ s.index.accept(new PrettyPrintVisitorExp()) + "] = "
 					+ s.rhs.accept(new PrettyPrintVisitorExp()) + ";\n";
 		}
