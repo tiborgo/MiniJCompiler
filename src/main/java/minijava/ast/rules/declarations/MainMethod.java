@@ -12,7 +12,7 @@ public class MainMethod extends Method {
 	public MainMethod(String argsName, Statement body) {
 		
 		// FIXME: Main method has argument of type String[]
-		super(new minijava.ast.rules.types.Void(),
+		super(new minijava.ast.rules.types.Integer(),
 				"main",
 				Arrays.asList(new Parameter(argsName, null)),
 				Collections.<Variable>emptyList(),

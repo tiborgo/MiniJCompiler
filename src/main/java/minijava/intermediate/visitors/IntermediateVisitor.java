@@ -10,7 +10,11 @@ import java.util.Map;
 
 import minijava.ast.rules.Program;
 import minijava.ast.rules.ProgramVisitor;
-import minijava.ast.rules.declarations.*;
+import minijava.ast.rules.declarations.DeclarationVisitor;
+import minijava.ast.rules.declarations.Main;
+import minijava.ast.rules.declarations.MainMethod;
+import minijava.ast.rules.declarations.Method;
+import minijava.ast.rules.declarations.Variable;
 import minijava.ast.rules.expressions.ArrayGet;
 import minijava.ast.rules.expressions.ArrayLength;
 import minijava.ast.rules.expressions.BinOp;
@@ -34,8 +38,6 @@ import minijava.ast.rules.statements.Statement;
 import minijava.ast.rules.statements.StatementList;
 import minijava.ast.rules.statements.StatementVisitor;
 import minijava.ast.rules.statements.While;
-import minijava.ast.rules.types.Class;
-import minijava.ast.visitors.TypeCheckVisitor;
 import minijava.backend.MachineSpecifics;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.Frame;
@@ -169,9 +171,6 @@ public class IntermediateVisitor implements
 			ExpressionVisitor<TreeExp, RuntimeException>,
 			StatementVisitor<TreeStm, RuntimeException> {
 
-		private final Program symbolTable;
-		private final minijava.ast.rules.declarations.Class classContext;
-		private final Method methodContext;
 		private final Map<String, java.lang.Integer> memoryFootprint;
 		private final Map<String, TreeExp> temps;
 		private final MachineSpecifics  machineSpecifics;
@@ -184,10 +183,7 @@ public class IntermediateVisitor implements
 				Program symbolTable) {
 			this.temps = temps;
 			this.machineSpecifics = machineSpecifics;
-			this.classContext = classContext;
-			this.methodContext = methodContext;
 			this.memoryFootprint = memoryFootprint;
-			this.symbolTable = symbolTable;
 		}
 
 		@Override
