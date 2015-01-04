@@ -1,19 +1,20 @@
 package minijava.ast.rules.statements;
 
 import minijava.ast.rules.expressions.Expression;
+import minijava.ast.rules.expressions.Id;
 
 public class Assignment extends Statement {
 
-  final public String id;
-  final public Expression rhs;
+	public final Id id;
+	public final Expression rhs;
 
-  public Assignment(String id, Expression rhs) {
-    this.id = id;
-    this.rhs = rhs;
-  }
+	public Assignment(Id id, Expression rhs) {
+		this.id = id;
+		this.rhs = rhs;
+	}
 
-  @Override
-  public <A, T extends Throwable> A accept(StatementVisitor<A, T> v) throws T {
-    return v.visit(this);
-  }
+	@Override
+	public <A, T extends Throwable> A accept(StatementVisitor<A, T> v) throws T {
+		return v.visit(this);
+	}
 }

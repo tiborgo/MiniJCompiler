@@ -21,4 +21,22 @@ public class Class extends Declaration {
 	public <A, T extends Throwable> A accept(DeclarationVisitor<A, T> v) throws T {
 		return v.visit(this);
 	}
+
+  public Method getMethod(String methodName) {
+    for (Method declaredMethod : methods) {
+      if (declaredMethod.methodName.equals(methodName)) {
+        return declaredMethod;
+      }
+    }
+    return null;
+  }
+
+  public Variable getField(String fieldName) {
+    for (Variable declaredField : fields) {
+      if (declaredField.name.equals(fieldName)) {
+        return declaredField;
+      }
+    }
+    return null;
+  }
 }

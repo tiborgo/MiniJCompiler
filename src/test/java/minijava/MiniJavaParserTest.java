@@ -10,12 +10,11 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import static org.junit.Assert.fail;
-import minijava.antlr.visitors.ASTVisitor;
-import minijava.ast.rules.Prg;
-import minijava.symboltable.visitors.CreateSymbolTableVisitor;
-import minijava.symboltable.visitors.TypeCheckVisitor;
-import minijava.symboltable.tree.Program;
 
+import minijava.antlr.visitors.ASTVisitor;
+import minijava.ast.rules.Program;
+import minijava.ast.visitors.TypeCheckVisitor;
+import minijava.ast.visitors.TypeInferenceVisitor;
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -88,12 +87,11 @@ public class MiniJavaParserTest {
 				
 				ParseTree tree = parser.prog();
 				ASTVisitor astVisitor = new ASTVisitor();
-				Prg program = (Prg) astVisitor.visit(tree);
+				Program program = (Program) astVisitor.visit(tree);
+				TypeInferenceVisitor typeInferenceVisitor = new TypeInferenceVisitor();
+				program.accept(typeInferenceVisitor);
 				
-				CreateSymbolTableVisitor createSymbolTableVisitor = new CreateSymbolTableVisitor();
-				Program symbolTable = program.accept(createSymbolTableVisitor);
-				
-				TypeCheckVisitor typeCheckVisitor = new TypeCheckVisitor(symbolTable);
+				TypeCheckVisitor typeCheckVisitor = new TypeCheckVisitor();
 				if (program.accept(typeCheckVisitor)) {
 					fail("The example "+file.toString()+" should have failed, but was accepted by the type checker.");
 				}
