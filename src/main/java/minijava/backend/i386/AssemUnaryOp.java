@@ -1,10 +1,12 @@
 package minijava.backend.i386;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import minijava.backend.Assem;
-import minijava.backend.AssemVisitor;
 import minijava.backend.Instruction;
+import minijava.backend.i386.visitors.AssemVisitor;
 import minijava.intermediate.Label;
 import minijava.intermediate.Temp;
 import minijava.util.Function;
@@ -29,38 +31,75 @@ public final class AssemUnaryOp extends Instruction {
 		this.op = op;
 		this.kind = kind;
 	}
+	
+	@Override
+	public List<Temp> use() {
+		return op.getTemps();
+	}
 
+	@Override
 	public List<Temp> def() {
-		throw new UnsupportedOperationException("Not supported yet.");
+		switch(kind) {
+		
+		case POP: {
+			List<Temp> temps = op.getTemps();
+			temps.add(I386MachineSpecifics.ESP.reg);
+			return temps;
+		}
+			
+		case NEG:
+		case NOT:
+		case INC:
+		case DEC:
+			return op.getTemps();
+		
+		case IMUL:
+		case IDIV:
+			return Arrays.asList(I386MachineSpecifics.EAX.reg, I386MachineSpecifics.EDX.reg);
+			
+		case PUSH:
+			return Arrays.asList(I386MachineSpecifics.ESP.reg);
+			
+		case ENTER:
+			return Arrays.asList(I386MachineSpecifics.ESP.reg, I386MachineSpecifics.EBP.reg);
+			
+		default:
+			throw new UnsupportedOperationException("Unknown operand " + kind);
+		}
 	}
 
+	@Override
 	public List<Label> jumps() {
-		throw new UnsupportedOperationException("Not supported yet.");
+		return Collections.emptyList();
 	}
 
+	@Override
 	public boolean isFallThrough() {
 		return true;
 	}
 
+	@Override
 	public Pair<Temp, Temp> isMoveBetweenTemps() {
-		throw new UnsupportedOperationException("Not supported yet.");
+		return null;
 	}
 
+	@Override
 	public Label isLabel() {
 		return null;
 	}
 
+	@Override
 	public String toString() {
-		throw new UnsupportedOperationException("Not supported yet.");
-	}
-
-	public Assem rename(Function<Temp, Temp> sigma) {
-		throw new UnsupportedOperationException("Not supported yet.");
+		return this.accept(new I386PrintAssemblyVisitor());
 	}
 
 	@Override
-	public <A, T extends Throwable> A accept(AssemVisitor<A, T> visitor)
-			throws T {
+	public Assem rename(Function<Temp, Temp> sigma) {
+		return new AssemUnaryOp(kind, op.rename(sigma));
+	}
+
+	@Override
+	public <A, T extends Throwable> A accept(AssemVisitor<A, T> visitor) throws T {
 		return visitor.visit(this);
 	}
 }
