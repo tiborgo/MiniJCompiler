@@ -103,8 +103,7 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 
 		@Override
 		public java.lang.Boolean visit(Main d) throws RuntimeException {
-			// TODO: check main method
-			return true;//return visit((minijava.ast.rules.declarations.Class) d);
+			return visit((minijava.ast.rules.declarations.Class) d);
 		}
 
 		@Override

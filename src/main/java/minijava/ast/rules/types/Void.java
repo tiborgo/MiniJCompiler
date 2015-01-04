@@ -7,7 +7,7 @@ public class Void extends Type {
 
   @Override
   public String toString() {
-    return "boolean";
+    return "void";
   }
 
   @Override
