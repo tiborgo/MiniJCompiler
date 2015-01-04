@@ -97,7 +97,7 @@ public class I386PrintAssemblyVisitor implements
 
 	@Override
 	public String visit(Operand.Reg op) {
-		return "%" + op.reg.toString();
+		return op.reg.toString();
 	}
 
 	@Override
@@ -107,8 +107,7 @@ public class I386PrintAssemblyVisitor implements
 		operation.append("DWORD PTR [");
 
 		if (op.base != null) {
-			operation.append("%")
-				.append(op.base.toString());
+			operation.append(op.base.toString());
 		}
 
 		if (op.index != null) {

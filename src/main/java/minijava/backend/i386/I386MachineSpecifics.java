@@ -65,7 +65,7 @@ public class I386MachineSpecifics implements MachineSpecifics {
 		StringBuilder stringBuilder = new StringBuilder();
 		
 		stringBuilder
-			.append("\t.intel_syntax" + System.lineSeparator())
+			.append("\t.intel_syntax noprefix" + System.lineSeparator())
 			.append("\t.globl " + new Label("lmain").toString() + System.lineSeparator())
 			.append(System.lineSeparator());
 
