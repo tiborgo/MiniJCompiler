@@ -102,7 +102,7 @@ public class MiniJavaCompiler {
 	@Option(name = "--print-interference-graphs", aliases = {"-ig"}, usage = "Prints the interference graphs", depends = "--verbose")
 	private boolean printInterferenceGraphs;
 	
-	@Option(name = "--run-executable", usage = "Runs the compiled executable")
+	@Option(name = "--run-executable", aliases = {"-re"}, usage = "Runs the compiled executable")
 	private boolean runExecutable;
 	
 	@Option(name = "--skip-type-check", aliases = {"-st"}, usage = "Skips the type check")
@@ -539,7 +539,7 @@ public class MiniJavaCompiler {
 			String gcc;
 			if (osName.contains("mac")) {
 				Label.leadingUnderscore = true;
-				gcc = "/usr/local/bin/gcc-4.9";
+				gcc = "gcc";// "/usr/local/bin/gcc-4.9";
 			}
 			else {
 				Label.leadingUnderscore = false;
