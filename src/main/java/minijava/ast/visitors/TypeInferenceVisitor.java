@@ -169,7 +169,7 @@ public class TypeInferenceVisitor implements ProgramVisitor<Void, RuntimeExcepti
 		public Void visit(ArrayGet e) throws RuntimeException {
 			e.index.accept(this);
 			e.array.accept(this);
-			e.type = ((Array) e.array.type).type;
+			e.type = (e.array.type != null) ? ((Array) e.array.type).type : null;
 			return null;
 		}
 
@@ -188,7 +188,7 @@ public class TypeInferenceVisitor implements ProgramVisitor<Void, RuntimeExcepti
 			Class classType = (Class) e.obj.type;
 			minijava.ast.rules.declarations.Class clazz = symbolTable.get(classType.c);
 			Method method = clazz.getMethod(e.method);
-			e.type = method.type;
+			e.type = (method != null) ? method.type : null;
 
 			// Argument types
 			for (Expression arg : e.args) {

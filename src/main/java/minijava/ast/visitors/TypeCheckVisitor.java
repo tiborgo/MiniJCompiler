@@ -115,6 +115,7 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 
 
 			ok = (m.body.accept(this)) ? ok : false;
+			ok = (m.returnExpression.accept(this) != null) ? ok : false;
 			ok = (m.returnExpression.type.equals(m.type)) ? ok : false;
 
 			methodContext = null;
@@ -192,6 +193,8 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 				}
 				else {
 					System.err.println("Both operands of binary operation '" + e.op + "' must have type int");
+					// TODO: proper exception
+					return null;
 				}
 				break;
 			case LT:
@@ -201,6 +204,8 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 				}
 				else {
 					System.err.println("Both operands of binary operation '" + e.op + "' must have type int");
+					// TODO: proper exception
+					return null;
 				}
 				break;
 
@@ -370,6 +375,11 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 
 		@Override
 		public java.lang.Boolean visit(PrintlnInt s) throws RuntimeException {
+			
+			if (s.arg.accept(this) == null) {
+				return java.lang.Boolean.FALSE;
+			}
+			
 			if (s.arg.type instanceof Integer) {
 				return java.lang.Boolean.TRUE;
 			}
@@ -391,6 +401,11 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 
 		@Override
 		public java.lang.Boolean visit(Assignment s) throws RuntimeException {
+			
+			if (s.rhs.accept(this) == null) {
+				return java.lang.Boolean.FALSE;
+			}
+			
 			Type idType     =  s.id.type;
 			Type assignType = s.rhs.type;
 			

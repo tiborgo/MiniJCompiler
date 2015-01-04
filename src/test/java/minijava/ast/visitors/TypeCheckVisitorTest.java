@@ -77,7 +77,7 @@ public class TypeCheckVisitorTest {
 				ast.accept(typeInferenceVisitor);
 				TypeCheckVisitor visitor = new TypeCheckVisitor();
 				boolean typesCorrect = ast.accept(visitor);
-				assertFalse(typesCorrect);
+				assertFalse("\"" + file.toString() + "\" passed type check but it shouldn't", typesCorrect);
 				return super.visitFile(file, attrs);
 			}
 		};
