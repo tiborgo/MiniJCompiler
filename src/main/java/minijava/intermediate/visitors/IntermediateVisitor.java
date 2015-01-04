@@ -87,7 +87,6 @@ public class IntermediateVisitor implements
 			classes.addAll(clazz.accept(this));
 		}
 
-		classes.addAll(p.mainClass.accept(this));
 		return classes;
 	}
 
@@ -117,7 +116,8 @@ public class IntermediateVisitor implements
 
 		methodContext = m;
 
-		Frame frame = this.machineSpecifics.newFrame(new Label(mangle(classContext.className, m.methodName)), m.parameters.size() + 1);
+		String name = (m instanceof MainMethod) ? "lmain" : mangle(classContext.className, m.methodName);
+		Frame frame = this.machineSpecifics.newFrame(new Label(name), m.parameters.size() + 1);
 
 		Map<String, TreeExp> methodTemps = new HashMap<>();
 		
