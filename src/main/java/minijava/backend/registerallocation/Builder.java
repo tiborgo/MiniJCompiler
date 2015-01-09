@@ -11,8 +11,7 @@ public class Builder {
 
 	public static SimpleGraph<ColoredTemp> build (SimpleGraph<Temp> interferenceGraph, List<Temp> colors) {
 		
-		SimpleGraph<ColoredTemp> coloredInterferenceGraph = new SimpleGraph<>(interferenceGraph.getName());
-		Map<Temp, SimpleGraph<ColoredTemp>.Node> nodes = new HashMap<>();
+		SimpleGraph<ColoredTemp> preColoredGraph = new SimpleGraph<>(interferenceGraph.getName());
 
 		for (SimpleGraph<Temp>.Node tNode : interferenceGraph.nodeSet()) {
 			Temp color = null;
@@ -20,19 +19,18 @@ public class Builder {
 				color = tNode.info;
 			}
 			
-			SimpleGraph<ColoredTemp>.Node node = coloredInterferenceGraph.new Node(new ColoredTemp(tNode.info, color));
-			nodes.put(tNode.info, node);
+			preColoredGraph.new Node(new ColoredTemp(tNode.info, color));
 		}
 		
 		for (SimpleGraph<Temp>.Node tNode : interferenceGraph.nodeSet()) {
 			for (SimpleGraph<Temp>.Node sNode : tNode.successors()) {
-				coloredInterferenceGraph.addEdge(nodes.get(tNode.info), nodes.get(sNode.info));
+				preColoredGraph.addEdge(preColoredGraph.get(new ColoredTemp(tNode.info)), preColoredGraph.get(new ColoredTemp(sNode.info)));
 			}
 			for (SimpleGraph<Temp>.Node pNode : tNode.predecessors()) {
-				coloredInterferenceGraph.addEdge(nodes.get(pNode.info), nodes.get(tNode.info));
+				preColoredGraph.addEdge(preColoredGraph.get(new ColoredTemp(pNode.info)), preColoredGraph.get(new ColoredTemp(tNode.info)));
 			}
 		}
 		
-		return coloredInterferenceGraph;
+		return preColoredGraph;
 	}
 }
