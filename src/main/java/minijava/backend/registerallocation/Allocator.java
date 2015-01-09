@@ -2,11 +2,9 @@ package minijava.backend.registerallocation;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import minijava.backend.Assem;
 import minijava.backend.MachineSpecifics;
@@ -16,25 +14,6 @@ import minijava.util.Function;
 import minijava.util.SimpleGraph;
 
 public class Allocator {
-	
-	/*static class StackNode {
-		public final ColoredNode node;
-		public final Set<ColoredNode> successors = new HashSet<>();
-		public final Set<ColoredNode> predecessors = new HashSet<>();
-		
-		public StackNode(SimpleGraph<ColoredNode>.Node node) {
-			
-			this.node = node.info;
-			
-			for (SimpleGraph<ColoredNode>.Node s : node.successors()) {
-				successors.add(s.info);
-			}
-			for (SimpleGraph<ColoredNode>.Node p : node.predecessors()) {
-				predecessors.add(p.info);
-			}
-		}
-	}*/
-	
 
 	public static SimpleGraph<ColoredNode> allocate (SimpleGraph<Temp> interferenceGraph, FragmentProc<List<Assem>> assemFragment, MachineSpecifics machineSpecifics) {
 		
@@ -46,7 +25,6 @@ public class Allocator {
 		
 		// BUILD
 		SimpleGraph<ColoredNode> graph = Builder.build(interferenceGraph, colors);
-		//SimpleGraph<ColoredNode> simplifiedGraph = new SimpleGraph<>(graph);
 		
 		Map<Temp, SimpleGraph<ColoredNode>.BackupNode> backupNodes = new HashMap<>();
 		for (SimpleGraph<ColoredNode>.Node n : graph.nodeSet()) {
@@ -59,7 +37,7 @@ public class Allocator {
 		}
 		
 		List<Temp> stack = new LinkedList<>();
-		//SimpleGraph<ColoredNode> simplifiedGraph = new SimpleGraph<>(graph);
+
 		do {
 			// SIMPLIFY
 			Simplifier.simplify(graph, stack, k);
@@ -81,7 +59,7 @@ public class Allocator {
 		}
 		
 		for (int i = 0; i < assemFragment.body.size(); i++) {
-		//for (Assem assem : assemFragment.body) {
+
 			assemFragment.body.set(i, assemFragment.body.get(i).rename(new Function<Temp, Temp>() {
 				
 				@Override

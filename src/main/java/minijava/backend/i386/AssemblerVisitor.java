@@ -60,6 +60,7 @@ public class AssemblerVisitor implements
 		int padding = 16 - ((localVariableSize + 8) % 16);
 		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.SUB, I386MachineSpecifics.ESP, new Operand.Imm(localVariableSize + padding)));
 		
+		// Make eax available to the register allocator
 		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.MOV, I386MachineSpecifics.EAX, new Operand.Imm(0)));
 		
 		for (TreeStm statement : fragProc.body) {

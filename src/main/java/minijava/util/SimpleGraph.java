@@ -6,8 +6,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import minijava.backend.registerallocation.ColoredNode;
-
 public class SimpleGraph<NodeInfo> {
 
 	private final Map<NodeInfo, Node> nodes = new HashMap<>();
@@ -35,7 +33,6 @@ public class SimpleGraph<NodeInfo> {
 	
 	public class Node {
 
-		//private boolean active = true;
 		public NodeInfo info;
 
 		public Node(NodeInfo info) {
@@ -87,42 +84,11 @@ public class SimpleGraph<NodeInfo> {
 		public BackupNode backup() {
 			return new BackupNode(nodes.get(info));
 		}
-		
-		/*public SimpleGraph<NodeInfo> getGraph() {
-			return SimpleGraph.this;
-		}*/
-		
-		/*@Override
-		public int hashCode() {
-			return info.hashCode();
-		}
-		
-		@SuppressWarnings("unchecked")
-		@Override
-		public boolean equals(Object obj) {
-			return (obj instanceof SimpleGraph.Node && ((Node)obj).info.equals(info));
-		}*/
 	}
 
 	public SimpleGraph(String name) {
 		this.name = name;
 	}
-	
-	/*public SimpleGraph(SimpleGraph<NodeInfo> toCopy) {
-		this.name = toCopy.name;
-		for (Node n : toCopy.nodeSet()) {
-			this.nodes.put(n.info, new Node(n.info));
-		}
-		for (Node n : toCopy.nodeSet()) {
-			Node n_ = nodes.get(n.info);
-			for (Node p : n.successors()) {
-				this.successors.get(n_).add(nodes.get(p.info));
-			}
-			for (Node s : n.predecessors()) {
-				this.predecessors.get(n_).add(nodes.get(s.info));
-			}
-		}
-	}*/
 
 	public String getName() {
 		return name;

@@ -2,7 +2,6 @@ package minijava.backend.livenessanalysis;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import minijava.backend.Assem;
 import minijava.intermediate.Temp;
