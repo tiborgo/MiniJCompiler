@@ -24,7 +24,7 @@ public class Allocator {
 		
 		
 		// BUILD
-		SimpleGraph<ColoredTemp> graph = Builder.build(interferenceGraph, colors);
+		final SimpleGraph<ColoredTemp> graph = Builder.build(interferenceGraph, colors);
 		
 		Map<ColoredTemp, SimpleGraph<ColoredTemp>.BackupNode> graphBackup = graph.backup();
 		
@@ -47,29 +47,24 @@ public class Allocator {
 		// SELECT
 		List<SimpleGraph<ColoredTemp>.Node> spillNodes = Selector.select(graph, stack, colors, graphBackup);
 		
-		// Replace colored temps
-		final Map<Temp, Temp> colorMap = new HashMap<>();
-		for (SimpleGraph<ColoredTemp>.Node n : graph.nodeSet()) {
-			if (n.info.isColored()) {
-				colorMap.put(n.info.temp, n.info.color);
-			}
-		}
 		
+		
+		
+		// Replace colored temps
 		for (int i = 0; i < assemFragment.body.size(); i++) {
 
 			assemFragment.body.set(i, assemFragment.body.get(i).rename(new Function<Temp, Temp>() {
 				
 				@Override
 				public Temp apply(Temp a) {
-					Temp color = colorMap.get(a);
-					return (color == null) ? a : color; 
+					SimpleGraph<ColoredTemp>.Node n = graph.get(new ColoredTemp(a));
+					return (n == null || n.info.color == null) ? a : n.info.color; 
 				}
 			}));
 		}
 		
 		System.out.println(spillNodes);
 		System.out.println(graph.nodeSet());
-		System.out.println(colorMap);
 		
 		return graph;
 	}

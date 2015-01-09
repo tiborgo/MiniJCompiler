@@ -6,6 +6,10 @@ public class ColoredTemp {
 	public Temp color;
 	public final Temp temp;
 	
+	public ColoredTemp(Temp temp) {
+		this(temp, null);
+	}
+	
 	public ColoredTemp(Temp temp, Temp color) {
 		this.color = color;
 		this.temp = temp;
@@ -23,5 +27,10 @@ public class ColoredTemp {
 	@Override
 	public boolean equals(Object obj) {
 		return (obj instanceof ColoredTemp && ((ColoredTemp)obj).temp.equals(temp)); 
+	}
+	
+	@Override
+	public int hashCode() {
+		return temp.hashCode();
 	}
 }

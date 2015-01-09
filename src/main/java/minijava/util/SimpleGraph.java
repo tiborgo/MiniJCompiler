@@ -77,8 +77,20 @@ public class SimpleGraph<NodeInfo> {
 			return inDegree() + outDegree();
 		}
 
+		@Override
 		public String toString() {
 			return "Node: " + info.toString();
+		}
+		
+		@SuppressWarnings("unchecked")
+		@Override
+		public boolean equals(Object obj) {
+			return (obj instanceof SimpleGraph.Node && ((Node)obj).info.equals(info));
+		}
+		
+		@Override
+		public int hashCode() {
+			return info.hashCode();
 		}
 		
 		public BackupNode backup() {

@@ -29,7 +29,11 @@ public final class AssemInstr extends DefaultInstruction {
 	public List<Temp> use() {
 		switch(kind) {
 		case LEAVE:
-			return Arrays.asList(I386MachineSpecifics.ESP.reg);
+			// Slide 196 is wrong here,
+			// leave is equivalent to
+			// mov %esp, ebp
+			// pop %ebp
+			return Arrays.asList(I386MachineSpecifics.EBP.reg);
 		case RET:
 			// eax is the returned value
 			return Arrays.asList(I386MachineSpecifics.EAX.reg);
