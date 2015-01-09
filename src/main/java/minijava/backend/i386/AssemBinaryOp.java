@@ -1,6 +1,7 @@
 package minijava.backend.i386;
 
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -36,14 +37,6 @@ public final class AssemBinaryOp extends DefaultInstruction {
 
 	@Override
 	public List<Temp> def() {
-		if (kind != Kind.CMP && dst instanceof Operand.Reg) {
-			return Collections.singletonList(((Operand.Reg) dst).reg);
-		}
-		return Collections.emptyList();
-	}
-
-	@Override
-	public List<Temp> use() {
 		switch(kind) {
 		case MOV:
 		case ADD:
@@ -55,13 +48,52 @@ public final class AssemBinaryOp extends DefaultInstruction {
 		case AND:
 		case OR:
 		case XOR:
+			return dst.getTemps();
+		
+		case CMP:
+		case LEA:
+		case TEST:
+			return Collections.emptyList();
+		}
+		
+		throw new UnsupportedOperationException("Operator " + kind + " is not known");
+	}
+
+	@Override
+	public List<Temp> use() {
+		switch(kind) {
+		case ADD:
+		case SUB:
+		case SHL:
+		case SHR:
+		case SAL:
+		case SAR:
+		case AND:
+		case OR:
+		case XOR:
+		case CMP:
+		case TEST: {
+			List<Temp> temps = new ArrayList<>(src.getTemps());
+			temps.addAll(dst.getTemps());
+			return temps;
+		}
+		
+		case MOV: {
+			if (dst instanceof Operand.Reg) {
+				return src.getTemps();
+			}
+			else {
+				List<Temp> temps = new ArrayList<>(src.getTemps());
+				temps.addAll(dst.getTemps());
+				return temps;
+			}
+		}
+		
 		case LEA:
 			return src.getTemps();
-		case CMP:
-		case TEST:
-		default:
-			return Collections.<Temp>emptyList();
 		}
+		
+		throw new UnsupportedOperationException("Operator " + kind + " is not known"); 
 	}
 	
 	@Override

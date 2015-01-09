@@ -14,12 +14,29 @@ import minijava.util.SimpleGraph;
 
 public class LivenessSetsBuilder {
 	
-	public static Pair<Map<Assem, Set<Temp>>, Map<Assem, Set<Temp>>> build(SimpleGraph<Assem> controlFlowGraph) {
+	static public class InOut {
+		public final Set<Temp> in = new HashSet<>();
+		public final Set<Temp> out = new HashSet<>();
+		
+		@Override
+		public boolean equals(Object obj) {
+			return (obj instanceof InOut && in.equals(((InOut)obj).in) && out.equals(((InOut)obj).out));
+		}
+		
+		@Override
+		public String toString() {
+			return "in: " + in.toString() + ",\t\tout: " + out.toString();
+		}
+	}
+	
+	public static Map<Assem, InOut> build(SimpleGraph<Assem> controlFlowGraph) {
 		
 		final List<SimpleGraph<Assem>.Node> nodes = ReverseOrderBuilder.build(controlFlowGraph);
 		
 		boolean changed;
 		
+		// With the help of the comparator the Map keys keep the order of the program flow.
+		// Helps a lot when debugging
 		Comparator<Assem> comparator = new Comparator<Assem>() {
 
 			@Override
@@ -42,58 +59,49 @@ public class LivenessSetsBuilder {
 						break;
 					}
 				}
-				return iO1 - iO2;
+				return iO2 - iO1;
 			}
 		};
 		
-		Map<Assem, Set<Temp>> in = new TreeMap<>(comparator);
-		Map<Assem, Set<Temp>> out = new TreeMap<>(comparator);
+		Map<Assem, InOut> inOut = new TreeMap<>(comparator);
 		
 		for (int i = 0; i < nodes.size(); i++) {
-			in.put(nodes.get(i).info, new HashSet<Temp>());
-			out.put(nodes.get(i).info, new HashSet<Temp>());
+			inOut.put(nodes.get(i).info, new InOut());
 		}
 		
 		do {
 		
 			changed = false;
-			
-			//for (int i = 0; i < nodes.size(); i++) {
+
 			for (SimpleGraph<Assem>.Node n : nodes) {
 				
-				//SimpleGraph<Assem>.Node n = nodes.get(i);
+				// old in and out set
+				InOut inOutN_ = inOut.get(n.info);
+				// new in and out set
+				InOut inOutN = new InOut();
 				
 				// OUT
-				Set<Temp> outN = new HashSet<>();
-				
 				for (SimpleGraph<Assem>.Node s : n.successors()) {
-					Set<Temp> inS = in.get(s.info);
-					outN.addAll(inS);
-				}
-				
-				if (!outN.equals(out.get(n.info))) {
-					changed = true;
-					out.put(n.info, outN);
+					Set<Temp> inS = inOut.get(s.info).in;
+					inOutN.out.addAll(inS);
 				}
 				
 				// IN
-				Set<Temp> inN = new HashSet<>();
-				
-				Set<Temp> outN_ = out.get(n.info);
-				inN.addAll(outN_);
+				inOutN.in.addAll(inOutN_.out);
 				List<Temp> def = n.info.def();
-				inN.removeAll(def);
+				inOutN.in.removeAll(def);
 				List<Temp> use = n.info.use();
-				inN.addAll(use);
-				
-				if (!inN.equals(in.get(n.info))) {
+				inOutN.in.addAll(use);
+
+				// replace if changed
+				if (!inOutN.equals(inOutN_)) {
+					inOut.put(n.info, inOutN);
 					changed = true;
-					in.put(n.info, inN);
 				}
 			}
 		}
 		while (changed);
 		
-		return new Pair<>(in, out);
+		return inOut;
 	}
 }

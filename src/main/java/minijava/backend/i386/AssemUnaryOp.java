@@ -1,5 +1,6 @@
 package minijava.backend.i386;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -34,7 +35,36 @@ public final class AssemUnaryOp extends Instruction {
 	
 	@Override
 	public List<Temp> use() {
-		return op.getTemps();
+		
+		switch(kind) {
+		
+		case POP:
+			return Arrays.asList(I386MachineSpecifics.ESP.reg);
+			
+		case PUSH: {
+			List<Temp> temps = new ArrayList<>(op.getTemps());
+			temps.add(I386MachineSpecifics.ESP.reg);
+			return temps;
+		}
+			
+		case NEG:
+		case NOT:
+		case INC:
+		case DEC:
+			return op.getTemps();
+			
+		case IMUL:
+		case IDIV: {
+			List<Temp> temps = new ArrayList<>(op.getTemps());
+			temps.add(I386MachineSpecifics.EAX.reg);
+			return temps;
+		}
+			
+		case ENTER:
+			return Arrays.asList(I386MachineSpecifics.ESP.reg, I386MachineSpecifics.EBP.reg);
+		}
+		
+		throw new UnsupportedOperationException("Unknown operand " + kind);
 	}
 
 	@Override
@@ -42,7 +72,7 @@ public final class AssemUnaryOp extends Instruction {
 		switch(kind) {
 		
 		case POP: {
-			List<Temp> temps = op.getTemps();
+			List<Temp> temps = new ArrayList<>(op.getTemps());
 			temps.add(I386MachineSpecifics.ESP.reg);
 			return temps;
 		}
@@ -62,10 +92,9 @@ public final class AssemUnaryOp extends Instruction {
 			
 		case ENTER:
 			return Arrays.asList(I386MachineSpecifics.ESP.reg, I386MachineSpecifics.EBP.reg);
-			
-		default:
-			throw new UnsupportedOperationException("Unknown operand " + kind);
 		}
+		
+		throw new UnsupportedOperationException("Unknown operand " + kind);
 	}
 
 	@Override

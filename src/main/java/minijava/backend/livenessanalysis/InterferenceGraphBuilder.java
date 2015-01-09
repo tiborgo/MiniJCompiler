@@ -11,13 +11,13 @@ import minijava.util.SimpleGraph;
 
 public class InterferenceGraphBuilder {
 	public static SimpleGraph<Temp> build(SimpleGraph<Assem> controlFlowGraph, 
-			Map<Assem, Set<Temp>> in, Map<Assem, Set<Temp>> out) {
+			Map<Assem, LivenessSetsBuilder.InOut> inOut) {
 
 		SimpleGraph<Temp> interferenceGraph = new SimpleGraph<>(controlFlowGraph.getName());
 		
 		Map<Temp, SimpleGraph<Temp>.Node> nodes = new HashMap<>();
-		for (Set<Temp> ts : in.values()) {
-			for (Temp t : ts) {
+		for (LivenessSetsBuilder.InOut inOutN : inOut.values()) {
+			for (Temp t : inOutN.in) {
 				if (nodes.get(t) == null) {
 					SimpleGraph<Temp>.Node node = interferenceGraph.new Node(t);
 					nodes.put(t, node);
@@ -32,7 +32,7 @@ public class InterferenceGraphBuilder {
 			if (moveInstruction == null) {
 				for (Temp t : n.info.def()) {
 					
-					for (Temp u : out.get(n.info)) {
+					for (Temp u : inOut.get(n.info).out) {
 						if (!u.equals(t)) {
 							SimpleGraph<Temp>.Node tNode = nodes.get(t);
 							SimpleGraph<Temp>.Node uNode = nodes.get(u);
@@ -43,22 +43,30 @@ public class InterferenceGraphBuilder {
 							if (uNode == null) {
 								throw new RuntimeException("Do not know temp '" + u + "'");
 							}
-							interferenceGraph.addEdge(tNode, uNode);
+							if (!tNode.predecessors().contains(uNode)) {
+								interferenceGraph.addEdge(tNode, uNode);
+							}
 						}
 					}
 				}
 			}
 			else {
 				
-				for (Temp u : out.get(n.info)) {
+				for (Temp u : inOut.get(n.info).out) {
 					
 					if (!u.equals(moveInstruction.snd) && !u.equals(moveInstruction.fst)) {
 						SimpleGraph<Temp>.Node tNode = nodes.get(moveInstruction.fst);
 						SimpleGraph<Temp>.Node uNode = nodes.get(u);
+						if (tNode == null) {
+							tNode = interferenceGraph.new Node(moveInstruction.fst);
+							nodes.put(moveInstruction.fst, tNode);
+						}
 						if (uNode == null) {
 							throw new RuntimeException("Do not know temp '" + u + "'");
 						}
-						interferenceGraph.addEdge(tNode, uNode);
+						if (!tNode.predecessors().contains(uNode)) {
+							interferenceGraph.addEdge(tNode, uNode);
+						}
 					}
 				}
 			}

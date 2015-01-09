@@ -29,11 +29,10 @@ public final class AssemInstr extends DefaultInstruction {
 	public List<Temp> use() {
 		switch(kind) {
 		case LEAVE:
-			return Arrays.asList(I386MachineSpecifics.EBP.reg, I386MachineSpecifics.ESP.reg);
+			return Arrays.asList(I386MachineSpecifics.ESP.reg);
 		case RET:
-			// callee-save registers: ebx, esi, edi, ebp (ebp already restored by LEAVE)
-			// eax is the return value
-			return Arrays.asList(I386MachineSpecifics.EBX.reg, I386MachineSpecifics.ESI.reg, I386MachineSpecifics.EDI.reg, I386MachineSpecifics.EAX.reg);
+			// eax is the returned value
+			return Arrays.asList(I386MachineSpecifics.EAX.reg);
 		case NOP:
 			return Collections.emptyList();
 		default:

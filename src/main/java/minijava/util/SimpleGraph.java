@@ -6,20 +6,41 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import minijava.backend.registerallocation.ColoredNode;
+
 public class SimpleGraph<NodeInfo> {
 
-	private final Set<Node> nodes = new HashSet<>();
+	private final Map<NodeInfo, Node> nodes = new HashMap<>();
+	
 	private Map<Node, Set<Node>> successors = new HashMap<>();
 	private Map<Node, Set<Node>> predecessors = new HashMap<>();
+	
 	private final String name;
+	
+	public class BackupNode {
+		public final NodeInfo info;
+		private final Set<NodeInfo> successors = new HashSet<>();
+		private final Set<NodeInfo> predecessors = new HashSet<>();
+		
+		private BackupNode(Node node) {
+			info = node.info;
+			for (Node s : node.successors()) {
+				successors.add(s.info);
+			}
+			for (Node p : node.predecessors()) {
+				predecessors.add(p.info);
+			}
+		}
+	}
 	
 	public class Node {
 
+		//private boolean active = true;
 		public NodeInfo info;
 
 		public Node(NodeInfo info) {
 			this.info = info;
-			nodes.add(this);
+			nodes.put(info, this);
 			successors.put(this, new HashSet<Node>());
 			predecessors.put(this, new HashSet<Node>());
 		}
@@ -63,37 +84,81 @@ public class SimpleGraph<NodeInfo> {
 			return "Node: " + info.toString();
 		}
 		
-		public SimpleGraph<NodeInfo> getGraph() {
-			return SimpleGraph.this;
+		public BackupNode backup() {
+			return new BackupNode(nodes.get(info));
 		}
+		
+		/*public SimpleGraph<NodeInfo> getGraph() {
+			return SimpleGraph.this;
+		}*/
+		
+		/*@Override
+		public int hashCode() {
+			return info.hashCode();
+		}
+		
+		@SuppressWarnings("unchecked")
+		@Override
+		public boolean equals(Object obj) {
+			return (obj instanceof SimpleGraph.Node && ((Node)obj).info.equals(info));
+		}*/
 	}
 
 	public SimpleGraph(String name) {
 		this.name = name;
 	}
 	
-	public SimpleGraph(SimpleGraph<NodeInfo> toCopy) {
-		this.nodes.addAll(toCopy.nodes);
-		this.successors.putAll(toCopy.successors);
-		this.predecessors.putAll(toCopy.predecessors);
+	/*public SimpleGraph(SimpleGraph<NodeInfo> toCopy) {
 		this.name = toCopy.name;
-	}
+		for (Node n : toCopy.nodeSet()) {
+			this.nodes.put(n.info, new Node(n.info));
+		}
+		for (Node n : toCopy.nodeSet()) {
+			Node n_ = nodes.get(n.info);
+			for (Node p : n.successors()) {
+				this.successors.get(n_).add(nodes.get(p.info));
+			}
+			for (Node s : n.predecessors()) {
+				this.predecessors.get(n_).add(nodes.get(s.info));
+			}
+		}
+	}*/
 
 	public String getName() {
 		return name;
 	}
-	
+
 	public Set<Node> nodeSet() {
-		return Collections.unmodifiableSet(nodes);
+		return new HashSet<>(nodes.values());
 	}
 
 	public void removeNode(Node n) {
-		nodes.remove(n);
+		nodes.remove(n.info);
 		successors.remove(n);
 		predecessors.remove(n);
-		for (Node m : nodes) {
+		for (Node m : nodes.values()) {
 			successors.get(m).remove(n);
 			predecessors.get(m).remove(n);
+		}
+	}
+	
+	public Node get(NodeInfo info) {
+		return nodes.get(info);
+	}
+	
+	public void addBackup(BackupNode node) {
+		Node n = new Node(node.info);
+		for (NodeInfo st : node.successors) {
+			Node s = nodes.get(st);
+			if (s != null) {
+				addEdge(n, s);
+			}
+		}
+		for (NodeInfo pt : node.predecessors) {
+			Node p = nodes.get(pt);
+			if (p != null) {
+				addEdge(p, n);
+			}
 		}
 	}
 
@@ -122,11 +187,11 @@ public class SimpleGraph<NodeInfo> {
 	public String getDot() {
 		StringBuilder out = new StringBuilder();
 		out.append("digraph G {" + System.lineSeparator());
-		for (Node n : nodes) {
+		for (Node n : nodes.values()) {
 			out.append("\"" + n.hashCode() + "\" [label=\"" + n.info.toString()
 					+ "\"];" + System.lineSeparator());
 		}
-		for (Node n : nodes) {
+		for (Node n : nodes.values()) {
 			for (Node m : n.successors()) {
 				out.append("\"" + n.hashCode() + "\"  -> \"" + m.hashCode()
 						+ "\"" + System.lineSeparator());
