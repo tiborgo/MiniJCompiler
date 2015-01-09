@@ -5,19 +5,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import minijava.backend.Assem;
-import minijava.backend.i386.AssemBinaryOp;
 import minijava.backend.i386.AssemBinaryOp.Kind;
-import minijava.backend.i386.AssemJump;
-import minijava.backend.i386.AssemLabel;
-import minijava.backend.i386.AssemUnaryOp;
-import minijava.backend.i386.Operand;
-import minijava.backend.i386.Operand.Imm;
 import minijava.backend.i386.Operand.Mem;
-import minijava.backend.i386.Operand.Reg;
 import minijava.backend.i386.visitors.OperandVisitor;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.FragmentVisitor;
-import minijava.intermediate.Label;
 import minijava.intermediate.Temp;
 import minijava.intermediate.tree.TreeExp;
 import minijava.intermediate.tree.TreeExpCALL;
@@ -53,6 +45,14 @@ public class AssemblerVisitor implements
 		// Prologue
 		instructions.add(new AssemUnaryOp(AssemUnaryOp.Kind.PUSH, I386MachineSpecifics.EBP));
 		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.MOV, I386MachineSpecifics.EBP, I386MachineSpecifics.ESP));
+		
+		// save callee-save registers: ebx, esi, edi, ebp (ebp already saved by prologue)
+		Operand.Reg ebxTemp = new Operand.Reg(new Temp());
+		Operand.Reg esiTemp = new Operand.Reg(new Temp());
+		Operand.Reg ediTemp = new Operand.Reg(new Temp());
+		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.MOV, ebxTemp, I386MachineSpecifics.EBX));
+		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.MOV, esiTemp, I386MachineSpecifics.ESI));
+		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.MOV, ediTemp, I386MachineSpecifics.EDI));
 
 		// TODO: Allocate space on stack for local variables
 		int localVariableSize = 0;
@@ -60,11 +60,18 @@ public class AssemblerVisitor implements
 		int padding = 16 - ((localVariableSize + 8) % 16);
 		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.SUB, I386MachineSpecifics.ESP, new Operand.Imm(localVariableSize + padding)));
 		
+		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.MOV, I386MachineSpecifics.EAX, new Operand.Imm(0)));
+		
 		for (TreeStm statement : fragProc.body) {
 			StatementExpressionVisitor visitor = new StatementExpressionVisitor();
 			statement.accept(visitor);
 			instructions.addAll(visitor.getInstructions());
 		}
+		
+		// restore callee-save registers: ebx, esi, edi, ebp (ebp will be restored by leave)
+		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.MOV, I386MachineSpecifics.EBX, ebxTemp));
+		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.MOV, I386MachineSpecifics.ESI, esiTemp));
+		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.MOV, I386MachineSpecifics.EDI, ediTemp));
 		
 		// Epilogue
 		Assem leave = new AssemInstr(AssemInstr.Kind.LEAVE);
@@ -216,12 +223,24 @@ public class AssemblerVisitor implements
 
 			// Unary instructions
 			if (operatorUnary != null) {
-				AssemBinaryOp moveToEAX = new AssemBinaryOp(Kind.MOV, I386MachineSpecifics.EAX, o1);
+				
+				// TODO: should we save %edx?
+				
+				Operand.Reg savedEAX = new Operand.Reg(new Temp());
+				//Operand.Reg savedEDX = new Operand.Reg(new Temp());
 				Operand.Reg o2Temp = new Operand.Reg(new Temp());
+				Operand.Reg result = new Operand.Reg(new Temp());
+				
+				AssemBinaryOp saveEAX = new AssemBinaryOp(Kind.MOV, savedEAX, I386MachineSpecifics.EAX);
+				//AssemBinaryOp saveEDX = new AssemBinaryOp(Kind.MOV, savedEDX, I386MachineSpecifics.EDX);
+				AssemBinaryOp moveToEAX = new AssemBinaryOp(Kind.MOV, I386MachineSpecifics.EAX, o1);
 				AssemBinaryOp moveToO2Temp = new AssemBinaryOp(Kind.MOV, o2Temp, o2);
 				AssemUnaryOp division = new AssemUnaryOp(operatorUnary, o2Temp);
-				emit(moveToEAX, moveToO2Temp, division);
-				return I386MachineSpecifics.EAX;
+				AssemBinaryOp saveResult = new AssemBinaryOp(Kind.MOV, result, I386MachineSpecifics.EAX);
+				AssemBinaryOp restoreEAX = new AssemBinaryOp(Kind.MOV, I386MachineSpecifics.EAX, savedEAX);
+				//AssemBinaryOp restoreEDX = new AssemBinaryOp(Kind.MOV, I386MachineSpecifics.EDX, savedEDX);
+				emit(saveEAX/*, saveEDX*/, moveToEAX, moveToO2Temp, division, saveResult, restoreEAX/*, restoreEDX*/);
+				return result;
 			}
 			else {
 				// Destination of most arithmetical and some logical operations cannot be immediates

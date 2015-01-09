@@ -38,8 +38,8 @@ class Test3 {
 		else {
 			a[9] = 3;
 		}*/
-		a[2] = 50;
-		return a[2];
+		//a[2] = 50;
+		return 1;
 	}
 }
 

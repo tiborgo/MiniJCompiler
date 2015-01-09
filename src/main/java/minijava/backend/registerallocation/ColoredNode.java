@@ -19,4 +19,9 @@ public class ColoredNode {
 	public String toString() {
 		return temp.toString() + " -> " + ((color != null) ? color.toString() : "<uncolored>");
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		return (obj instanceof ColoredNode && ((ColoredNode)obj).temp.equals(temp)); 
+	}
 }

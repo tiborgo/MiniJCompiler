@@ -3,10 +3,11 @@ package minijava.backend.registerallocation;
 import java.util.List;
 
 import minijava.util.SimpleGraph;
+import minijava.intermediate.Temp;
 
 public class Spiller {
 
-	public static void spill(SimpleGraph<ColoredNode> graph, List<SimpleGraph<ColoredNode>.Node> stack) {
+	public static void spill(SimpleGraph<ColoredNode> graph, List<Temp> stack) {
 		
 		int maxDegree = 0;
 		SimpleGraph<ColoredNode>.Node maxDegreeNode = null;
@@ -18,8 +19,9 @@ public class Spiller {
 		}
 
 		if (maxDegreeNode != null) {
+			stack.add(maxDegreeNode.info.temp);
 			graph.removeNode(maxDegreeNode);
-			stack.add(maxDegreeNode);
+			
 		}
 	}
 }

@@ -8,14 +8,15 @@ import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Program;
 import minijava.ast.visitors.PrettyPrintVisitor;
+import minijava.ast.visitors.TypeCheckVisitor;
 import minijava.ast.visitors.TypeInferenceVisitor;
 import minijava.ast.visitors.baseblocks.BaseBlock;
 import minijava.ast.visitors.baseblocks.Generator;
@@ -27,6 +28,7 @@ import minijava.backend.i386.I386MachineSpecifics;
 import minijava.backend.livenessanalysis.ControlFlowGraphBuilder;
 import minijava.backend.livenessanalysis.InterferenceGraphBuilder;
 import minijava.backend.livenessanalysis.LivenessSetsBuilder;
+import minijava.backend.livenessanalysis.LivenessSetsBuilder.InOut;
 import minijava.backend.registerallocation.Allocator;
 import minijava.backend.registerallocation.ColoredNode;
 import minijava.intermediate.Fragment;
@@ -36,9 +38,8 @@ import minijava.intermediate.Temp;
 import minijava.intermediate.canon.Canon;
 import minijava.intermediate.tree.TreeStm;
 import minijava.intermediate.visitors.IntermediateVisitor;
-import minijava.ast.visitors.TypeCheckVisitor;
-import minijava.util.Pair;
 import minijava.util.SimpleGraph;
+
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -267,8 +268,31 @@ public class MiniJavaCompiler {
 		try {
 			List<SimpleGraph<Temp>> interferenceGraphs = new LinkedList<>();
 			for (SimpleGraph<Assem> controlFlowGraph : controlFlowGraphs) {
-				Pair<Map<Assem, Set<Temp>>, Map<Assem, Set<Temp>>> livenessSets = LivenessSetsBuilder.build(controlFlowGraph);
-				SimpleGraph<Temp> interferenceGraph = InterferenceGraphBuilder.build(controlFlowGraph, livenessSets.fst, livenessSets.snd);
+				Map<Assem, LivenessSetsBuilder.InOut> inOut = LivenessSetsBuilder.build(controlFlowGraph);
+				
+				
+				Iterator<Assem> iter = inOut.keySet().iterator();
+				StringBuilder inOutStringBuilder = new StringBuilder();
+				inOutStringBuilder.append("[" + System.lineSeparator());
+				while (iter.hasNext()) {
+					Assem next = iter.next();
+					inOutStringBuilder
+						.append("\t   in: ")
+						.append(inOut.get(next).in)
+						.append(System.lineSeparator())
+						.append("\t")
+						.append(next)
+						.append(System.lineSeparator())
+						.append("\t   out:")
+						.append(inOut.get(next).out);
+					inOutStringBuilder
+						.append(System.lineSeparator())
+						.append(System.lineSeparator());
+				}
+				inOutStringBuilder.append("]");
+				System.out.println(inOutStringBuilder);
+				
+				SimpleGraph<Temp> interferenceGraph = InterferenceGraphBuilder.build(controlFlowGraph, inOut);
 				interferenceGraphs.add(interferenceGraph);
 			}
 			
@@ -329,7 +353,9 @@ public class MiniJavaCompiler {
 			graphOutput.append(graph.getName() + System.lineSeparator());
 			graphOutput.append(System.lineSeparator());
 			
-			try {
+			graphOutput.append(dotCode);
+			
+			/*try {
 				ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "graph-easy --as boxart");
 				processBuilder.environment().put("PATH", "/usr/local/bin:" + processBuilder.environment().get("PATH"));
 				Process graphEasyCall = processBuilder.start();
@@ -367,7 +393,7 @@ public class MiniJavaCompiler {
 			}
 			catch (InterruptedException e) {
 				throw new CompilerException("Failed to invoke graph-easy", e);
-			}
+			}*/
 		}
 		
 		return graphOutput.toString();
