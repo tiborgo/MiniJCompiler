@@ -9,7 +9,6 @@ import java.util.TreeMap;
 
 import minijava.backend.Assem;
 import minijava.intermediate.Temp;
-import minijava.util.Pair;
 import minijava.util.SimpleGraph;
 
 public class LivenessSetsBuilder {
