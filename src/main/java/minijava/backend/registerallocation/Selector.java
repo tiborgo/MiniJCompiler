@@ -10,43 +10,29 @@ import minijava.util.SimpleGraph;
 
 public class Selector {
 
-	public static List<SimpleGraph<ColoredNode>.Node> select(
-			SimpleGraph<ColoredNode> graph,
-			List<Temp> stack,
+	public static List<SimpleGraph<ColoredTemp>.Node> select(
+			SimpleGraph<ColoredTemp> graph,
+			List<ColoredTemp> stack,
 			List<Temp> colors,
-			Map<Temp, SimpleGraph<ColoredNode>.BackupNode> backupNodes) {
+			Map<ColoredTemp, SimpleGraph<ColoredTemp>.BackupNode> graphBackup) {
 		
-		List<SimpleGraph<ColoredNode>.Node> spilledNodes = new LinkedList<>();
+		List<SimpleGraph<ColoredTemp>.Node> spilledNodes = new LinkedList<>();
 		
-		for (Temp t : stack) {
+		for (ColoredTemp t : stack) {
 			
 			// Add node to simplified graph
 			
-			//SimpleGraph<ColoredNode>.Node n_ = simplifiedGraph.new Node(n.node);
 			
-			SimpleGraph<ColoredNode>.BackupNode b = backupNodes.get(t);
-			graph.addBackup(b);
-			SimpleGraph<ColoredNode>.Node n = graph.get(b.info);
-			
-			/*for  (ColoredNode st : n.successors) {
-				SimpleGraph<ColoredNode>.Node s = simplifiedGraph.get(st);
-				if (s != null) {
-					simplifiedGraph.addEdge(n_, s);
-				}
-			}
-			for  (ColoredNode pt : n.predecessors) {
-				SimpleGraph<ColoredNode>.Node p = simplifiedGraph.get(pt);
-				if (p != null) {
-					simplifiedGraph.addEdge(p, n_);
-				}
-			}*/
+			SimpleGraph<ColoredTemp>.BackupNode b = graphBackup.get(t);
+			graph.restore(b);
+			SimpleGraph<ColoredTemp>.Node n = graph.get(t);
 			
 			// Find color for node
-			Set<SimpleGraph<ColoredNode>.Node> neighbours = n.neighbours();
+			Set<SimpleGraph<ColoredTemp>.Node> neighbours = n.neighbours();
 			
 			for (Temp color : colors) {
 				boolean occupied = false;
-				for (SimpleGraph<ColoredNode>.Node neighbour : neighbours) {
+				for (SimpleGraph<ColoredTemp>.Node neighbour : neighbours) {
 					if (color.equals(neighbour.info.color)) {
 						occupied = true;
 						break;

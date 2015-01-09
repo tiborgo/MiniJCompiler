@@ -30,7 +30,7 @@ import minijava.backend.livenessanalysis.InterferenceGraphBuilder;
 import minijava.backend.livenessanalysis.LivenessSetsBuilder;
 import minijava.backend.livenessanalysis.LivenessSetsBuilder.InOut;
 import minijava.backend.registerallocation.Allocator;
-import minijava.backend.registerallocation.ColoredNode;
+import minijava.backend.registerallocation.ColoredTemp;
 import minijava.intermediate.Fragment;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.Label;
@@ -314,7 +314,7 @@ public class MiniJavaCompiler {
 	private void allocateRegisters(List<SimpleGraph<Temp>> interferenceGraphs, List<Fragment<List<Assem>>> assemFragments) throws CompilerException {
 		
 		try {
-			List<SimpleGraph<ColoredNode>> colroedInterferenceGraphs = new LinkedList<>();
+			List<SimpleGraph<ColoredTemp>> colroedInterferenceGraphs = new LinkedList<>();
 			for (int i = 0; i < interferenceGraphs.size(); i++) {
 			//for (SimpleGraph<Temp> interferenceGraph : interferenceGraphs) {
 				SimpleGraph<Temp> interferenceGraph = interferenceGraphs.get(i);

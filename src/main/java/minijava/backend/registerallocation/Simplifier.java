@@ -4,18 +4,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import minijava.intermediate.Temp;
 import minijava.util.SimpleGraph;
 
 public class Simplifier {
 
-	public static void simplify(SimpleGraph<ColoredNode> graph, List<Temp> stack, int k) {
+	public static void simplify(SimpleGraph<ColoredTemp> graph, List<ColoredTemp> stack, int k) {
 		
-		Set<SimpleGraph<ColoredNode>.Node> nodes = new HashSet<>(graph.nodeSet());
+		Set<SimpleGraph<ColoredTemp>.Node> nodes = new HashSet<>(graph.nodeSet());
 		
-		for (SimpleGraph<ColoredNode>.Node node : nodes) {
+		for (SimpleGraph<ColoredTemp>.Node node : nodes) {
 			if (node.info.color == null && node.degree() < k) {
-				stack.add(node.info.temp);
+				stack.add(node.info);
 				graph.removeNode(node);
 			}
 		}
