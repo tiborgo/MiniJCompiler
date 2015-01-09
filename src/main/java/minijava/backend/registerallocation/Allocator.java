@@ -15,7 +15,7 @@ import minijava.util.SimpleGraph;
 
 public class Allocator {
 
-	public static SimpleGraph<ColoredNode> allocate (SimpleGraph<Temp> interferenceGraph, FragmentProc<List<Assem>> assemFragment, MachineSpecifics machineSpecifics) {
+	public static SimpleGraph<ColoredTemp> allocate (SimpleGraph<Temp> interferenceGraph, FragmentProc<List<Assem>> assemFragment, MachineSpecifics machineSpecifics) {
 		
 		// slide 267
 		
@@ -24,19 +24,16 @@ public class Allocator {
 		
 		
 		// BUILD
-		SimpleGraph<ColoredNode> graph = Builder.build(interferenceGraph, colors);
+		SimpleGraph<ColoredTemp> graph = Builder.build(interferenceGraph, colors);
 		
-		Map<Temp, SimpleGraph<ColoredNode>.BackupNode> backupNodes = new HashMap<>();
-		for (SimpleGraph<ColoredNode>.Node n : graph.nodeSet()) {
-			backupNodes.put(n.info.temp, n.backup());
-		}
+		Map<ColoredTemp, SimpleGraph<ColoredTemp>.BackupNode> graphBackup = graph.backup();
 		
 		int coloredNodesCount = 0;
-		for (SimpleGraph<ColoredNode>.Node n : graph.nodeSet()) {
+		for (SimpleGraph<ColoredTemp>.Node n : graph.nodeSet()) {
 			if (n.info.isColored()) coloredNodesCount++;
 		}
 		
-		List<Temp> stack = new LinkedList<>();
+		List<ColoredTemp> stack = new LinkedList<>();
 
 		do {
 			// SIMPLIFY
@@ -48,11 +45,11 @@ public class Allocator {
 		while(graph.nodeSet().size() > coloredNodesCount);
 		
 		// SELECT
-		List<SimpleGraph<ColoredNode>.Node> spillNodes = Selector.select(graph, stack, colors, backupNodes);
+		List<SimpleGraph<ColoredTemp>.Node> spillNodes = Selector.select(graph, stack, colors, graphBackup);
 		
 		// Replace colored temps
 		final Map<Temp, Temp> colorMap = new HashMap<>();
-		for (SimpleGraph<ColoredNode>.Node n : graph.nodeSet()) {
+		for (SimpleGraph<ColoredTemp>.Node n : graph.nodeSet()) {
 			if (n.info.isColored()) {
 				colorMap.put(n.info.temp, n.info.color);
 			}

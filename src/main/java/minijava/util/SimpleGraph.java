@@ -16,7 +16,7 @@ public class SimpleGraph<NodeInfo> {
 	private final String name;
 	
 	public class BackupNode {
-		public final NodeInfo info;
+		private final NodeInfo info;
 		private final Set<NodeInfo> successors = new HashSet<>();
 		private final Set<NodeInfo> predecessors = new HashSet<>();
 		
@@ -112,7 +112,7 @@ public class SimpleGraph<NodeInfo> {
 		return nodes.get(info);
 	}
 	
-	public void addBackup(BackupNode node) {
+	public void restore(BackupNode node) {
 		Node n = new Node(node.info);
 		for (NodeInfo st : node.successors) {
 			Node s = nodes.get(st);
@@ -126,6 +126,14 @@ public class SimpleGraph<NodeInfo> {
 				addEdge(p, n);
 			}
 		}
+	}
+	
+	public Map<NodeInfo, BackupNode> backup() {
+		Map<NodeInfo, BackupNode> backup = new HashMap<>();
+		for (NodeInfo info : nodes.keySet()) {
+			backup.put(info, nodes.get(info).backup());
+		}
+		return backup;
 	}
 
 	public void addEdge(Node src, Node dst) {

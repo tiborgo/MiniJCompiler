@@ -9,10 +9,10 @@ import minijava.util.SimpleGraph;
 
 public class Builder {
 
-	public static SimpleGraph<ColoredNode> build (SimpleGraph<Temp> interferenceGraph, List<Temp> colors) {
+	public static SimpleGraph<ColoredTemp> build (SimpleGraph<Temp> interferenceGraph, List<Temp> colors) {
 		
-		SimpleGraph<ColoredNode> coloredInterferenceGraph = new SimpleGraph<>(interferenceGraph.getName());
-		Map<Temp, SimpleGraph<ColoredNode>.Node> nodes = new HashMap<>();
+		SimpleGraph<ColoredTemp> coloredInterferenceGraph = new SimpleGraph<>(interferenceGraph.getName());
+		Map<Temp, SimpleGraph<ColoredTemp>.Node> nodes = new HashMap<>();
 
 		for (SimpleGraph<Temp>.Node tNode : interferenceGraph.nodeSet()) {
 			Temp color = null;
@@ -20,7 +20,7 @@ public class Builder {
 				color = tNode.info;
 			}
 			
-			SimpleGraph<ColoredNode>.Node node = coloredInterferenceGraph.new Node(new ColoredNode(tNode.info, color));
+			SimpleGraph<ColoredTemp>.Node node = coloredInterferenceGraph.new Node(new ColoredTemp(tNode.info, color));
 			nodes.put(tNode.info, node);
 		}
 		

@@ -2,11 +2,11 @@ package minijava.backend.registerallocation;
 
 import minijava.intermediate.Temp;
 
-public class ColoredNode {
+public class ColoredTemp {
 	public Temp color;
 	public final Temp temp;
 	
-	public ColoredNode(Temp temp, Temp color) {
+	public ColoredTemp(Temp temp, Temp color) {
 		this.color = color;
 		this.temp = temp;
 	}
@@ -22,6 +22,6 @@ public class ColoredNode {
 	
 	@Override
 	public boolean equals(Object obj) {
-		return (obj instanceof ColoredNode && ((ColoredNode)obj).temp.equals(temp)); 
+		return (obj instanceof ColoredTemp && ((ColoredTemp)obj).temp.equals(temp)); 
 	}
 }
