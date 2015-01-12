@@ -20,7 +20,7 @@ public class Builder {
 		Map<Assem, LivenessSetsBuilder.InOut> inOut = LivenessSetsBuilder.build(controlFlowGraph);
 		SimpleGraph<Temp> interferenceGraph = InterferenceGraphBuilder.build(controlFlowGraph, inOut);
 		
-		Iterator<Assem> iter = inOut.keySet().iterator();
+		/*Iterator<Assem> iter = inOut.keySet().iterator();
 		StringBuilder inOutStringBuilder = new StringBuilder();
 		inOutStringBuilder.append("[" + System.lineSeparator());
 		while (iter.hasNext()) {
@@ -39,7 +39,7 @@ public class Builder {
 				.append(System.lineSeparator());
 		}
 		inOutStringBuilder.append("]");
-		System.out.println(inOutStringBuilder);
+		System.out.println(inOutStringBuilder);*/
 		
 		
 		SimpleGraph<ColoredTemp> preColoredGraph = new SimpleGraph<>(interferenceGraph.getName());

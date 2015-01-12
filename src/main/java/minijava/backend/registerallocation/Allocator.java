@@ -75,6 +75,8 @@ public class Allocator {
 			// rewrite program
 			allocatedFrag = new FragmentProc<>(allocatedFrag.frame, machineSpecifics.spill(allocatedFrag.frame, allocatedFrag.body, spillNodes));
 			
+			System.out.println("Register allocator round " + counter + ", " + spillNodes.size() + " spill nodes");
+			
 			// START OVER
 			
 		}
