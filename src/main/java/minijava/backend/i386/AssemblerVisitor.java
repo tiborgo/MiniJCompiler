@@ -243,16 +243,11 @@ public class AssemblerVisitor implements
 				return result;
 			}
 			else {
+				// Binary instructions
+				
 				// Destination of most arithmetical and some logical operations cannot be immediates
 				// (whenever the destination is changed by the operation it must be a register or memory location)
-				/*if (o1 instanceof Operand.Imm &&
-						(operatorBinary == Kind.ADD || operatorBinary == Kind.SUB || operatorBinary == Kind.SHL || operatorBinary == Kind.SHR || operatorBinary == Kind.SAR)) {
-					Operand.Reg o1_ = new Operand.Reg(new Temp());
-					emit(new AssemBinaryOp(Kind.MOV, o1_, o1));
-					o1 = o1_;
-				}*/
 				
-				// Binary instructions
 				Operand.Reg o1_ = new Operand.Reg(new Temp());
 				emit(new AssemBinaryOp(Kind.MOV, o1_, o1));
 				
@@ -269,11 +264,24 @@ public class AssemblerVisitor implements
 
 		@Override
 		public Void visit(TreeStmMOVE stmMOVE) {
+			
+			Operand dst = stmMOVE.dest.accept(this);
+			Operand src = stmMOVE.src.accept(this);
+			
+			// 1. dst must not be an immediate
+			// TODO: maybe revert jump?
+			// 2. either dst or src must not be an mem
+			if (dst instanceof Operand.Imm ||
+					(dst instanceof Operand.Mem && src instanceof Operand.Mem)) {
+				Operand.Reg tDst = new Operand.Reg(new Temp());
+				emit(new AssemBinaryOp(Kind.MOV, tDst, dst));
+				dst = tDst;
+			}
 
 			AssemBinaryOp assemBinaryOp = new AssemBinaryOp(
 				Kind.MOV,
-				stmMOVE.dest.accept(this),
-				stmMOVE.src.accept(this)
+				dst,
+				src
 			);
 			emit(assemBinaryOp);
 			return null;
@@ -329,9 +337,11 @@ public class AssemblerVisitor implements
 			Operand left  = stmCJUMP.left.accept(this);
 			Operand right = stmCJUMP.right.accept(this);
 
-			// dst must not be an immediate
+			// 1. dst must not be an immediate
 			// TODO: maybe revert jump?
-			if (left instanceof Operand.Imm) {
+			// 2. either dst or src must not be an mem
+			if (left instanceof Operand.Imm ||
+					(left instanceof Operand.Mem && right instanceof Operand.Mem)) {
 				Operand.Reg tLeft = new Operand.Reg(new Temp());
 				emit(new AssemBinaryOp(Kind.MOV, tLeft, left));
 				left = tLeft;

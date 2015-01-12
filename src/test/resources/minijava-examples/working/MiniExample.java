@@ -22,11 +22,11 @@ class Main {
     }
 }
 
-/*class Test {
+class Test {
 	public int test() {
 		return 100;
 	}
-}*/
+}
 
 class Test3 {
 	public int test() {
@@ -39,7 +39,7 @@ class Test3 {
 			a[9] = 3;
 		}*/
 		a[2] = 50;
-		return a[2];
+		return (new Test()).test();
 	}
 }
 

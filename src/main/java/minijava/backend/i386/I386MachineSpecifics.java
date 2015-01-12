@@ -54,69 +54,66 @@ public class I386MachineSpecifics implements MachineSpecifics {
 
 	@Override
 	public List<Assem> spill(Frame frame, List<Assem> instrs, List<Temp> toSpill) {
+		
+		List<Assem> spilledInstrs = new LinkedList<>();
 
-		if (toSpill.size() > 0) {
-			List<Assem> spilledInstrs = new LinkedList<>();
-	
+		for (Assem instr : instrs) {
+			
+			boolean spilled = false;
+		
 			for (int i = 0; i < toSpill.size(); i++) {
-	
+
 				final Temp t = toSpill.get(i);
-				
-				TreeExp mExp = frame.addLocal(Location.IN_MEMORY);
-				AssemblerVisitor.StatementExpressionVisitor expVisitor = new AssemblerVisitor.StatementExpressionVisitor();
-				Operand m = mExp.accept(expVisitor);
-	
-				for (Assem instr : instrs) {
-	
-					List<Temp> use = instr.use();
-					List<Temp> def = instr.def();
-	
-					if (use.contains(t) || def.contains(t)) {
-						
-						final Temp t_ = new Temp();
-						
-						spilledInstrs.addAll(expVisitor.getInstructions());
-	
-						if (use.contains(t)) {
-							spilledInstrs.add(new AssemBinaryOp(Kind.MOV, new Operand.Reg(t_), m));
-						}
-	
-						spilledInstrs.add(instr.rename(new Function<Temp, Temp>() {
-	
-							@Override
-							public Temp apply(Temp a) {
-								return a.equals(t) ? t_ : a;
-							}
-	
-						}));
-	
-						if (def.contains(t)) {
-							spilledInstrs.add(new AssemBinaryOp(Kind.MOV, m, new Operand.Reg(t_)));
-						}
+
+				List<Temp> use = instr.use();
+				List<Temp> def = instr.def();
+
+				if (use.contains(t) || def.contains(t)) {
+					
+					spilled = true;
+					
+					final Temp t_ = new Temp();
+					TreeExp mExp = frame.addLocal(Location.IN_MEMORY);
+					AssemblerVisitor.StatementExpressionVisitor expVisitor = new AssemblerVisitor.StatementExpressionVisitor();
+					Operand m = mExp.accept(expVisitor);
+					
+					spilledInstrs.addAll(expVisitor.getInstructions());
+
+					if (use.contains(t)) {
+						spilledInstrs.add(new AssemBinaryOp(Kind.MOV, new Operand.Reg(t_), m));
 					}
-					else {
-						/*
-						 * Set amount of memory reserved on the stack according to
-						 * the number of local variables. The local variable count
-						 * is only available after spilling.
-						 */
-						if (instr instanceof StackAllocation) {
-							int byteCount = frame.size() - I386MachineSpecifics.WORD_SIZE;
-							Operand.Imm byteCountOperand = new Operand.Imm(byteCount);
-							((StackAllocation) instr).setByteCount(byteCountOperand);
+
+					spilledInstrs.add(instr.rename(new Function<Temp, Temp>() {
+
+						@Override
+						public Temp apply(Temp a) {
+							return a.equals(t) ? t_ : a;
 						}
-						spilledInstrs.add(instr);
+
+					}));
+
+					if (def.contains(t)) {
+						spilledInstrs.add(new AssemBinaryOp(Kind.MOV, m, new Operand.Reg(t_)));
 					}
-	
 				}
 			}
 			
-			return spilledInstrs;
+			if (!spilled) {
+				/*
+				 * Set amount of memory reserved on the stack according to
+				 * the number of local variables. The local variable count
+				 * is only available after spilling.
+				 */
+				if (instr instanceof StackAllocation) {
+					int byteCount = frame.size() - I386MachineSpecifics.WORD_SIZE;
+					Operand.Imm byteCountOperand = new Operand.Imm(byteCount);
+					((StackAllocation) instr).setByteCount(byteCountOperand);
+				}
+				spilledInstrs.add(instr);
+			}
 		}
-		else {
-			return new ArrayList<>(instrs);
-		}
-
+		
+		return spilledInstrs;
 	}
 
 	@Override
