@@ -6,6 +6,6 @@ public class StackAllocation extends AssemBinaryOp {
 	}
 
 	public void setByteCount(Operand.Imm byteCount) {
-		this.dst = byteCount;
+		this.src = byteCount;
 	}
 }

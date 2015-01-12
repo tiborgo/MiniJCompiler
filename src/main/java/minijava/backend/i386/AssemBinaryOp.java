@@ -19,9 +19,9 @@ public class AssemBinaryOp extends DefaultInstruction {
 		MOV, ADD, SUB, SHL, SHR, SAL, SAR, AND, OR, XOR, TEST, CMP, LEA
 	}
 
-	public final Operand src;
 	// FIXME: Member is non-final due to class StackAllocation
-	public Operand dst;
+	public Operand src;
+	public final Operand dst;
 	public final Kind kind;
 
 	public AssemBinaryOp(Kind kind, Operand dst, Operand src) {
