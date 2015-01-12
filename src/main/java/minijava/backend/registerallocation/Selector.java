@@ -10,13 +10,13 @@ import minijava.util.SimpleGraph;
 
 public class Selector {
 
-	public static List<SimpleGraph<ColoredTemp>.Node> select(
+	public static List<Temp> select(
 			SimpleGraph<ColoredTemp> graph,
 			List<ColoredTemp> stack,
 			List<Temp> colors,
 			Map<ColoredTemp, SimpleGraph<ColoredTemp>.BackupNode> graphBackup) {
 		
-		List<SimpleGraph<ColoredTemp>.Node> spilledNodes = new LinkedList<>();
+		List<Temp> spilledNodes = new LinkedList<>();
 		
 		for (ColoredTemp t : stack) {
 			
@@ -45,7 +45,7 @@ public class Selector {
 			}
 			
 			if (n.info.color == null) {
-				spilledNodes.add(n);
+				spilledNodes.add(n.info.temp);
 			}
 		}
 		

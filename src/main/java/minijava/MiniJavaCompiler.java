@@ -311,28 +311,30 @@ public class MiniJavaCompiler {
 		}
 	}
 	
-	private void allocateRegisters(List<SimpleGraph<Temp>> interferenceGraphs, List<Fragment<List<Assem>>> assemFragments) throws CompilerException {
+	private List<Fragment<List<Assem>>> allocateRegisters(List<Fragment<List<Assem>>> frags) throws CompilerException {
 		
 		try {
-			List<SimpleGraph<ColoredTemp>> colroedInterferenceGraphs = new LinkedList<>();
-			for (int i = 0; i < interferenceGraphs.size(); i++) {
+			List<Fragment<List<Assem>>> allocatedFrags = new LinkedList<>();
+			for (int i = 0; i < frags.size(); i++) {
 			//for (SimpleGraph<Temp> interferenceGraph : interferenceGraphs) {
-				SimpleGraph<Temp> interferenceGraph = interferenceGraphs.get(i);
+				//SimpleGraph<Temp> interferenceGraph = interferenceGraphs.get(i);
 				try {
-					FragmentProc<List<Assem>> assemFragment = (FragmentProc<List<Assem>>)assemFragments.get(i);
-					colroedInterferenceGraphs.add(Allocator.allocate(interferenceGraph, assemFragment, machineSpecifics));
+					FragmentProc<List<Assem>> frag = (FragmentProc<List<Assem>>)frags.get(i);
+					allocatedFrags.add(Allocator.allocate(frag, machineSpecifics));
 				}
 				catch (ClassCastException e) {
 					throw new CompilerException("Can only alocate registers for FragementProc");
 				}
 			}
 			
-			String graphOutput = null;
+			/*String graphOutput = null;
 			if (printPreColoredGraphs) {
 				graphOutput = simpleGraphsToString(colroedInterferenceGraphs);
-			}
+			}*/
 			
-			printVerbose("Successfully generated interference graphs", graphOutput);
+			printVerbose("Successfully allocated registers");
+			
+			return allocatedFrags;
 
 		}
 		catch (Exception e) {
@@ -516,12 +518,12 @@ public class MiniJavaCompiler {
 		List<FragmentProc<TreeStm>> intermediate = generateIntermediate(program);
 		List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = canonicalize(intermediate); 
 		List<Fragment<List<Assem>>> assemFragments = generatePreAssembly(intermediateCanonicalized);
-		List<SimpleGraph<Assem>> controlFlowGraphs = generateControlFlowGraphs(assemFragments);
-		List<SimpleGraph<Temp>> inferenceGraphs = generateInterferenceGraphs(controlFlowGraphs);
+		//List<SimpleGraph<Assem>> controlFlowGraphs = generateControlFlowGraphs(assemFragments);
+		//List<SimpleGraph<Temp>> inferenceGraphs = generateInterferenceGraphs(controlFlowGraphs);
 		
-		allocateRegisters(inferenceGraphs, assemFragments);
+		List<Fragment<List<Assem>>> allocatedFrags = allocateRegisters(assemFragments);
 
-		String assembly = generateAssembly(assemFragments);
+		String assembly = generateAssembly(allocatedFrags);
 		
 		compileAssembly(gcc, assembly);
 		if (runExecutable) {
