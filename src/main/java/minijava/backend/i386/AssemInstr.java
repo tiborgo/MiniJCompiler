@@ -31,7 +31,7 @@ public final class AssemInstr extends DefaultInstruction {
 		case LEAVE:
 			// Slide 196 is wrong here,
 			// leave is equivalent to
-			// mov %esp, ebp
+			// mov %esp, %ebp
 			// pop %ebp
 			return Arrays.asList(I386MachineSpecifics.EBP.reg);
 		case RET:

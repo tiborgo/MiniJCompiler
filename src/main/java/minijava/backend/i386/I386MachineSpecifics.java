@@ -5,12 +5,16 @@ import java.util.List;
 
 import minijava.backend.Assem;
 import minijava.backend.MachineSpecifics;
+import minijava.backend.i386.AssemBinaryOp.Kind;
 import minijava.intermediate.Fragment;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.Frame;
+import minijava.intermediate.Frame.Location;
 import minijava.intermediate.Label;
 import minijava.intermediate.Temp;
+import minijava.intermediate.tree.TreeExp;
 import minijava.intermediate.tree.TreeStm;
+import minijava.util.Function;
 
 public class I386MachineSpecifics implements MachineSpecifics {
 	public static final Operand.Reg EAX = new Operand.Reg(new I386RegTemp("eax"));
@@ -44,13 +48,56 @@ public class I386MachineSpecifics implements MachineSpecifics {
 
 	@Override
 	public Frame newFrame(Label name, int paramCount) {
-		return new I386Frame(name, paramCount, EAX.reg);
+		return new I386Frame(name, paramCount);
 	}
 
 	@Override
 	public List<Assem> spill(Frame frame, List<Assem> instrs, List<Temp> toSpill) {
-		// TODO Auto-generated method stub
-		return null;
+
+		List<Assem> spilledInstrs = new LinkedList<>();
+		
+		for (int i = 0; i < toSpill.size(); i++) {
+
+			final Temp t = toSpill.get(i);
+			final Temp t_ = new Temp();
+			TreeExp mExp = frame.addLocal(Location.IN_MEMORY);
+			AssemblerVisitor.StatementExpressionVisitor expVisitor = new AssemblerVisitor.StatementExpressionVisitor();
+			Operand m = mExp.accept(expVisitor);
+			
+			for (Assem instr : instrs) {
+				
+				List<Temp> use = instr.use();
+				List<Temp> def = instr.def();
+				
+				if (use.contains(t) || def.contains(t)) {
+					
+					spilledInstrs.addAll(expVisitor.getInstructions());
+					
+					if (use.contains(t)) {
+						spilledInstrs.add(new AssemBinaryOp(Kind.MOV, new Operand.Reg(t_), m));
+					}
+					
+					spilledInstrs.add(instr.rename(new Function<Temp, Temp>() {
+
+						@Override
+						public Temp apply(Temp a) {
+							return a.equals(t) ? t_ : a;
+						}
+						
+					}));
+					
+					if (def.contains(t)) {
+						spilledInstrs.add(new AssemBinaryOp(Kind.MOV, m, new Operand.Reg(t_)));
+					}
+				}
+				else {
+					spilledInstrs.add(instr);
+				}
+				
+			}
+		}
+		
+		return spilledInstrs;
 	}
 
 	@Override
