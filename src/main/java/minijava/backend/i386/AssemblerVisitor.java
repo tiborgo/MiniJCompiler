@@ -38,14 +38,14 @@ public class AssemblerVisitor implements
 	@Override
 	public FragmentProc<List<Assem>> visit(FragmentProc<List<TreeStm>> fragProc) {
 		List<Assem> instructions = new LinkedList<>();
-		
+
 		// Function label
 		instructions.add(new AssemLabel(fragProc.frame.getName()));
-		
+
 		// Prologue
 		instructions.add(new AssemUnaryOp(AssemUnaryOp.Kind.PUSH, I386MachineSpecifics.EBP));
 		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.MOV, I386MachineSpecifics.EBP, I386MachineSpecifics.ESP));
-		
+
 		// save callee-save registers: ebx, esi, edi, ebp (ebp already saved by prologue)
 		Operand.Reg ebxTemp = new Operand.Reg(new Temp());
 		Operand.Reg esiTemp = new Operand.Reg(new Temp());
@@ -58,29 +58,29 @@ public class AssemblerVisitor implements
 		int localVariableSize = 0;
 		// 4 (push ebp) + 4 (ret address) + localVariableSize
 		int padding = 16 - ((localVariableSize + 8) % 16);
-		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.SUB, I386MachineSpecifics.ESP, new Operand.Imm(localVariableSize + padding)));
-		
+		instructions.add(new StackAllocation(new Operand.Imm(localVariableSize + padding)));
+
 		// Make eax available to the register allocator
 		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.MOV, I386MachineSpecifics.EAX, new Operand.Imm(0)));
-		
+
 		for (TreeStm statement : fragProc.body) {
 			StatementExpressionVisitor visitor = new StatementExpressionVisitor();
 			statement.accept(visitor);
 			instructions.addAll(visitor.getInstructions());
 		}
-		
+
 		// restore callee-save registers: ebx, esi, edi, ebp (ebp will be restored by leave)
 		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.MOV, I386MachineSpecifics.EBX, ebxTemp));
 		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.MOV, I386MachineSpecifics.ESI, esiTemp));
 		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.MOV, I386MachineSpecifics.EDI, ediTemp));
-		
+
 		// Epilogue
 		Assem leave = new AssemInstr(AssemInstr.Kind.LEAVE);
 		instructions.add(leave);
 
 		Assem ret = new AssemInstr(AssemInstr.Kind.RET);
 		instructions.add(ret);
-		
+
 		// FIXME: Set correct frame?
 		return new FragmentProc<List<Assem>>(fragProc.frame, instructions);
 	}
@@ -143,7 +143,7 @@ public class AssemblerVisitor implements
 		@Override
 		public Operand visit(TreeExpMEM e) throws RuntimeException {
 			Operand address = e.addr.accept(this);
-			
+
 			OperandVisitor<Operand.Mem, RuntimeException> memVisitor = new OperandVisitor<Operand.Mem, RuntimeException>() {
 
 				@Override
@@ -166,7 +166,7 @@ public class AssemblerVisitor implements
 					return new Operand.Mem(operand.reg);
 				}
 			};
-			
+
 			return address.accept(memVisitor);
 		}
 
@@ -179,9 +179,9 @@ public class AssemblerVisitor implements
 		public Operand visit(TreeExpOP e) throws RuntimeException {
 			Operand o1 = e.left.accept(this);
 			Operand o2 = e.right.accept(this);
-			
+
 			assert(!(o1 instanceof Operand.Label));
-			
+
 			AssemUnaryOp.Kind operatorUnary = null;
 			AssemBinaryOp.Kind operatorBinary = null;
 			switch (e.op) {
@@ -224,14 +224,14 @@ public class AssemblerVisitor implements
 
 			// Unary instructions
 			if (operatorUnary != null) {
-				
+
 				// TODO: should we save %edx?
-				
+
 				Operand.Reg savedEAX = new Operand.Reg(new Temp());
 				//Operand.Reg savedEDX = new Operand.Reg(new Temp());
 				Operand.Reg o2Temp = new Operand.Reg(new Temp());
 				Operand.Reg result = new Operand.Reg(new Temp());
-				
+
 				AssemBinaryOp saveEAX = new AssemBinaryOp(Kind.MOV, savedEAX, I386MachineSpecifics.EAX);
 				//AssemBinaryOp saveEDX = new AssemBinaryOp(Kind.MOV, savedEDX, I386MachineSpecifics.EDX);
 				AssemBinaryOp moveToEAX = new AssemBinaryOp(Kind.MOV, I386MachineSpecifics.EAX, o1);
@@ -252,7 +252,7 @@ public class AssemblerVisitor implements
 					emit(new AssemBinaryOp(Kind.MOV, o1_, o1));
 					o1 = o1_;
 				}
-				
+
 				// Binary instructions
 				AssemBinaryOp binaryOperation = new AssemBinaryOp(operatorBinary, o1, o2);
 				emit(binaryOperation);
@@ -323,10 +323,10 @@ public class AssemblerVisitor implements
 			default:
 				throw new UnsupportedOperationException("Unsigned conditions are not supported");
 			}
-			
+
 			Operand left  = stmCJUMP.left.accept(this);
 			Operand right = stmCJUMP.right.accept(this);
-			
+
 			// dst must not be an immediate
 			// TODO: maybe revert jump?
 			if (left instanceof Operand.Imm) {
