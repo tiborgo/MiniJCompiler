@@ -25,9 +25,9 @@ public class I386MachineSpecifics implements MachineSpecifics {
 	public static final Operand.Reg EDX = new Operand.Reg(new I386RegTemp("edx"));
 	public static final Operand.Reg ESI = new Operand.Reg(new I386RegTemp("esi"));
 	public static final Operand.Reg EDI = new Operand.Reg(new I386RegTemp("edi"));
-	
+
 	public static final int WORD_SIZE = 4;
-	
+
 	private final String indentation = "\t";
 
 	@Override
@@ -55,7 +55,7 @@ public class I386MachineSpecifics implements MachineSpecifics {
 	public List<Assem> spill(Frame frame, List<Assem> instrs, List<Temp> toSpill) {
 
 		List<Assem> spilledInstrs = new LinkedList<>();
-		
+
 		for (int i = 0; i < toSpill.size(); i++) {
 
 			final Temp t = toSpill.get(i);
@@ -63,40 +63,50 @@ public class I386MachineSpecifics implements MachineSpecifics {
 			TreeExp mExp = frame.addLocal(Location.IN_MEMORY);
 			AssemblerVisitor.StatementExpressionVisitor expVisitor = new AssemblerVisitor.StatementExpressionVisitor();
 			Operand m = mExp.accept(expVisitor);
-			
+
 			for (Assem instr : instrs) {
-				
+
 				List<Temp> use = instr.use();
 				List<Temp> def = instr.def();
-				
+
 				if (use.contains(t) || def.contains(t)) {
-					
+
 					spilledInstrs.addAll(expVisitor.getInstructions());
-					
+
 					if (use.contains(t)) {
 						spilledInstrs.add(new AssemBinaryOp(Kind.MOV, new Operand.Reg(t_), m));
 					}
-					
+
 					spilledInstrs.add(instr.rename(new Function<Temp, Temp>() {
 
 						@Override
 						public Temp apply(Temp a) {
 							return a.equals(t) ? t_ : a;
 						}
-						
+
 					}));
-					
+
 					if (def.contains(t)) {
 						spilledInstrs.add(new AssemBinaryOp(Kind.MOV, m, new Operand.Reg(t_)));
 					}
 				}
 				else {
+					/*
+					 * Set amount of memory reserved on the stack according to
+					 * the number of local variables. The local variable count
+					 * is only available after spilling.
+					 */
+					if (instr instanceof StackAllocation) {
+						int byteCount = frame.size() - I386MachineSpecifics.WORD_SIZE;
+						Operand.Imm byteCountOperand = new Operand.Imm(byteCount);
+						((StackAllocation) instr).setByteCount(byteCountOperand);
+					}
 					spilledInstrs.add(instr);
 				}
-				
+
 			}
 		}
-		
+
 		return spilledInstrs;
 	}
 
@@ -110,14 +120,14 @@ public class I386MachineSpecifics implements MachineSpecifics {
 	public String printAssembly(List<Fragment<List<Assem>>> frags) {
 
 		StringBuilder stringBuilder = new StringBuilder();
-		
+
 		stringBuilder
 			.append("\t.intel_syntax noprefix" + System.lineSeparator())
 			.append("\t.globl " + new Label("lmain").toString() + System.lineSeparator())
 			.append(System.lineSeparator());
 
 		for (Fragment<List<Assem>> frag : frags) {
-			
+
 			// TODO: Treat FragmentProc as special case
 			FragmentProc<List<Assem>> procedure = (FragmentProc<List<Assem>>) frag;
 
