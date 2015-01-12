@@ -12,7 +12,7 @@ import minijava.intermediate.Temp;
 import minijava.util.Function;
 import minijava.util.Pair;
 
-public final class AssemBinaryOp extends DefaultInstruction {
+public class AssemBinaryOp extends DefaultInstruction {
 
 	public static enum Kind {
 
@@ -20,7 +20,8 @@ public final class AssemBinaryOp extends DefaultInstruction {
 	}
 
 	public final Operand src;
-	public final Operand dst;
+	// FIXME: Member is non-final due to class StackAllocation
+	public Operand dst;
 	public final Kind kind;
 
 	public AssemBinaryOp(Kind kind, Operand dst, Operand src) {
@@ -49,13 +50,13 @@ public final class AssemBinaryOp extends DefaultInstruction {
 		case OR:
 		case XOR:
 			return dst.getTemps();
-		
+
 		case CMP:
 		case LEA:
 		case TEST:
 			return Collections.emptyList();
 		}
-		
+
 		throw new UnsupportedOperationException("Operator " + kind + " is not known");
 	}
 
@@ -77,7 +78,7 @@ public final class AssemBinaryOp extends DefaultInstruction {
 			temps.addAll(dst.getTemps());
 			return temps;
 		}
-		
+
 		case MOV: {
 			if (dst instanceof Operand.Reg) {
 				return src.getTemps();
@@ -88,14 +89,14 @@ public final class AssemBinaryOp extends DefaultInstruction {
 				return temps;
 			}
 		}
-		
+
 		case LEA:
 			return src.getTemps();
 		}
-		
-		throw new UnsupportedOperationException("Operator " + kind + " is not known"); 
+
+		throw new UnsupportedOperationException("Operator " + kind + " is not known");
 	}
-	
+
 	@Override
 	public Pair<Temp, Temp> isMoveBetweenTemps() {
 		if (dst instanceof Operand.Reg && src instanceof Operand.Reg) {
