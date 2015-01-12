@@ -1,5 +1,6 @@
 package minijava.backend.registerallocation;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +19,28 @@ public class Builder {
 		SimpleGraph<Assem> controlFlowGraph = ControlFlowGraphBuilder.build(assemFragment);
 		Map<Assem, LivenessSetsBuilder.InOut> inOut = LivenessSetsBuilder.build(controlFlowGraph);
 		SimpleGraph<Temp> interferenceGraph = InterferenceGraphBuilder.build(controlFlowGraph, inOut);
+		
+		Iterator<Assem> iter = inOut.keySet().iterator();
+		StringBuilder inOutStringBuilder = new StringBuilder();
+		inOutStringBuilder.append("[" + System.lineSeparator());
+		while (iter.hasNext()) {
+			Assem next = iter.next();
+			inOutStringBuilder
+				.append("\t   in: ")
+				.append(inOut.get(next).in)
+				.append(System.lineSeparator())
+				.append("\t")
+				.append(next)
+				.append(System.lineSeparator())
+				.append("\t   out:")
+				.append(inOut.get(next).out);
+			inOutStringBuilder
+				.append(System.lineSeparator())
+				.append(System.lineSeparator());
+		}
+		inOutStringBuilder.append("]");
+		System.out.println(inOutStringBuilder);
+		
 		
 		SimpleGraph<ColoredTemp> preColoredGraph = new SimpleGraph<>(interferenceGraph.getName());
 
