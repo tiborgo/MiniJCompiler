@@ -91,6 +91,6 @@ final class I386Frame implements Frame {
 
 	@Override
 	public int size() {
-		return 0;
+		return memoryLocalsOffset;
 	}
 }
