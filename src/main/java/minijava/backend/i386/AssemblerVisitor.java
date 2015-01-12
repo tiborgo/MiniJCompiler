@@ -54,7 +54,6 @@ public class AssemblerVisitor implements
 		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.MOV, esiTemp, I386MachineSpecifics.ESI));
 		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.MOV, ediTemp, I386MachineSpecifics.EDI));
 
-		// TODO: Allocate space on stack for local variables
 		int localVariableSize = 0;
 		// 4 (push ebp) + 4 (ret address) + localVariableSize
 		int padding = 16 - ((localVariableSize + 8) % 16);
