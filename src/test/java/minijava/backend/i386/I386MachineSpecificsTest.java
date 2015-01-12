@@ -31,13 +31,15 @@ public class I386MachineSpecificsTest {
 		List<Assem> instructions = new ArrayList<>();
 		instructions.add(new StackAllocation(new Operand.Imm(0)));
 		Temp toSpill = new Temp();
+		Temp toSpill2 = new Temp();
 		instructions.add(new AssemBinaryOp(Kind.MOV, new Operand.Reg(toSpill), new Operand.Imm(0)));
+		instructions.add(new AssemBinaryOp(Kind.MOV, new Operand.Reg(toSpill2), new Operand.Imm(1)));
 		List<Assem> spilledCode = machineSpecifics.spill(
-				testFrame, instructions, Arrays.asList(toSpill));
+				testFrame, instructions, Arrays.asList(toSpill, toSpill2));
 		assertTrue(spilledCode.size() > instructions.size());
 		for (Assem assem : spilledCode) {
 			if (assem instanceof StackAllocation) {
-				Operand dst = ((StackAllocation) assem).dst;
+				Operand dst = ((StackAllocation) assem).src;
 				assertEquals(2*I386MachineSpecifics.WORD_SIZE, ((Operand.Imm) dst).imm);
 			}
 		}
