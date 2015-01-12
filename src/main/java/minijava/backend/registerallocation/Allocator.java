@@ -27,8 +27,16 @@ public class Allocator {
 		int counter = 0;
 		
 		do {
+			System.out.println("#################");
+			
 			// BUILD
-			final SimpleGraph<ColoredTemp> graph = Builder.build(colors, frag);
+			final SimpleGraph<ColoredTemp> graph = Builder.build(colors, allocatedFrag);
+			
+			if (counter > 2) {
+				//break;
+			}
+			
+			counter++;
 			
 			Map<ColoredTemp, SimpleGraph<ColoredTemp>.BackupNode> graphBackup = graph.backup();
 			
@@ -52,9 +60,9 @@ public class Allocator {
 			spillNodes = Selector.select(graph, stack, colors, graphBackup);
 			
 			// Replace colored temps
-			for (int i = 0; i < frag.body.size(); i++) {
+			for (int i = 0; i < allocatedFrag.body.size(); i++) {
 
-				frag.body.set(i, frag.body.get(i).rename(new Function<Temp, Temp>() {
+				allocatedFrag.body.set(i, allocatedFrag.body.get(i).rename(new Function<Temp, Temp>() {
 					
 					@Override
 					public Temp apply(Temp a) {
@@ -65,14 +73,10 @@ public class Allocator {
 			}
 			
 			// rewrite program
-			allocatedFrag = new FragmentProc<>(frag.frame, machineSpecifics.spill(frag.frame, frag.body, spillNodes));
+			allocatedFrag = new FragmentProc<>(allocatedFrag.frame, machineSpecifics.spill(allocatedFrag.frame, allocatedFrag.body, spillNodes));
 			
 			// START OVER
-			if (counter > 1) {
-				break;
-			}
 			
-			counter++;
 		}
 		while(spillNodes.size() > 0);
 		
