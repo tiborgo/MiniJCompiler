@@ -120,27 +120,45 @@ public class IntermediateVisitor implements
 
 		methodContext = m;
 
-		String name = (m instanceof MainMethod) ? "lmain" : mangle(classContext.className, m.methodName);
-		Frame frame = this.machineSpecifics.newFrame(new Label(name), m.parameters.size() + 1);
+		
+		
+		//String name = (m instanceof MainMethod) ? "lmain" : mangle(classContext.className, m.methodName);
+		Frame frame;;
 
 		Map<String, TreeExp> methodTemps = new HashMap<>();
 		
-		TreeExp thisExp = frame.getParameter(0);
 		
-		methodTemps.put("this", thisExp);
-		for (int i = 1; i < m.parameters.size()+1; i++) {
-			methodTemps.put(m.parameters.get(i-1).id, frame.getParameter(i));
+		classTemps.clear();
+		
+		if (m instanceof MainMethod) {
+			
+			frame = this.machineSpecifics.newFrame(new Label("lmain"), m.parameters.size());
+			
+			for (int i = 0; i < m.parameters.size(); i++) {
+				methodTemps.put(m.parameters.get(i).id, frame.getParameter(i));
+			}
 		}
+		else {
+			
+			frame = this.machineSpecifics.newFrame(new Label(mangle(classContext.className, m.methodName)), m.parameters.size() + 1);
+			
+			TreeExp thisExp = frame.getParameter(0);
+			methodTemps.put("this", thisExp);
+			
+			for (int i = 1; i < m.parameters.size()+1; i++) {
+				methodTemps.put(m.parameters.get(i-1).id, frame.getParameter(i));
+			}
+			
+			// Fields
+			// TODO: better in DeclClass visit ?
+			for (int i = 0; i < classContext.fields.size(); i++) {
+				int offset = (i+1) * machineSpecifics.getWordSize();
+				classTemps.put(classContext.fields.get(i).name, new TreeExpMEM(new TreeExpOP(Op.PLUS, thisExp, new TreeExpCONST(offset))));
+			}
+		}
+		
 		for (Variable var : m.localVars) {
 			methodTemps.put(var.name, frame.addLocal(Frame.Location.ANYWHERE));
-		}
-		
-		// Fields
-		// TODO: better in DeclClass visit ?
-		classTemps.clear();
-		for (int i = 0; i < classContext.fields.size(); i++) {
-			int offset = (i+1) * machineSpecifics.getWordSize();
-			classTemps.put(classContext.fields.get(i).name, new TreeExpMEM(new TreeExpOP(Op.PLUS, thisExp, new TreeExpCONST(offset))));
 		}
 
 		Map<String, TreeExp> methodAndClassTemps = new HashMap<>();

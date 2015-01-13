@@ -1,6 +1,5 @@
 package minijava.ast.rules.declarations;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 import minijava.ast.rules.Parameter;
@@ -14,7 +13,7 @@ public class MainMethod extends Method {
 		// FIXME: Main method has argument of type String[]
 		super(new minijava.ast.rules.types.Integer(),
 				"main",
-				Arrays.asList(new Parameter(argsName, null)),
+				Collections.<Parameter>emptyList(),
 				Collections.<Variable>emptyList(),
 				body,
 				new IntConstant(0));

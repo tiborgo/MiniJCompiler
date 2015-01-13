@@ -1,5 +1,6 @@
 package minijava.backend.registerallocation;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ public class Selector {
 			Map<ColoredTemp, SimpleGraph<ColoredTemp>.BackupNode> graphBackup) {
 		
 		List<Temp> spilledNodes = new LinkedList<>();
+		Collections.reverse(stack);
 		
 		for (ColoredTemp t : stack) {
 			

@@ -1,11 +1,11 @@
 package minijava.backend.livenessanalysis;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 import minijava.backend.Assem;
 import minijava.intermediate.Temp;
@@ -62,7 +62,7 @@ public class LivenessSetsBuilder {
 			}
 		};
 		
-		Map<Assem, InOut> inOut = new TreeMap<>(comparator);
+		Map<Assem, InOut> inOut = new HashMap<>();//TreeMap<>(comparator);
 		
 		for (int i = 0; i < nodes.size(); i++) {
 			inOut.put(nodes.get(i).info, new InOut());
