@@ -1,6 +1,7 @@
 package minijava.backend.i386;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -42,23 +43,43 @@ public final class AssemJump extends DefaultInstruction {
 	}
 
 	public List<Temp> use() {
-		List<Temp> usedTemporaries = new ArrayList<>(2);
-		if (dest instanceof Operand.Reg) {
-			usedTemporaries.add(((Operand.Reg) dest).reg);
-		} else if (dest instanceof Operand.Mem) {
-			Operand.Mem memoryAccess = (Operand.Mem) dest;
-			if (memoryAccess.base != null) {
-				usedTemporaries.add(memoryAccess.base);
+		switch(kind) {
+		case JMP:
+		case J: {
+			List<Temp> usedTemporaries = new ArrayList<>(2);
+			if (dest instanceof Operand.Reg) {
+				usedTemporaries.add(((Operand.Reg) dest).reg);
+			} else if (dest instanceof Operand.Mem) {
+				Operand.Mem memoryAccess = (Operand.Mem) dest;
+				if (memoryAccess.base != null) {
+					usedTemporaries.add(memoryAccess.base);
+				}
+				if (memoryAccess.index != null) {
+					usedTemporaries.add(memoryAccess.index);
+				}
 			}
-			if (memoryAccess.index != null) {
-				usedTemporaries.add(memoryAccess.index);
-			}
+			return usedTemporaries;
 		}
-		return usedTemporaries;
+		
+		case CALL:
+			return Arrays.asList(I386MachineSpecifics.ESP.reg);
+		
+		default:
+			throw new UnsupportedOperationException("Unknown kind " + kind);
+		}
 	}
 
 	public List<Temp> def() {
-		return Collections.emptyList();
+		switch(kind) {
+		case JMP:
+		case J:
+			return Collections.emptyList();
+		case CALL:
+			// FIXME: save caller-save register
+			return Arrays.asList(I386MachineSpecifics.EAX.reg);
+		default:
+			throw new UnsupportedOperationException("Unknown kind " + kind);
+		}
 	}
 
 	public List<Label> jumps() {

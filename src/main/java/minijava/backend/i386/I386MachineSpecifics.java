@@ -105,8 +105,11 @@ public class I386MachineSpecifics implements MachineSpecifics {
 				 * is only available after spilling.
 				 */
 				if (instr instanceof StackAllocation) {
+					
 					int byteCount = frame.size() - I386MachineSpecifics.WORD_SIZE;
-					Operand.Imm byteCountOperand = new Operand.Imm(byteCount);
+					// 4 (push ebp) + 4 (ret address) + byteCount
+					int padding = 16 - ((byteCount + 8) % 16);
+					Operand.Imm byteCountOperand = new Operand.Imm(byteCount + padding);
 					((StackAllocation) instr).setByteCount(byteCountOperand);
 				}
 				spilledInstrs.add(instr);

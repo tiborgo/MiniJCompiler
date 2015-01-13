@@ -23,8 +23,38 @@ class Main {
 }
 
 class Test {
-	public int test() {
-		return 100;
+	public int test(int a) {
+		int b;
+		int c;
+		int d;
+		int e;
+		int f;
+		int g;
+		int h;
+		int i;
+		int j;
+		int k;
+		int l;
+		int m;
+		int n;
+		int o;
+		int p;
+		b = 0;
+		c = 0;
+		d = 0;
+		e = 0;
+		f = 0;
+		g = 0;
+		h = 0;
+		i = 0;
+		j = 0;
+		k = 0;
+		l = 0;
+		m = 0;
+		n = 0;
+		o = 0;
+		p = a + b + c + d + e + f + g + h + i + j + k + l + m + n + o;
+		return p;
 	}
 }
 
@@ -39,7 +69,7 @@ class Test3 {
 			a[9] = 3;
 		}*/
 		a[2] = 50;
-		return (new Test()).test();
+		return (new Test()).test(89);
 	}
 }
 

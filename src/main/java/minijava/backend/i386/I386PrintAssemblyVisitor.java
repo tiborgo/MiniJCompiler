@@ -16,9 +16,9 @@ public class I386PrintAssemblyVisitor implements
 
 		StringBuilder operation = new StringBuilder()
 			.append(assem.kind.name())
-			.append("\t")
+			.append(" ")
 			.append(assem.dst.accept(this))
-			.append(",\t")
+			.append(", ")
 			.append(assem.src.accept(this));
 
 		return operation.toString();
@@ -40,7 +40,7 @@ public class I386PrintAssemblyVisitor implements
 		}
 
 		if (assem.dest instanceof Operand.Label) {
-			operation.append("\t")
+			operation.append(" ")
 				.append(assem.dest.accept(this));
 		}
 		else {
@@ -54,7 +54,7 @@ public class I386PrintAssemblyVisitor implements
 	public String visit(AssemUnaryOp assem) {
 		StringBuilder operation = new StringBuilder()
 			.append(assem.kind.name())
-			.append("\t")
+			.append(" ")
 			.append(assem.op.accept(this));
 
 		return operation.toString();
@@ -66,13 +66,13 @@ public class I386PrintAssemblyVisitor implements
 			.append(instruction.toString());
 		Iterator<Operand> operandIterator = instruction.operands.iterator();
 		if (operandIterator.hasNext()) {
-			instructionString.append("\t");
+			instructionString.append(" ");
 		}
 		while (operandIterator.hasNext()) {
 			Operand operand = operandIterator.next();
 			instructionString.append(operand.accept(this));
 			if (operandIterator.hasNext()) {
-				instructionString.append(",\t");
+				instructionString.append(", ");
 			}
 		}
 		return instructionString.toString();

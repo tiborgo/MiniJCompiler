@@ -4,7 +4,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import minijava.backend.Assem;
+import minijava.backend.i386.I386PrintAssemblyVisitor;
 import minijava.backend.livenessanalysis.ControlFlowGraphBuilder;
 import minijava.backend.livenessanalysis.InterferenceGraphBuilder;
 import minijava.backend.livenessanalysis.LivenessSetsBuilder;
@@ -20,26 +23,43 @@ public class Builder {
 		Map<Assem, LivenessSetsBuilder.InOut> inOut = LivenessSetsBuilder.build(controlFlowGraph);
 		SimpleGraph<Temp> interferenceGraph = InterferenceGraphBuilder.build(controlFlowGraph, inOut);
 		
-		/*Iterator<Assem> iter = inOut.keySet().iterator();
+		int maxInterference = 0;
+		I386PrintAssemblyVisitor visitor = new I386PrintAssemblyVisitor();
+		Iterator<Assem> iter = assemFragment.body.iterator();
 		StringBuilder inOutStringBuilder = new StringBuilder();
-		inOutStringBuilder.append("[" + System.lineSeparator());
+		
 		while (iter.hasNext()) {
+			
+			
 			Assem next = iter.next();
-			inOutStringBuilder
-				.append("\t   in: ")
-				.append(inOut.get(next).in)
+			String nextString = StringUtils.rightPad(next.accept(visitor), 30); 
+			String padding = StringUtils.rightPad("", 30);
+			String separator = StringUtils.rightPad("", 100, '-');
+			
+			LivenessSetsBuilder.InOut inOutN = inOut.get(next);
+			if (inOutN.in.size() > maxInterference) {
+				maxInterference = inOutN.in.size();
+			}
+			if (inOutN.out.size() > maxInterference) {
+				maxInterference = inOutN.out.size();
+			}
+			
+			/*inOutStringBuilder
+				.append(nextString)
+				.append("   in: ")
+				.append(inOutN.in)
 				.append(System.lineSeparator())
-				.append("\t")
-				.append(next)
+				.append(padding)
+				.append("   out:")
+				.append(inOutN.out)
 				.append(System.lineSeparator())
-				.append("\t   out:")
-				.append(inOut.get(next).out);
-			inOutStringBuilder
-				.append(System.lineSeparator())
-				.append(System.lineSeparator());
+				.append(separator)
+				.append(System.lineSeparator());*/
 		}
-		inOutStringBuilder.append("]");
-		System.out.println(inOutStringBuilder);*/
+		inOutStringBuilder
+			.append("Max interference: ")
+			.append(maxInterference);
+		System.out.println(inOutStringBuilder);
 		
 		
 		SimpleGraph<ColoredTemp> preColoredGraph = new SimpleGraph<>(interferenceGraph.getName());

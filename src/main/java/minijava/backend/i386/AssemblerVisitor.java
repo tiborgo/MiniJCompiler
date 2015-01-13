@@ -45,6 +45,7 @@ public class AssemblerVisitor implements
 		// Prologue
 		instructions.add(new AssemUnaryOp(AssemUnaryOp.Kind.PUSH, I386MachineSpecifics.EBP));
 		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.MOV, I386MachineSpecifics.EBP, I386MachineSpecifics.ESP));
+		instructions.add(new StackAllocation(new Operand.Imm(0)));
 
 		// save callee-save registers: ebx, esi, edi, ebp (ebp already saved by prologue)
 		Operand.Reg ebxTemp = new Operand.Reg(new Temp());
@@ -53,15 +54,20 @@ public class AssemblerVisitor implements
 		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.MOV, ebxTemp, I386MachineSpecifics.EBX));
 		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.MOV, esiTemp, I386MachineSpecifics.ESI));
 		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.MOV, ediTemp, I386MachineSpecifics.EDI));
-
-		int localVariableSize = 0;
-		// 4 (push ebp) + 4 (ret address) + localVariableSize
-		int padding = 16 - ((localVariableSize + 8) % 16);
-		instructions.add(new StackAllocation(new Operand.Imm(localVariableSize + padding)));
-
+		
 		// Make eax available to the register allocator
 		instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.MOV, I386MachineSpecifics.EAX, new Operand.Imm(0)));
 
+		// Load parameters from stack into temp
+		for (int i = 0; i < fragProc.frame.getParameterCount(); i++) {
+			StatementExpressionVisitor visitor = new StatementExpressionVisitor();
+			Operand param = fragProc.frame.getParameter(i).accept(visitor);
+			instructions.addAll(visitor.getInstructions());
+			Operand address = new Operand.Mem(I386MachineSpecifics.EBP.reg, null, null, (i+2) * I386MachineSpecifics.WORD_SIZE);
+			instructions.add(new AssemBinaryOp(AssemBinaryOp.Kind.MOV, param, address));
+		}
+		
+		// translate body
 		for (TreeStm statement : fragProc.body) {
 			StatementExpressionVisitor visitor = new StatementExpressionVisitor();
 			statement.accept(visitor);
