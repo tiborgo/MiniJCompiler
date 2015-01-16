@@ -8,10 +8,9 @@ import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Program;
@@ -26,15 +25,10 @@ import minijava.backend.Assem;
 import minijava.backend.MachineSpecifics;
 import minijava.backend.i386.I386MachineSpecifics;
 import minijava.backend.livenessanalysis.ControlFlowGraphBuilder;
-import minijava.backend.livenessanalysis.InterferenceGraphBuilder;
-import minijava.backend.livenessanalysis.LivenessSetsBuilder;
-import minijava.backend.livenessanalysis.LivenessSetsBuilder.InOut;
 import minijava.backend.registerallocation.Allocator;
-import minijava.backend.registerallocation.ColoredTemp;
 import minijava.intermediate.Fragment;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.Label;
-import minijava.intermediate.Temp;
 import minijava.intermediate.canon.Canon;
 import minijava.intermediate.tree.TreeStm;
 import minijava.intermediate.visitors.IntermediatePrettyPrintVisitor;
@@ -56,6 +50,21 @@ import org.kohsuke.args4j.Option;
 public class MiniJavaCompiler {
 	private static final Path RUNTIME_DIRECTORY = Paths.get("src/main/resources/minijava/runtime");
 	private final MachineSpecifics machineSpecifics;
+	
+	public static class RunException extends Exception {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -7579391088215934802L;
+
+		public RunException(String message) {
+			super(message);
+		}
+		
+		public RunException(String message, Throwable cause) {
+			super(message, cause);
+		}
+	}
 	
 	public static class CompilerException extends Exception {
 
@@ -471,7 +480,7 @@ public class MiniJavaCompiler {
 		
 	}
 	
-	private void runExecutable() throws CompilerException {
+	public void runExecutable() throws RunException {
 		
 		try {
 			ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "./" + outputFile);
@@ -510,7 +519,7 @@ public class MiniJavaCompiler {
 			}
 			
 			if (outCall.exitValue() != 0) {
-				throw new CompilerException("Failed to run executable:" + System.lineSeparator() + errOutput.toString());
+				throw new RunException("Failed to run executable:" + System.lineSeparator() + errOutput.toString());
 			}
 			else {
 				System.out.println(output.toString());
@@ -518,10 +527,10 @@ public class MiniJavaCompiler {
 
 		}
 		catch (IOException e) {
-			throw new CompilerException("Failed to read output of compiled executable", e);
+			throw new RunException("Failed to read output of compiled executable", e);
 		}
 		catch (InterruptedException e) {
-			throw new CompilerException("Failed to invoke compiled executable", e);
+			throw new RunException("Failed to invoke compiled executable", e);
 		}
 	}
 	
@@ -540,9 +549,6 @@ public class MiniJavaCompiler {
 		String assembly = generateAssembly(allocatedFrags);
 		
 		compileAssembly(gcc, assembly);
-		if (runExecutable) {
-			runExecutable();
-		}
 	}
 
 	
@@ -583,11 +589,24 @@ public class MiniJavaCompiler {
 			}
 			
 			try {
+				Date startTime = new Date();
 				compiler.compile(gcc);
+				Date endTime = new Date();
+				System.out.printf("Successfully compiled input file in %.1f seconds%n", (endTime.getTime()-startTime.getTime())/1000f);
 			}
 			catch(CompilerException e) {
 				e.printStackTrace();
 				System.exit(-1);
+			}
+			
+			if (compiler.runExecutable) {
+				try {
+					compiler.runExecutable();
+				} catch (RunException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					System.exit(-1);
+				}
 			}
 	
 			
