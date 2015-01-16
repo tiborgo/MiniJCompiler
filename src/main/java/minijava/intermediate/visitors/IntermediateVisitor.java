@@ -119,11 +119,7 @@ public class IntermediateVisitor implements
 	public List<FragmentProc<TreeStm>> visit(Method m) throws RuntimeException {
 
 		methodContext = m;
-
-		
-		
-		//String name = (m instanceof MainMethod) ? "lmain" : mangle(classContext.className, m.methodName);
-		Frame frame;;
+		Frame frame;
 
 		Map<String, TreeExp> methodTemps = new HashMap<>();
 		
@@ -161,12 +157,29 @@ public class IntermediateVisitor implements
 			methodTemps.put(var.name, frame.addLocal(Frame.Location.ANYWHERE));
 		}
 
+		Label raiseLabel = new Label();
+		Label afterLabel = new Label();
+		TreeStm raiseStm = TreeStmSEQ.fromArray(
+			TreeStmJUMP.jumpToLabel(afterLabel),
+			new TreeStmLABEL(raiseLabel),
+			new TreeStmEXP( 
+				TreeExpCALL.call1("raise", new TreeExpCONST(1))
+			),
+			TreeStmJUMP.jumpToLabel(raiseLabel),
+			new TreeStmLABEL(afterLabel)
+		);
+		
 		Map<String, TreeExp> methodAndClassTemps = new HashMap<>();
 		methodAndClassTemps.putAll(classTemps);
 		methodAndClassTemps.putAll(methodTemps);
-		TreeStm body = m.body.accept(new IntermediateVisitorExpStm(methodAndClassTemps, machineSpecifics, classContext, methodContext, memoryFootprint, symbolTable));
-		TreeExp returnExp = m.returnExpression.accept(new IntermediateVisitorExpStm(methodAndClassTemps, machineSpecifics, classContext, methodContext, memoryFootprint, symbolTable));
-
+		IntermediateVisitorExpStm visitor = new IntermediateVisitorExpStm(methodAndClassTemps, machineSpecifics, classContext, methodContext, memoryFootprint, symbolTable, raiseLabel);
+		TreeStm body = m.body.accept(visitor);
+		TreeExp returnExp = m.returnExpression.accept(visitor);
+		
+		if (visitor.raises()) {
+			body = new TreeStmSEQ(body, raiseStm);
+		}
+		
 		TreeStm method = frame.makeProc(body, returnExp);
 
 		FragmentProc<TreeStm> frag = new FragmentProc<>(frame, method);
@@ -185,23 +198,33 @@ public class IntermediateVisitor implements
 		return (className != "") ? className + "$" + methodName : methodName;
 	}
 
-	static public class IntermediateVisitorExpStm implements
+	public static class IntermediateVisitorExpStm implements
 			ExpressionVisitor<TreeExp, RuntimeException>,
 			StatementVisitor<TreeStm, RuntimeException> {
 
 		private final Map<String, java.lang.Integer> memoryFootprint;
 		private final Map<String, TreeExp> temps;
 		private final MachineSpecifics  machineSpecifics;
+		private final Label raiseLabel;
+		private boolean raises;
+		
+		public boolean raises() {
+			return raises;
+		}
 
 		public IntermediateVisitorExpStm(Map<String, TreeExp> temps,
 				MachineSpecifics machineSpecifics,
 				minijava.ast.rules.declarations.Class classContext,
 				Method methodContext,
 				Map<String, java.lang.Integer> memoryFootprint,
-				Program symbolTable) {
+				Program symbolTable,
+				Label raiseLabel) {
+			
 			this.temps = temps;
 			this.machineSpecifics = machineSpecifics;
 			this.memoryFootprint = memoryFootprint;
+			this.raiseLabel = raiseLabel;
+			raises = false;
 		}
 
 		@Override
@@ -514,8 +537,7 @@ public class IntermediateVisitor implements
 			TreeExp array = this.temps.get(s.id.id);
 			TreeExp index = s.index.accept(this);
 			TreeExp assignValue = s.rhs.accept(this);
-			
-			Label raiseLabel = new Label();
+
 			Label assignLabel = new Label();
 			
 			TreeStm boundsCheckStm = new TreeStmCJUMP(
@@ -524,14 +546,8 @@ public class IntermediateVisitor implements
 					new TreeExpMEM(array),
 					raiseLabel,
 					assignLabel);
-
-			// jump explicitly to label so that base block generator produces efficient base blocks
-			TreeStm raiseStm = TreeStmSEQ.fromArray(
-				new TreeStmEXP( 
-					TreeExpCALL.call1("raise", new TreeExpCONST(1))
-				),
-				TreeStmJUMP.jumpToLabel(raiseLabel)
-			);
+			
+			raises = true;
 
 			
 			TreeStm assignStm =  new TreeStmMOVE(
@@ -553,8 +569,6 @@ public class IntermediateVisitor implements
 
 			return TreeStmSEQ.fromArray(
 				boundsCheckStm,
-				new TreeStmLABEL(raiseLabel),
-				raiseStm,
 				new TreeStmLABEL(assignLabel),
 				assignStm
 			);

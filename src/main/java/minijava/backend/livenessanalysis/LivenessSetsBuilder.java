@@ -1,5 +1,7 @@
 package minijava.backend.livenessanalysis;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,15 +30,17 @@ public class LivenessSetsBuilder {
 		}
 	}
 	
-	public static Map<Assem, InOut> build(SimpleGraph<Assem> controlFlowGraph) {
+	public static Map<Assem, InOut> build(SimpleGraph<Assem> controlFlowGraph, List<Assem> assems) {
 		
-		final List<SimpleGraph<Assem>.Node> nodes = ReverseOrderBuilder.build(controlFlowGraph);
+		//final List<SimpleGraph<Assem>.Node> nodes = ReverseOrderBuilder.build(controlFlowGraph);
+		List<Assem> reverseAssems = new ArrayList<>(assems);
+		Collections.reverse(reverseAssems);
 		
 		boolean changed;
 		
 		// With the help of the comparator the Map keys keep the order of the program flow.
 		// Helps a lot when debugging
-		Comparator<Assem> comparator = new Comparator<Assem>() {
+		/*Comparator<Assem> comparator = new Comparator<Assem>() {
 
 			@Override
 			public int compare(Assem o1, Assem o2) {
@@ -60,19 +64,30 @@ public class LivenessSetsBuilder {
 				}
 				return iO2 - iO1;
 			}
-		};
+		};*/
 		
 		Map<Assem, InOut> inOut = new HashMap<>();//TreeMap<>(comparator);
 		
-		for (int i = 0; i < nodes.size(); i++) {
-			inOut.put(nodes.get(i).info, new InOut());
+		for (Assem assem : reverseAssems) {
+		//for (int i = 0; i < nodes.size(); i++) {
+			inOut.put(assem, new InOut());
 		}
 		
+		int printCountEach = 500;
+		int counter = 0;
+		
 		do {
+			
+			if (counter % printCountEach == printCountEach-1) {
+				System.out.println("Liveness Sets Builder round: " + (counter+1));
+			}
+			counter++;
 		
 			changed = false;
 
-			for (SimpleGraph<Assem>.Node n : nodes) {
+			for (Assem a : reverseAssems) {
+				
+				SimpleGraph<Assem>.Node n = controlFlowGraph.get(a);
 				
 				// old in and out set
 				InOut inOutN_ = inOut.get(n.info);
@@ -86,7 +101,7 @@ public class LivenessSetsBuilder {
 				}
 				
 				// IN
-				inOutN.in.addAll(inOutN_.out);
+				inOutN.in.addAll(inOutN.out);
 				List<Temp> def = n.info.def();
 				inOutN.in.removeAll(def);
 				List<Temp> use = n.info.use();

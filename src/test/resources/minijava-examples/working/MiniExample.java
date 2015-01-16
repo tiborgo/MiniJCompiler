@@ -24,7 +24,7 @@ class Main {
 
 class Test {
 	public int test(int a) {
-		int b;
+		/*int b;
 		int c;
 		int d;
 		int e;
@@ -53,8 +53,8 @@ class Test {
 		m = 0;
 		n = 0;
 		o = 0;
-		p = a + b + c + d + e + f + g + h + i + j + k + l + m + n + o;
-		return p;
+		p = a + b + c + d + e + f + g + h + i + j + k + l + m + n + o;*/
+		return 10;
 	}
 }
 
