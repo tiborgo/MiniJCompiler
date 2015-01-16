@@ -43,30 +43,25 @@ public class IntermediatePrettyPrintVisitor implements
 		encloseBuilder
 			.append(indent).append(name).append("(").append(System.lineSeparator());
 		
+		increaseIndent();
+		
 		if (level < 10) {
 			for (int i = 0; i < args.length; i++) {
-				
-				String arg;
+
 				if (args[i] instanceof String) {
-					arg = (String) args[i];
+					encloseBuilder
+						.append(indent)
+						.append(args[i]);
 				}
-				else if (args[i] instanceof TreeExp ||
-						args[i] instanceof TreeStm) {
-					
-					increaseIndent();
-					if (args[i] instanceof TreeExp) {
-						arg = ((TreeExp)args[i]).accept(this);
-					}
-					else {
-						arg = ((TreeStm)args[i]).accept(this);
-					}
-					decreaseIndent();
+				else if (args[i] instanceof TreeExp) {
+					encloseBuilder.append(((TreeExp)args[i]).accept(this));
+				}
+				else if (args[i] instanceof TreeStm) {
+					encloseBuilder.append(((TreeStm)args[i]).accept(this));
 				}
 				else {
 					throw new IllegalArgumentException("'args' item must be of type String, TreeExp or TreeStm");
 				}
-				
-				encloseBuilder.append(arg);
 			
 				if (i < args.length-1) {
 					encloseBuilder
@@ -77,9 +72,11 @@ public class IntermediatePrettyPrintVisitor implements
 		}
 		else {
 			encloseBuilder
-				.append("...")
-				.append(System.lineSeparator());
+				.append(indent)
+				.append("...");
 		}
+		
+		decreaseIndent();
 		
 		encloseBuilder
 			.append(System.lineSeparator())
