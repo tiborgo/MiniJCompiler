@@ -75,8 +75,7 @@ public final class AssemJump extends DefaultInstruction {
 		case J:
 			return Collections.emptyList();
 		case CALL:
-			// FIXME: save caller-save register
-			return Arrays.asList(I386MachineSpecifics.EAX.reg);
+			return Arrays.asList(I386MachineSpecifics.EAX.reg, I386MachineSpecifics.EDX.reg, I386MachineSpecifics.ECX.reg);
 		default:
 			throw new UnsupportedOperationException("Unknown kind " + kind);
 		}
