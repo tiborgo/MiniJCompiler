@@ -15,13 +15,13 @@ class Arr {
 
 	// theArr[i-1]=i, for all 1<=i<m
 	public int init(int m) {
-		/*int i;
+		int i;
 		mx = m;
 		i = 1;
 		while (i < mx + 1) {
 			theArr[i - 1] = i;
 			i = i + 1;
-		}*/
+		}
 		return 0;
 	}
 
@@ -38,14 +38,10 @@ class Arr {
 		return s;
 	}
 
-	public int do_it(int m_) {
+	public int do_it(int m) {
 		int q;
-		int m;
-		int[] x;
-		m = 10;
-		//x[1] = 3;
-		theArr = new int[m];// new int[m];
-		//q = this.init(m);
-		return x[1];// this.sum();
+		theArr = new int[m];
+		q = this.init(m);
+		return this.sum();
 	}
 }

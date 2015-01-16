@@ -17,16 +17,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.fail;
-
 import minijava.MiniJavaLexer;
 import minijava.MiniJavaParser;
-import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Program;
 import minijava.backend.dummymachine.DummyMachineSpecifics;
 import minijava.backend.dummymachine.IntermediateToCmm;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.canon.Canon;
 import minijava.intermediate.tree.TreeStm;
+import minijava.parsing_actions.ASTVisitor;
+
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;

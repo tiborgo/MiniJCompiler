@@ -10,11 +10,11 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import static org.junit.Assert.fail;
-
-import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Program;
 import minijava.ast.visitors.TypeCheckVisitor;
 import minijava.ast.visitors.TypeInferenceVisitor;
+import minijava.parsing_actions.ASTVisitor;
+
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CommonTokenStream;

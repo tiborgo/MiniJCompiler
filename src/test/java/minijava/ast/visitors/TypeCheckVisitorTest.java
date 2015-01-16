@@ -11,11 +11,11 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-
 import minijava.MiniJavaLexer;
 import minijava.MiniJavaParser;
-import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Program;
+import minijava.parsing_actions.ASTVisitor;
+
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
