@@ -504,8 +504,15 @@ public class MiniJavaCompiler {
 				bufferedStdout.close();
 				stdout.close();
 				break;
+			case 138:
+				errOutput
+					.append("Bus error: 10")
+					.append(System.lineSeparator());
+				break;
 			case 139:
-				errOutput.append("Segmentation Fault" + System.lineSeparator());
+				errOutput
+					.append("Segmentation Fault")
+					.append(System.lineSeparator());
 				break;
 			default:
 				System.err.println("Exit Code: " + outCall.exitValue());

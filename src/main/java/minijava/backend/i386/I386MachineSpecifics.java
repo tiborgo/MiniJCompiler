@@ -1,8 +1,9 @@
 package minijava.backend.i386;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import minijava.backend.Assem;
 import minijava.backend.MachineSpecifics;
@@ -55,6 +56,11 @@ public class I386MachineSpecifics implements MachineSpecifics {
 	@Override
 	public List<Assem> spill(Frame frame, List<Assem> instrs, List<Temp> toSpill) {
 		
+		Map<Temp, TreeExp> locals = new HashMap<>(toSpill.size());
+		for (Temp t : toSpill) {
+			locals.put(t, frame.addLocal(Location.IN_MEMORY));
+		}
+		
 		List<Assem> spilledInstrs = new LinkedList<>();
 
 		for (Assem instr : instrs) {
@@ -73,10 +79,10 @@ public class I386MachineSpecifics implements MachineSpecifics {
 					spilled = true;
 					
 					final Temp t_ = new Temp();
-					TreeExp mExp = frame.addLocal(Location.IN_MEMORY);
+					
+					TreeExp mExp = locals.get(t);
 					AssemblerVisitor.StatementExpressionVisitor expVisitor = new AssemblerVisitor.StatementExpressionVisitor();
 					Operand m = mExp.accept(expVisitor);
-					
 					spilledInstrs.addAll(expVisitor.getInstructions());
 
 					if (use.contains(t)) {
