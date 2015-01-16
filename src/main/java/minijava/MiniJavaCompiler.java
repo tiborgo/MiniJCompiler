@@ -89,7 +89,7 @@ public class MiniJavaCompiler {
 	// Command line Arguments
 	
 	@Argument(usage = "Input file", required = true)
-	private String inputFile;
+	public String inputFile;
 	
 	@Option(name = "--output", usage = "Output file")
 	private String outputFile = "CC.out";
