@@ -37,6 +37,7 @@ import minijava.intermediate.Label;
 import minijava.intermediate.Temp;
 import minijava.intermediate.canon.Canon;
 import minijava.intermediate.tree.TreeStm;
+import minijava.intermediate.visitors.IntermediatePrettyPrintVisitor;
 import minijava.intermediate.visitors.IntermediateVisitor;
 import minijava.util.SimpleGraph;
 
@@ -184,6 +185,12 @@ public class MiniJavaCompiler {
 			IntermediateVisitor intermediateVisitor = new IntermediateVisitor(machineSpecifics, program);
 			List<FragmentProc<TreeStm>> procFragements = program.accept(intermediateVisitor);
 			
+			String output = "";
+			for (FragmentProc<TreeStm> frag : procFragements) {
+				output += frag.body.accept(new IntermediatePrettyPrintVisitor()) + System.lineSeparator() + "-----" + System.lineSeparator();
+			}
+			System.out.println(output);
+			
 			printVerbose("Successfully generated intermediate language");
 			
 			return procFragements;
@@ -200,6 +207,13 @@ public class MiniJavaCompiler {
 			List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = new ArrayList<>(intermediate.size());
 			for (FragmentProc<TreeStm> fragment : intermediate) {
 				FragmentProc<List<TreeStm>> canonFrag = (FragmentProc<List<TreeStm>>) fragment.accept(new Canon());
+				
+				String output = "*******" + System.lineSeparator();
+				for (TreeStm stm : canonFrag.body) {
+					output += stm.accept(new IntermediatePrettyPrintVisitor()) + System.lineSeparator() + "-----" + System.lineSeparator();
+				}
+				System.out.println(output);
+				
 				Generator.BaseBlockContainer baseBlocks = Generator.generate(canonFrag.body);
 				List<BaseBlock> tracedBaseBlocks = Tracer.trace(baseBlocks);
 				List<TreeStm> tracedBody = ToTreeStmConverter.convert(tracedBaseBlocks, baseBlocks.startLabel, baseBlocks.endLabel);
@@ -263,7 +277,7 @@ public class MiniJavaCompiler {
 		}
 	}
 	
-	private List<SimpleGraph<Temp>> generateInterferenceGraphs(List<SimpleGraph<Assem>> controlFlowGraphs) throws CompilerException {
+	/*private List<SimpleGraph<Temp>> generateInterferenceGraphs(List<SimpleGraph<Assem>> controlFlowGraphs) throws CompilerException {
 		
 		try {
 			List<SimpleGraph<Temp>> interferenceGraphs = new LinkedList<>();
@@ -309,7 +323,7 @@ public class MiniJavaCompiler {
 			// TODO: proper exception
 			throw new CompilerException("Failed to generate interference graphs", e);
 		}
-	}
+	}*/
 	
 	private List<Fragment<List<Assem>>> allocateRegisters(List<Fragment<List<Assem>>> frags) throws CompilerException {
 		
