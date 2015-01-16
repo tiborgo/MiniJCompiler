@@ -12,7 +12,6 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import minijava.antlr.visitors.ASTVisitor;
 import minijava.ast.rules.Program;
 import minijava.ast.visitors.PrettyPrintVisitor;
 import minijava.ast.visitors.TypeCheckVisitor;
@@ -33,6 +32,7 @@ import minijava.intermediate.canon.Canon;
 import minijava.intermediate.tree.TreeStm;
 import minijava.intermediate.visitors.IntermediatePrettyPrintVisitor;
 import minijava.intermediate.visitors.IntermediateVisitor;
+import minijava.parsing_actions.ASTVisitor;
 import minijava.util.SimpleGraph;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
@@ -85,45 +85,13 @@ public class MiniJavaCompiler {
 	public MiniJavaCompiler(MachineSpecifics machineSpecifics) {
 		this.machineSpecifics = machineSpecifics;
 	}
-
-	// Command line Arguments
-
-	@Argument(usage = "Input file", required = true)
-	public String inputFile;
-
-	@Option(name = "--output", usage = "Output file")
-	private String outputFile = "CC.out";
-
-	@Option(name = "--verbose", aliases = {"-v"}, usage = "Print additional information")
-	private boolean verbose;
-
-	@Option(name = "--print-source-code", aliases = {"-sc"}, usage = "Pretty print the input source code", depends = "--verbose")
-	private boolean printSourceCode;
-
-	@Option(name = "--print-pre-assembly", aliases = {"-pa"}, usage = "Prints the assembly with temporiaries and unspecified frame size", depends = "--verbose")
-	private boolean printPreAssembly;
-
-	@Option(name = "--print-assembly", aliases = {"-a"}, usage = "Prints the final assembly", depends = "--verbose")
-	private boolean printAssembly;
-
-	@Option(name = "--print-control-flow-graphs", aliases = {"-cfg"}, usage = "Prints the control flow graph", depends = "--verbose")
-	private boolean printControlFlowGraphs;
-
-	@Option(name = "--print-interference-graphs", aliases = {"-ig"}, usage = "Prints the interference graphs", depends = "--verbose")
-	private boolean printInterferenceGraphs;
-
-	@Option(name = "--run-executable", aliases = {"-re"}, usage = "Runs the compiled executable")
-	private boolean runExecutable;
-
-	@Option(name = "--print-pre-colored-graphs", aliases = {"-pg"},  depends = "--verbose")
-	private boolean printPreColoredGraphs;
-
+	
 	private void printDelimiter() {
 		System.out.println("-------------------------");
 	}
 
 	private void printVerbose(String... infos) {
-		if (verbose) {
+		if (Configuration.getInstance().verbose) {
 			printDelimiter();
 			for (int i = 0; i < infos.length; i++) {
 				if (infos[i] != null) {
@@ -141,7 +109,7 @@ public class MiniJavaCompiler {
 
 	private Program parse() throws CompilerException {
 		try {
-			ANTLRFileStream reader = new ANTLRFileStream(inputFile);
+			ANTLRFileStream reader = new ANTLRFileStream(Configuration.getInstance().inputFile);
 			MiniJavaLexer lexer = new MiniJavaLexer((CharStream) reader);
 			TokenStream tokens = new CommonTokenStream(lexer);
 			MiniJavaParser parser = new MiniJavaParser(tokens);
@@ -150,8 +118,8 @@ public class MiniJavaCompiler {
 			Program program = (Program) astVisitor.visit(parseTree);
 
 			printVerbose("Successfully parsed input file",
-					(printSourceCode) ? program.accept(new PrettyPrintVisitor("")) : null);
-
+					(Configuration.getInstance().printSourceCode) ? program.accept(new PrettyPrintVisitor("")) : null);
+			
 			return program;
 		}
 		catch (IOException e) {
@@ -194,7 +162,7 @@ public class MiniJavaCompiler {
 			IntermediateVisitor intermediateVisitor = new IntermediateVisitor(machineSpecifics, program);
 			List<FragmentProc<TreeStm>> procFragements = program.accept(intermediateVisitor);
 
-			if (verbose) {
+			if (Configuration.getInstance().verbose) {
 				String output = "";
 				for (FragmentProc<TreeStm> frag : procFragements) {
 					output += frag.body.accept(new IntermediatePrettyPrintVisitor()) + System.lineSeparator() + "-----" + System.lineSeparator();
@@ -219,7 +187,7 @@ public class MiniJavaCompiler {
 			for (FragmentProc<TreeStm> fragment : intermediate) {
 				FragmentProc<List<TreeStm>> canonFrag = (FragmentProc<List<TreeStm>>) fragment.accept(new Canon());
 
-				if (verbose) {
+				if (Configuration.getInstance().verbose) {
 					String output = "*******" + System.lineSeparator();
 					for (TreeStm stm : canonFrag.body) {
 						output += stm.accept(new IntermediatePrettyPrintVisitor()) + System.lineSeparator() + "-----" + System.lineSeparator();
@@ -253,7 +221,7 @@ public class MiniJavaCompiler {
 			}
 
 			String assembly = null;
-			if (printPreAssembly) {
+			if (Configuration.getInstance().printPreAssembly) {
 				assembly = machineSpecifics.printAssembly(assemFragments);
 			}
 
@@ -276,7 +244,7 @@ public class MiniJavaCompiler {
 			}
 
 			String graphOutput = null;
-			if (printControlFlowGraphs) {
+			if (Configuration.getInstance().printControlFlowGraphs) {
 				graphOutput = simpleGraphsToString(controlFlowGraphs);
 			}
 
@@ -432,9 +400,9 @@ public class MiniJavaCompiler {
 		try {
 
 			String assembly = machineSpecifics.printAssembly(assemFragments);;
-
-			printVerbose("Successfully generated assembly", (printAssembly) ? assembly : null);
-
+			
+			printVerbose("Successfully generated assembly", (Configuration.getInstance().printAssembly) ? assembly : null);
+			
 			return assembly;
 		}
 		catch (Exception e) {
@@ -442,12 +410,12 @@ public class MiniJavaCompiler {
 			throw new CompilerException("Failed to generate assembly", e);
 		}
 	}
-
-	private void compileAssembly (String gcc, String assembly) throws CompilerException {
-
+	
+	private void compileAssembly (String assembly) throws CompilerException {
+		
 		try {
 			// -xc specifies the input language as C and is required for GCC to read from stdin
-			ProcessBuilder processBuilder = new ProcessBuilder(gcc, "-o", outputFile, "-m32", "-xc", "runtime_32.c", "-m32", "-xassembler", "-");
+			ProcessBuilder processBuilder = new ProcessBuilder("gcc", "-o", Configuration.getInstance().outputFile, "-m32", "-xc", "runtime_32.c", "-m32", "-xassembler", "-");
 			processBuilder.directory(RUNTIME_DIRECTORY.toFile());
 			Process gccCall = processBuilder.start();
 			// Write C code to stdin of C Compiler
@@ -487,7 +455,7 @@ public class MiniJavaCompiler {
 	public void runExecutable() throws RunException {
 
 		try {
-			ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "./" + outputFile);
+			ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "./" + Configuration.getInstance().outputFile);
 			processBuilder.directory(RUNTIME_DIRECTORY.toFile());
 			Process outCall = processBuilder.start();
 
@@ -544,8 +512,8 @@ public class MiniJavaCompiler {
 			throw new RunException("Failed to invoke compiled executable", e);
 		}
 	}
-
-	public void compile(String gcc) throws CompilerException {
+	
+	public void compile() throws CompilerException {
 		Program program = parse();
 		Program symbolTable = inferTypes(program);
 		checkTypes(program);
@@ -558,50 +526,31 @@ public class MiniJavaCompiler {
 		List<Fragment<List<Assem>>> allocatedFrags = allocateRegisters(assemFragments);
 
 		String assembly = generateAssembly(allocatedFrags);
-
-		compileAssembly(gcc, assembly);
+		
+		compileAssembly(assembly);
 	}
 
 
 
 	public static void main (String[] args) {
-
-		MiniJavaCompiler compiler = new MiniJavaCompiler(new I386MachineSpecifics());
-
-	    CmdLineParser commandLineParser = new CmdLineParser(compiler);
-
-	    if (args.length == 0) {
-	    	System.out.println("java MiniJavaCompiler [options...] input_file");
-			System.out.println("Options:");
-			commandLineParser.printUsage(System.out);
-	    }
-	    else {
-
-			try {
-				// Parse command line arguments
-				commandLineParser.parseArgument(args);
-			}
-			catch(CmdLineException e) {
-				System.err.println(e.getMessage());
-				System.exit(-1);
-			}
-
+		
+		if (Configuration.initialize(args)) {
 
 			String osName = System.getProperty("os.name").toLowerCase();
 			// TODO: better solution?
-			String gcc;
 			if (osName.contains("mac")) {
 				Label.leadingUnderscore = true;
-				gcc = "gcc";// "/usr/local/bin/gcc-4.9";
 			}
 			else {
 				Label.leadingUnderscore = false;
-				gcc = "gcc";
 			}
-
+			
+			MiniJavaCompiler compiler = new MiniJavaCompiler(new I386MachineSpecifics());
+			
+			
 			try {
 				Date startTime = new Date();
-				compiler.compile(gcc);
+				compiler.compile();
 				Date endTime = new Date();
 				System.out.printf("Successfully compiled input file in %.1f seconds%n", (endTime.getTime()-startTime.getTime())/1000f);
 			}
@@ -609,8 +558,8 @@ public class MiniJavaCompiler {
 				e.printStackTrace();
 				System.exit(-1);
 			}
-
-			if (compiler.runExecutable) {
+			
+			if (Configuration.getInstance().runExecutable) {
 				try {
 					compiler.runExecutable();
 				} catch (RunException e) {
@@ -619,26 +568,6 @@ public class MiniJavaCompiler {
 					System.exit(-1);
 				}
 			}
-
-
-			/*Path compilerOutputFile = null;
-			try {
-				compilerOutputFile = Files.createTempFile("miniJavaCompiler", "CC.out");
-			} catch (IOException e) {
-				e.printStackTrace();
-			}*/
-
-
-
-			/*finally {
-				try {
-					Files.delete(compilerOutputFile);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}*/
 	    }
 	}
-
-
 }
