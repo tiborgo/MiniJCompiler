@@ -194,11 +194,13 @@ public class MiniJavaCompiler {
 			IntermediateVisitor intermediateVisitor = new IntermediateVisitor(machineSpecifics, program);
 			List<FragmentProc<TreeStm>> procFragements = program.accept(intermediateVisitor);
 
-			String output = "";
-			for (FragmentProc<TreeStm> frag : procFragements) {
-				output += frag.body.accept(new IntermediatePrettyPrintVisitor()) + System.lineSeparator() + "-----" + System.lineSeparator();
+			if (verbose) {
+				String output = "";
+				for (FragmentProc<TreeStm> frag : procFragements) {
+					output += frag.body.accept(new IntermediatePrettyPrintVisitor()) + System.lineSeparator() + "-----" + System.lineSeparator();
+				}
+				System.out.println(output);
 			}
-			System.out.println(output);
 
 			printVerbose("Successfully generated intermediate language");
 
