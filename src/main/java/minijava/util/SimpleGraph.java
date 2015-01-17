@@ -10,9 +10,6 @@ public class SimpleGraph<NodeInfo> {
 
 	private final Map<NodeInfo, Node<NodeInfo>> nodes = new HashMap<>();
 
-	private Map<Node<NodeInfo>, Set<Node<NodeInfo>>> successors = new HashMap<>();
-	private Map<Node<NodeInfo>, Set<Node<NodeInfo>>> predecessors = new HashMap<>();
-
 	private final String name;
 
 	public static class BackupNode<T> {
@@ -34,8 +31,8 @@ public class SimpleGraph<NodeInfo> {
 	public static class Node<T> {
 
 		public T info;
-		private final Set<Node<T>> successors;
-		private final Set<Node<T>> predecessors;
+		private Set<Node<T>> successors;
+		private Set<Node<T>> predecessors;
 
 		private Node(T info, Set<Node<T>> successors, Set<Node<T>> predecessors) {
 			this.info = info;
@@ -98,6 +95,32 @@ public class SimpleGraph<NodeInfo> {
 		public BackupNode<T> backup() {
 			return new BackupNode<T>(this);
 		}
+
+		// TODO: Should not be necessary
+		public void addSuccessor(Node<T> successor) {
+			successors.add(successor);
+		}
+
+		// TODO: Should not be necessary
+		public void addPredecessor(Node<T> predecessor) {
+			predecessors.add(predecessor);
+		}
+
+		// TODO: Should not be necessary
+		public void removeSuccessor(Node<T> successor) {
+			successors.remove(successor);
+		}
+
+		// TODO: Should not be necessary
+		public void removePredecessor(Node<T> predecessor) {
+			predecessors.remove(predecessor);
+		}
+
+		public void reverse() {
+			Set<Node<T>> temp = successors;
+			successors = predecessors;
+			predecessors = temp;
+		}
 	}
 
 	public SimpleGraph(String name) {
@@ -114,11 +137,9 @@ public class SimpleGraph<NodeInfo> {
 
 	public void removeNode(Node<NodeInfo> n) {
 		nodes.remove(n.info);
-		successors.remove(n);
-		predecessors.remove(n);
-		for (Node<NodeInfo> m : nodes.values()) {
-			successors.get(m).remove(n);
-			predecessors.get(m).remove(n);
+		for (Map.Entry<NodeInfo, Node<NodeInfo>> m : nodes.entrySet()) {
+			m.getValue().removeSuccessor(n);
+			m.getValue().removePredecessor(n);
 		}
 	}
 
@@ -127,8 +148,6 @@ public class SimpleGraph<NodeInfo> {
 		Set<Node<NodeInfo>> predecessorSet = new HashSet<>();
 		Node<NodeInfo> node = new Node<NodeInfo>(info, successorSet, predecessorSet);
 		nodes.put(info, node);
-		successors.put(node, successorSet);
-		predecessors.put(node, predecessorSet);
 		return node;
 	}
 
@@ -161,19 +180,19 @@ public class SimpleGraph<NodeInfo> {
 	}
 
 	public void addEdge(Node<NodeInfo> src, Node<NodeInfo> dst) {
-		successors.get(src).add(dst);
-		predecessors.get(dst).add(src);
+		src.addSuccessor(dst);
+		dst.addPredecessor(src);
 	}
 
 	public void removeEdge(Node<NodeInfo> src, Node<NodeInfo> dst) {
-		successors.get(src).remove(dst);
-		predecessors.get(dst).remove(src);
+		src.removeSuccessor(dst);
+		dst.removePredecessor(src);
 	}
 
 	public void reverse() {
-		Map<Node<NodeInfo>, Set<Node<NodeInfo>>> m = successors;
-		successors = predecessors;
-		predecessors = m;
+		for (Node<NodeInfo> node : nodes.values()) {
+			node.reverse();
+		}
 	}
 
 	/**
