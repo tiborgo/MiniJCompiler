@@ -34,11 +34,10 @@ public class SimpleGraph<NodeInfo> {
 		private Set<Node<T>> successors;
 		private Set<Node<T>> predecessors;
 
-		private Node(T info, Set<Node<T>> successors, Set<Node<T>> predecessors) {
+		private Node(T info) {
 			this.info = info;
-			// TODO: Make defensive copy
-			this.successors = successors;
-			this.predecessors = predecessors;
+			this.successors = new HashSet<>();
+			this.predecessors = new HashSet<>();
 		}
 
 		/**
@@ -144,9 +143,7 @@ public class SimpleGraph<NodeInfo> {
 	}
 
 	public Node<NodeInfo> addNode(NodeInfo info) {
-		Set<Node<NodeInfo>> successorSet = new HashSet<>();
-		Set<Node<NodeInfo>> predecessorSet = new HashSet<>();
-		Node<NodeInfo> node = new Node<NodeInfo>(info, successorSet, predecessorSet);
+		Node<NodeInfo> node = new Node<NodeInfo>(info);
 		nodes.put(info, node);
 		return node;
 	}
