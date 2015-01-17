@@ -96,7 +96,7 @@ public class SimpleGraph<NodeInfo> {
 		}
 
 		public BackupNode backup() {
-			return new BackupNode(nodes.get(info));
+			return new BackupNode(this);
 		}
 	}
 
