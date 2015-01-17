@@ -9,17 +9,17 @@ import java.util.Set;
 public class SimpleGraph<NodeInfo> {
 
 	private final Map<NodeInfo, Node> nodes = new HashMap<>();
-	
+
 	private Map<Node, Set<Node>> successors = new HashMap<>();
 	private Map<Node, Set<Node>> predecessors = new HashMap<>();
-	
+
 	private final String name;
-	
+
 	public class BackupNode {
 		private final NodeInfo info;
 		private final Set<NodeInfo> successors = new HashSet<>();
 		private final Set<NodeInfo> predecessors = new HashSet<>();
-		
+
 		private BackupNode(Node node) {
 			info = node.info;
 			for (Node s : node.successors()) {
@@ -30,16 +30,13 @@ public class SimpleGraph<NodeInfo> {
 			}
 		}
 	}
-	
+
 	public class Node {
 
 		public NodeInfo info;
 
-		public Node(NodeInfo info) {
+		private Node(NodeInfo info) {
 			this.info = info;
-			nodes.put(info, this);
-			successors.put(this, new HashSet<Node>());
-			predecessors.put(this, new HashSet<Node>());
 		}
 
 		/**
@@ -81,18 +78,18 @@ public class SimpleGraph<NodeInfo> {
 		public String toString() {
 			return "Node: " + info.toString();
 		}
-		
+
 		@SuppressWarnings("unchecked")
 		@Override
 		public boolean equals(Object obj) {
 			return (obj instanceof SimpleGraph.Node && ((Node)obj).info.equals(info));
 		}
-		
+
 		@Override
 		public int hashCode() {
 			return info.hashCode();
 		}
-		
+
 		public BackupNode backup() {
 			return new BackupNode(nodes.get(info));
 		}
@@ -119,13 +116,21 @@ public class SimpleGraph<NodeInfo> {
 			predecessors.get(m).remove(n);
 		}
 	}
-	
+
+	public Node addNode(NodeInfo info) {
+		Node node = new Node(info);
+		nodes.put(info, node);
+		successors.put(node, new HashSet<Node>());
+		predecessors.put(node, new HashSet<Node>());
+		return node;
+	}
+
 	public Node get(NodeInfo info) {
 		return nodes.get(info);
 	}
-	
+
 	public void restore(BackupNode node) {
-		Node n = new Node(node.info);
+		Node n = addNode(node.info);
 		for (NodeInfo st : node.successors) {
 			Node s = nodes.get(st);
 			if (s != null) {
@@ -139,7 +144,7 @@ public class SimpleGraph<NodeInfo> {
 			}
 		}
 	}
-	
+
 	public Map<NodeInfo, BackupNode> backup() {
 		Map<NodeInfo, BackupNode> backup = new HashMap<>();
 		for (NodeInfo info : nodes.keySet()) {
