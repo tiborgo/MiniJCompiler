@@ -14,17 +14,17 @@ public class InterferenceGraphBuilder {
 
 		SimpleGraph<Temp> interferenceGraph = new SimpleGraph<>(controlFlowGraph.getName());
 
-		Map<Temp, SimpleGraph<Temp>.Node> nodes = new HashMap<>();
+		Map<Temp, SimpleGraph.Node<Temp>> nodes = new HashMap<>();
 		for (LivenessSetsBuilder.InOut inOutN : inOut.values()) {
 			for (Temp t : inOutN.in) {
 				if (nodes.get(t) == null) {
-					SimpleGraph<Temp>.Node node = interferenceGraph.addNode(t);
+					SimpleGraph.Node<Temp> node = interferenceGraph.addNode(t);
 					nodes.put(t, node);
 				}
 			}
 		}
 
-		for (SimpleGraph<Assem>.Node n : controlFlowGraph.nodeSet()) {
+		for (SimpleGraph.Node<Assem> n : controlFlowGraph.nodeSet()) {
 
 			Pair<Temp, Temp> moveInstruction = n.info.isMoveBetweenTemps();
 
@@ -33,8 +33,8 @@ public class InterferenceGraphBuilder {
 
 					for (Temp u : inOut.get(n.info).out) {
 						if (!u.equals(t)) {
-							SimpleGraph<Temp>.Node tNode = nodes.get(t);
-							SimpleGraph<Temp>.Node uNode = nodes.get(u);
+							SimpleGraph.Node<Temp> tNode = nodes.get(t);
+							SimpleGraph.Node<Temp> uNode = nodes.get(u);
 							if (tNode == null) {
 								tNode = interferenceGraph.addNode(t);
 								nodes.put(t, tNode);
@@ -54,8 +54,8 @@ public class InterferenceGraphBuilder {
 				for (Temp u : inOut.get(n.info).out) {
 
 					if (!u.equals(moveInstruction.snd) && !u.equals(moveInstruction.fst)) {
-						SimpleGraph<Temp>.Node tNode = nodes.get(moveInstruction.fst);
-						SimpleGraph<Temp>.Node uNode = nodes.get(u);
+						SimpleGraph.Node<Temp> tNode = nodes.get(moveInstruction.fst);
+						SimpleGraph.Node<Temp> uNode = nodes.get(u);
 						if (tNode == null) {
 							tNode = interferenceGraph.addNode(moveInstruction.fst);
 							nodes.put(moveInstruction.fst, tNode);

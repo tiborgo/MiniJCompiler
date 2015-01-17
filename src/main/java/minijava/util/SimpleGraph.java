@@ -8,36 +8,36 @@ import java.util.Set;
 
 public class SimpleGraph<NodeInfo> {
 
-	private final Map<NodeInfo, Node> nodes = new HashMap<>();
+	private final Map<NodeInfo, Node<NodeInfo>> nodes = new HashMap<>();
 
-	private Map<Node, Set<Node>> successors = new HashMap<>();
-	private Map<Node, Set<Node>> predecessors = new HashMap<>();
+	private Map<Node<NodeInfo>, Set<Node<NodeInfo>>> successors = new HashMap<>();
+	private Map<Node<NodeInfo>, Set<Node<NodeInfo>>> predecessors = new HashMap<>();
 
 	private final String name;
 
-	public class BackupNode {
-		private final NodeInfo info;
-		private final Set<NodeInfo> successors = new HashSet<>();
-		private final Set<NodeInfo> predecessors = new HashSet<>();
+	public static class BackupNode<T> {
+		private final T info;
+		private final Set<T> successors = new HashSet<>();
+		private final Set<T> predecessors = new HashSet<>();
 
-		private BackupNode(Node node) {
+		private BackupNode(Node<T> node) {
 			info = node.info;
-			for (Node s : node.successors()) {
+			for (Node<T> s : node.successors()) {
 				successors.add(s.info);
 			}
-			for (Node p : node.predecessors()) {
+			for (Node<T> p : node.predecessors()) {
 				predecessors.add(p.info);
 			}
 		}
 	}
 
-	public class Node {
+	public static class Node<T> {
 
-		public NodeInfo info;
-		private final Set<Node> successors;
-		private final Set<Node> predecessors;
+		public T info;
+		private final Set<Node<T>> successors;
+		private final Set<Node<T>> predecessors;
 
-		private Node(NodeInfo info, Set<Node> successors, Set<Node> predecessors) {
+		private Node(T info, Set<Node<T>> successors, Set<Node<T>> predecessors) {
 			this.info = info;
 			// TODO: Make defensive copy
 			this.successors = successors;
@@ -48,7 +48,7 @@ public class SimpleGraph<NodeInfo> {
 		 * n.successors() gibt die Menge aller Nachfolger des Knotes n zurueck,
 		 * d.h. die Menge {n | (n, m) in E}
 		 */
-		public Set<Node> successors() {
+		public Set<Node<T>> successors() {
 			return Collections.unmodifiableSet(successors);
 		}
 
@@ -56,12 +56,12 @@ public class SimpleGraph<NodeInfo> {
 		 * n.predecessors() gibt die Menge aller Nachfolger des Knotes n
 		 * zurueck, d.h. die Menge {m | (m, n) in E}
 		 */
-		public Set<Node> predecessors() {
+		public Set<Node<T>> predecessors() {
 			return Collections.unmodifiableSet(predecessors);
 		}
 
-		public Set<Node> neighbours() {
-			Set<Node> neigbours = new HashSet<>();
+		public Set<Node<T>> neighbours() {
+			Set<Node<T>> neigbours = new HashSet<>();
 			neigbours.addAll(successors);
 			neigbours.addAll(predecessors);
 			return neigbours;
@@ -87,7 +87,7 @@ public class SimpleGraph<NodeInfo> {
 		@SuppressWarnings("unchecked")
 		@Override
 		public boolean equals(Object obj) {
-			return (obj instanceof SimpleGraph.Node && ((Node)obj).info.equals(info));
+			return (obj instanceof SimpleGraph.Node && ((Node<T>)obj).info.equals(info));
 		}
 
 		@Override
@@ -95,8 +95,8 @@ public class SimpleGraph<NodeInfo> {
 			return info.hashCode();
 		}
 
-		public BackupNode backup() {
-			return new BackupNode(this);
+		public BackupNode<T> backup() {
+			return new BackupNode<T>(this);
 		}
 	}
 
@@ -108,70 +108,70 @@ public class SimpleGraph<NodeInfo> {
 		return name;
 	}
 
-	public Set<Node> nodeSet() {
+	public Set<Node<NodeInfo>> nodeSet() {
 		return new HashSet<>(nodes.values());
 	}
 
-	public void removeNode(Node n) {
+	public void removeNode(Node<NodeInfo> n) {
 		nodes.remove(n.info);
 		successors.remove(n);
 		predecessors.remove(n);
-		for (Node m : nodes.values()) {
+		for (Node<NodeInfo> m : nodes.values()) {
 			successors.get(m).remove(n);
 			predecessors.get(m).remove(n);
 		}
 	}
 
-	public Node addNode(NodeInfo info) {
-		Set<Node> successorSet = new HashSet<Node>();
-		Set<Node> predecessorSet = new HashSet<Node>();
-		Node node = new Node(info, successorSet, predecessorSet);
+	public Node<NodeInfo> addNode(NodeInfo info) {
+		Set<Node<NodeInfo>> successorSet = new HashSet<>();
+		Set<Node<NodeInfo>> predecessorSet = new HashSet<>();
+		Node<NodeInfo> node = new Node<NodeInfo>(info, successorSet, predecessorSet);
 		nodes.put(info, node);
 		successors.put(node, successorSet);
 		predecessors.put(node, predecessorSet);
 		return node;
 	}
 
-	public Node get(NodeInfo info) {
+	public Node<NodeInfo> get(NodeInfo info) {
 		return nodes.get(info);
 	}
 
-	public void restore(BackupNode node) {
-		Node n = addNode(node.info);
+	public void restore(BackupNode<NodeInfo> node) {
+		Node<NodeInfo> n = addNode(node.info);
 		for (NodeInfo st : node.successors) {
-			Node s = nodes.get(st);
+			Node<NodeInfo> s = nodes.get(st);
 			if (s != null) {
 				addEdge(n, s);
 			}
 		}
 		for (NodeInfo pt : node.predecessors) {
-			Node p = nodes.get(pt);
+			Node<NodeInfo> p = nodes.get(pt);
 			if (p != null) {
 				addEdge(p, n);
 			}
 		}
 	}
 
-	public Map<NodeInfo, BackupNode> backup() {
-		Map<NodeInfo, BackupNode> backup = new HashMap<>();
+	public Map<NodeInfo, BackupNode<NodeInfo>> backup() {
+		Map<NodeInfo, BackupNode<NodeInfo>> backup = new HashMap<>();
 		for (NodeInfo info : nodes.keySet()) {
 			backup.put(info, nodes.get(info).backup());
 		}
 		return backup;
 	}
 
-	public void addEdge(Node src, Node dst) {
+	public void addEdge(Node<NodeInfo> src, Node<NodeInfo> dst) {
 		successors.get(src).add(dst);
 		predecessors.get(dst).add(src);
 	}
 
-	public void removeEdge(Node src, Node dst) {
+	public void removeEdge(Node<NodeInfo> src, Node<NodeInfo> dst) {
 		successors.get(src).remove(dst);
 		predecessors.get(dst).remove(src);
 	}
 
 	public void reverse() {
-		Map<Node, Set<Node>> m = successors;
+		Map<Node<NodeInfo>, Set<Node<NodeInfo>>> m = successors;
 		successors = predecessors;
 		predecessors = m;
 	}
@@ -185,12 +185,12 @@ public class SimpleGraph<NodeInfo> {
 	public String getDot() {
 		StringBuilder out = new StringBuilder();
 		out.append("digraph G {" + System.lineSeparator());
-		for (Node n : nodes.values()) {
+		for (Node<NodeInfo> n : nodes.values()) {
 			out.append("\"" + n.hashCode() + "\" [label=\"" + n.info.toString()
 					+ "\"];" + System.lineSeparator());
 		}
-		for (Node n : nodes.values()) {
-			for (Node m : n.successors()) {
+		for (Node<NodeInfo> n : nodes.values()) {
+			for (Node<NodeInfo> m : n.successors()) {
 				out.append("\"" + n.hashCode() + "\"  -> \"" + m.hashCode()
 						+ "\"" + System.lineSeparator());
 			}
