@@ -15,15 +15,15 @@ public class ControlFlowGraphBuilder {
 	public static SimpleGraph<Assem> build(FragmentProc<List<Assem>> frag) {
 
 		SimpleGraph<Assem> graph = new SimpleGraph<>(frag.frame.getName().toString());
-		List<SimpleGraph<Assem>.Node> jumps = new LinkedList<>();
-		Map<Label, SimpleGraph<Assem>.Node> labelNodes = new HashMap<>();
+		List<SimpleGraph.Node<Assem>> jumps = new LinkedList<>();
+		Map<Label, SimpleGraph.Node<Assem>> labelNodes = new HashMap<>();
 
-		SimpleGraph<Assem>.Node previousNode = null;
+		SimpleGraph.Node<Assem> previousNode = null;
 		Iterator<Assem> iter = frag.body.iterator();
 
 		while (iter.hasNext()) {
 
-			SimpleGraph<Assem>.Node currentNode = graph.addNode(iter.next());
+			SimpleGraph.Node<Assem> currentNode = graph.addNode(iter.next());
 
 			if (previousNode != null && previousNode.info.isFallThrough()) {
 				graph.addEdge(previousNode, currentNode);
@@ -40,10 +40,10 @@ public class ControlFlowGraphBuilder {
 			previousNode = currentNode;
 		}
 
-		for (SimpleGraph<Assem>.Node srcNode : jumps) {
+		for (SimpleGraph.Node<Assem> srcNode : jumps) {
 			List<Label> dstLabels = srcNode.info.jumps();
 			for (Label dstLabel : dstLabels) {
-				SimpleGraph<Assem>.Node dstNode = labelNodes.get(dstLabel);
+				SimpleGraph.Node<Assem> dstNode = labelNodes.get(dstLabel);
 				graph.addEdge(srcNode, dstNode);
 			}
 		}

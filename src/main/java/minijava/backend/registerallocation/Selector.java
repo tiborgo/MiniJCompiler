@@ -15,26 +15,26 @@ public class Selector {
 			SimpleGraph<ColoredTemp> graph,
 			List<ColoredTemp> stack,
 			List<Temp> colors,
-			Map<ColoredTemp, SimpleGraph<ColoredTemp>.BackupNode> graphBackup) {
-		
+			Map<ColoredTemp, SimpleGraph.BackupNode<ColoredTemp>> graphBackup) {
+
 		List<Temp> spilledNodes = new LinkedList<>();
 		Collections.reverse(stack);
-		
+
 		for (ColoredTemp t : stack) {
-			
+
 			// Add node to simplified graph
-			
-			
-			SimpleGraph<ColoredTemp>.BackupNode b = graphBackup.get(t);
+
+
+			SimpleGraph.BackupNode<ColoredTemp> b = graphBackup.get(t);
 			graph.restore(b);
-			SimpleGraph<ColoredTemp>.Node n = graph.get(t);
-			
+			SimpleGraph.Node<ColoredTemp> n = graph.get(t);
+
 			// Find color for node
-			Set<SimpleGraph<ColoredTemp>.Node> neighbours = n.neighbours();
-			
+			Set<SimpleGraph.Node<ColoredTemp>> neighbours = n.neighbours();
+
 			for (Temp color : colors) {
 				boolean occupied = false;
-				for (SimpleGraph<ColoredTemp>.Node neighbour : neighbours) {
+				for (SimpleGraph.Node<ColoredTemp> neighbour : neighbours) {
 					if (color.equals(neighbour.info.color)) {
 						occupied = true;
 						break;
@@ -45,14 +45,14 @@ public class Selector {
 					break;
 				}
 			}
-			
+
 			if (n.info.color == null) {
 				spilledNodes.add(n.info.temp);
 			}
 		}
-		
+
 		stack.clear();
-		
+
 		return spilledNodes;
 	}
 }

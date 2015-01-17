@@ -64,7 +64,7 @@ public class Builder {
 
 		SimpleGraph<ColoredTemp> preColoredGraph = new SimpleGraph<>(interferenceGraph.getName());
 
-		for (SimpleGraph<Temp>.Node tNode : interferenceGraph.nodeSet()) {
+		for (SimpleGraph.Node<Temp> tNode : interferenceGraph.nodeSet()) {
 			Temp color = null;
 			if (colors.contains(tNode.info)) {
 				color = tNode.info;
@@ -73,11 +73,11 @@ public class Builder {
 			preColoredGraph.addNode(new ColoredTemp(tNode.info, color));
 		}
 
-		for (SimpleGraph<Temp>.Node tNode : interferenceGraph.nodeSet()) {
-			for (SimpleGraph<Temp>.Node sNode : tNode.successors()) {
+		for (SimpleGraph.Node<Temp> tNode : interferenceGraph.nodeSet()) {
+			for (SimpleGraph.Node<Temp> sNode : tNode.successors()) {
 				preColoredGraph.addEdge(preColoredGraph.get(new ColoredTemp(tNode.info)), preColoredGraph.get(new ColoredTemp(sNode.info)));
 			}
-			for (SimpleGraph<Temp>.Node pNode : tNode.predecessors()) {
+			for (SimpleGraph.Node<Temp> pNode : tNode.predecessors()) {
 				preColoredGraph.addEdge(preColoredGraph.get(new ColoredTemp(pNode.info)), preColoredGraph.get(new ColoredTemp(tNode.info)));
 			}
 		}
