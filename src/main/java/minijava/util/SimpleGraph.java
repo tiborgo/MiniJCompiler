@@ -96,26 +96,26 @@ public class SimpleGraph<NodeInfo> {
 		}
 
 		// TODO: Should not be necessary
-		public void addSuccessor(Node<T> successor) {
+		protected void addSuccessor(Node<T> successor) {
 			successors.add(successor);
 		}
 
 		// TODO: Should not be necessary
-		public void addPredecessor(Node<T> predecessor) {
+		protected void addPredecessor(Node<T> predecessor) {
 			predecessors.add(predecessor);
 		}
 
 		// TODO: Should not be necessary
-		public void removeSuccessor(Node<T> successor) {
+		protected void removeSuccessor(Node<T> successor) {
 			successors.remove(successor);
 		}
 
 		// TODO: Should not be necessary
-		public void removePredecessor(Node<T> predecessor) {
+		protected void removePredecessor(Node<T> predecessor) {
 			predecessors.remove(predecessor);
 		}
 
-		public void reverse() {
+		protected void reverse() {
 			Set<Node<T>> temp = successors;
 			successors = predecessors;
 			predecessors = temp;
