@@ -136,9 +136,12 @@ public class SimpleGraph<NodeInfo> {
 
 	public void removeNode(Node<NodeInfo> n) {
 		nodes.remove(n.info);
-		for (Map.Entry<NodeInfo, Node<NodeInfo>> m : nodes.entrySet()) {
-			m.getValue().removeSuccessor(n);
-			m.getValue().removePredecessor(n);
+		for (Node<NodeInfo> successor : n.successors()) {
+			successor.removePredecessor(n);
+		}
+
+		for (Node<NodeInfo> predecessor : n.predecessors()) {
+			predecessor.removeSuccessor(n);
 		}
 	}
 
