@@ -34,9 +34,14 @@ public class SimpleGraph<NodeInfo> {
 	public class Node {
 
 		public NodeInfo info;
+		private final Set<Node> successors;
+		private final Set<Node> predecessors;
 
-		private Node(NodeInfo info) {
+		private Node(NodeInfo info, Set<Node> successors, Set<Node> predecessors) {
 			this.info = info;
+			// TODO: Make defensive copy
+			this.successors = successors;
+			this.predecessors = predecessors;
 		}
 
 		/**
@@ -44,7 +49,7 @@ public class SimpleGraph<NodeInfo> {
 		 * d.h. die Menge {n | (n, m) in E}
 		 */
 		public Set<Node> successors() {
-			return Collections.unmodifiableSet(successors.get(this));
+			return Collections.unmodifiableSet(successors);
 		}
 
 		/**
@@ -52,22 +57,22 @@ public class SimpleGraph<NodeInfo> {
 		 * zurueck, d.h. die Menge {m | (m, n) in E}
 		 */
 		public Set<Node> predecessors() {
-			return Collections.unmodifiableSet(predecessors.get(this));
+			return Collections.unmodifiableSet(predecessors);
 		}
 
 		public Set<Node> neighbours() {
 			Set<Node> neigbours = new HashSet<>();
-			neigbours.addAll(successors.get(this));
-			neigbours.addAll(predecessors.get(this));
+			neigbours.addAll(successors);
+			neigbours.addAll(predecessors);
 			return neigbours;
 		}
 
 		public int inDegree() {
-			return predecessors.get(this).size();
+			return predecessors.size();
 		}
 
 		public int outDegree() {
-			return successors.get(this).size();
+			return successors.size();
 		}
 
 		public int degree() {
@@ -118,10 +123,12 @@ public class SimpleGraph<NodeInfo> {
 	}
 
 	public Node addNode(NodeInfo info) {
-		Node node = new Node(info);
+		Set<Node> successorSet = new HashSet<Node>();
+		Set<Node> predecessorSet = new HashSet<Node>();
+		Node node = new Node(info, successorSet, predecessorSet);
 		nodes.put(info, node);
-		successors.put(node, new HashSet<Node>());
-		predecessors.put(node, new HashSet<Node>());
+		successors.put(node, successorSet);
+		predecessors.put(node, predecessorSet);
 		return node;
 	}
 
