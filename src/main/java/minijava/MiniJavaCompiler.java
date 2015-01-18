@@ -111,7 +111,7 @@ public class MiniJavaCompiler {
 		}
 	}
 
-	public int runExecutable(Configuration config, int timeOut_s) throws RunException {
+	public ExecutableOutput runExecutable(Configuration config, int timeOut_s) throws RunException {
 
 		try {
 			final ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "./" + config.outputFile);
@@ -182,7 +182,10 @@ public class MiniJavaCompiler {
 					.append(System.lineSeparator());
 				break;
 			default:
-				System.err.println("Exit Code: " + outProcess.exitValue());
+				errOutput
+					.append("Exit value: ")
+					.append(outProcess.exitValue());
+
 				InputStream stderr = outProcess.getErrorStream();
 				BufferedReader bufferedStderr = new BufferedReader(new InputStreamReader(stderr));
 				while ((line = bufferedStderr.readLine()) != null) {
@@ -193,13 +196,10 @@ public class MiniJavaCompiler {
 			}
 
 			if (outProcess.exitValue() != 0) {
-				System.err.println("Failed to run executable: " + errOutput.toString());
-			}
-			else {
-				System.out.println(output.toString());
+				throw new RunException("Failed to run executable: " + errOutput);
 			}
 			
-			return outProcess.exitValue();
+			return new ExecutableOutput(outProcess.exitValue(), output.toString());
 
 		}
 		catch (IOException e) {
@@ -224,10 +224,18 @@ public class MiniJavaCompiler {
 			
 			if (config.runExecutable) {
 				try {
-					compiler.runExecutable(config, 0);
+					ExecutableOutput out = compiler.runExecutable(config, 0);
+					if (!config.silent) {
+						System.out.println(out.output);
+					}
 				}
 				catch (RunException e) {
-					e.printStackTrace();
+					if (config.debug) {
+						e.printStackTrace();
+					}
+					else {
+						System.err.println(e.getMessage());
+					}
 					System.exit(-1);
 				}
 			}
