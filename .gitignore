@@ -5,5 +5,5 @@ bin/
 .classpath
 .settings/
 src/generated-sources
-a.out
+*.out
 src/main/resources/minijava/runtime/CC.out
