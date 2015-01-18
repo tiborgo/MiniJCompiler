@@ -18,6 +18,9 @@ public class Configuration {
 	@Option(name = "--verbose", aliases = {"-v"}, usage = "Print additional information")
 	public boolean verbose;
 	
+	@Option(name = "--silent", aliases = {"-s"})
+	public boolean silent;
+	
 	@Option(name = "--print-source-code", aliases = {"-sc"}, usage = "Pretty print the input source code", depends = "--verbose")
 	public boolean printSourceCode;
 	
