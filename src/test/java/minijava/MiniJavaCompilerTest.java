@@ -49,7 +49,7 @@ public class MiniJavaCompilerTest {
 		outputs.put("ManyArgs", "1\n0\n2\n1\n3\n1\n4\n0\n5\n1\n10\n0\n89\n1\n999\n");
 		outputs.put("Newton", "2\n999\n577\n408\n0\n");
 		outputs.put("Precedence", "5\n");
-		outputs.put("Primes", "...");
+		outputs.put("Primes", "2\n3\n5\n7\n11\n13\n17\n19\n999\n8\n");
 		outputs.put("QuickSort", "...");
 		outputs.put("Scope", "5\n");
 		outputs.put("Scope2", "5\n");
@@ -59,9 +59,6 @@ public class MiniJavaCompilerTest {
 		outputs.put("TestEq", "1\n0\n");
 		outputs.put("TrivialClass", "555\n");
 		outputs.put("While", "1\n3\n6\n10\n15\n21\n28\n36\n45\n55\n0\n");
-		
-		
-		
 	}
 	
 	public MiniJavaCompilerTest(File file, Class<? extends Exception> exceptionClass) {

@@ -75,6 +75,7 @@ statement: LCBRACKET ( statement )* RCBRACKET							# bracketStatement
 expression: expression LSBRACKET expression RSBRACKET					# arrayAccessExpression
 	|  expression DOT LENGTH											# arrayLengthExpression
 	|  expression DOT identifier LBRACKET ( expression ( COMMA expression )* )? RBRACKET # invokeExpression
+	|  EXCLAMATION_MARK expression										# notExpression
 	|  expression ( STAR | SLASH ) expression							# binOpExpression
 	|  expression ( PLUS | MINUS ) expression							# binOpExpression
 	|  expression ( SMALLER ) expression								# binOpExpression
@@ -83,7 +84,6 @@ expression: expression LSBRACKET expression RSBRACKET					# arrayAccessExpressio
 	|  identifier														# identifierExpression
 	|  NEW INT LSBRACKET expression RSBRACKET							# newIntArrayExpression
 	|  NEW identifier LBRACKET RBRACKET									# newExpression
-	|  EXCLAMATION_MARK expression										# notExpression
 	|  LBRACKET expression RBRACKET										# bracketExpression
 	|  FALSE															# falseExpression
 	|  TRUE																# trueExpression
