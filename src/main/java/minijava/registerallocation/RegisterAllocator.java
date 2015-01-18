@@ -6,7 +6,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import minijava.Configuration;
 import minijava.Logger;
+import minijava.flowanalysis.FlowAnalyser;
 import minijava.instructionselection.MachineSpecifics;
 import minijava.instructionselection.assems.Assem;
 import minijava.translate.layout.Fragment;
@@ -17,7 +19,7 @@ import minijava.util.SimpleGraph;
 
 public class RegisterAllocator {
 
-	public static List<Fragment<List<Assem>>> allocateRegisters(List<Fragment<List<Assem>>> frags, MachineSpecifics machineSpecifics) throws RegisterAllocatorException {
+	public static List<Fragment<List<Assem>>> allocateRegisters(Configuration config, List<Fragment<List<Assem>>> frags, MachineSpecifics machineSpecifics) throws RegisterAllocatorException {
 		
 		try {
 			List<Fragment<List<Assem>>> allocatedFrags = new LinkedList<>();
@@ -37,11 +39,15 @@ public class RegisterAllocator {
 				SimpleGraph<ColoredTemp> graph;
 		
 				do {
-					Logger.logVerbosely("#################");
-					Logger.logVerbosely(fragProc.frame.getName().toString());
+					if (config.printRegisterAllocationDetails) {
+						Logger.log("#################");
+						Logger.log(fragProc.frame.getName().toString());
+					}
 		
+					SimpleGraph<Temp> interferenceGraph = FlowAnalyser.analyseFlow(config, allocatedFrag);
+					
 					// BUILD
-					graph = Builder.build(colors, allocatedFrag);
+					graph = Builder.build(interferenceGraph, colors, allocatedFrag);
 		
 					if (counter > 2) {
 						//break;
@@ -75,8 +81,10 @@ public class RegisterAllocator {
 					// rewrite program
 					allocatedFrag = new FragmentProc<>(allocatedFrag.frame, machineSpecifics.spill(allocatedFrag.frame, allocatedFrag.body, spillNodes));
 		
-					Logger.logVerbosely("Register allocator round " + counter + ", " + spillNodes.size() + " spill nodes " + spillNodes);
-					//System.out.println(machineSpecifics.printAssembly(Arrays.<Fragment<List<Assem>>>asList(allocatedFrag)));+
+					if (config.printRegisterAllocationDetails) {
+						Logger.log("Register allocator round " + counter + ", " + spillNodes.size() + " spill nodes " + spillNodes);
+						//System.out.println(machineSpecifics.printAssembly(Arrays.<Fragment<List<Assem>>>asList(allocatedFrag)));+
+					}
 		
 					// START OVER
 		

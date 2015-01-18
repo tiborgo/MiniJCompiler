@@ -52,20 +52,35 @@ public class MiniJavaCompiler {
 	}
 	
 	private void pipeline(Configuration config) throws CompilerException {
+		Logger.setStepName("parse");
 		Program program = Parser.parse(config);
 		if (config.parse) return;
+		
+		Logger.setStepName("semantic analysis");
 		Program typedProgram = SemanticAnalyser.analyseSemantics(config, program);
 		if (config.semanticAnalysis) return;
+		
+		Logger.setStepName("translate");
 		List<FragmentProc<TreeStm>> intermediate = Translator.translate(config, typedProgram, machineSpecifics);
 		if (config.translate) return;
+		
+		Logger.setStepName("canonicalize");
 		List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = Canonicalizer.canonicalize(config, intermediate);
 		if (config.canonicalize) return;
+		
+		Logger.setStepName("instruction selection");
 		List<Fragment<List<Assem>>> assemFragments =  InstructionSelector.selectInstructions(config, intermediateCanonicalized, machineSpecifics);
 		if (config.instructionSelection) return;
-		List<Fragment<List<Assem>>> allocatedFragments = RegisterAllocator.allocateRegisters(assemFragments, machineSpecifics);
+		
+		Logger.setStepName("register allocation");
+		List<Fragment<List<Assem>>> allocatedFragments = RegisterAllocator.allocateRegisters(config, assemFragments, machineSpecifics);
 		if (config.registerAllocation) return;
+		
+		Logger.setStepName("code emission");
 		String assembly = CodeEmitter.emitCode(config, allocatedFragments, machineSpecifics);
 		if (config.codeEmission) return;
+		
+		Logger.setStepName("assembler");
 		Assembler.assemble(config, assembly);
 	}
 	

@@ -2,7 +2,6 @@ package minijava.registerallocation;
 
 import java.util.List;
 
-import minijava.flowanalysis.FlowAnalyser;
 import minijava.flowanalysis.FlowAnalyserException;
 import minijava.instructionselection.assems.Assem;
 import minijava.translate.layout.FragmentProc;
@@ -11,9 +10,8 @@ import minijava.util.SimpleGraph;
 
 class Builder {
 
-	static SimpleGraph<ColoredTemp> build(List<Temp> colors, FragmentProc<List<Assem>> assemFragment) throws FlowAnalyserException {
+	static SimpleGraph<ColoredTemp> build(SimpleGraph<Temp> interferenceGraph, List<Temp> colors, FragmentProc<List<Assem>> assemFragment) throws FlowAnalyserException {
 
-		SimpleGraph<Temp> interferenceGraph = FlowAnalyser.analyseFlow(assemFragment);
 		SimpleGraph<ColoredTemp> preColoredGraph = new SimpleGraph<>(interferenceGraph.getName());
 
 		for (SimpleGraph.Node<Temp> tNode : interferenceGraph.nodeSet()) {

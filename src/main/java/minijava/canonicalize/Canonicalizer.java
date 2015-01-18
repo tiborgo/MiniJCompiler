@@ -22,10 +22,13 @@ public class Canonicalizer {
 			String output = null;
 			
 			List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = new ArrayList<>(intermediate.size());
+			
+			
+			
 			for (FragmentProc<TreeStm> fragment : intermediate) {
 				FragmentProc<List<TreeStm>> canonFrag = (FragmentProc<List<TreeStm>>) fragment.accept(new CanonVisitor());
 
-				if (config.printCanonicalzedIntermediate) {
+				if (config.printCanonicalizedIntermediate) {
 					StringBuilder outputBuilder = new StringBuilder();
 					outputBuilder
 						.append("*******")
@@ -47,7 +50,11 @@ public class Canonicalizer {
 				intermediateCanonicalized.add(new FragmentProc<List<TreeStm>>(canonFrag.frame, tracedBody));
 			}
 
-			Logger.logVerbosely("Successfully canonicalized intermediate language", output);
+			Logger.logVerbosely("Successfully canonicalized intermediate language");
+			
+			if (config.printCanonicalizedIntermediate) {
+				Logger.log(output);
+			}
 
 			return intermediateCanonicalized;
 		}
