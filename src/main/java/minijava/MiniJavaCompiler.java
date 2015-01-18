@@ -109,39 +109,6 @@ public class MiniJavaCompiler {
 		}
 	}*/
 
-	private List<Fragment<List<Assem>>> allocateRegisters(Configuration config, List<Fragment<List<Assem>>> frags) throws CompilerException {
-
-		try {
-			List<Fragment<List<Assem>>> allocatedFrags = new LinkedList<>();
-			for (int i = 0; i < frags.size(); i++) {
-			//for (SimpleGraph<Temp> interferenceGraph : interferenceGraphs) {
-				//SimpleGraph<Temp> interferenceGraph = interferenceGraphs.get(i);
-				try {
-					FragmentProc<List<Assem>> frag = (FragmentProc<List<Assem>>)frags.get(i);
-					allocatedFrags.add(RegisterAllocator.allocateRegisters(frag, machineSpecifics));
-				}
-				catch (ClassCastException e) {
-					throw new CompilerException("Can only alocate registers for FragementProc");
-				}
-			}
-
-			/*String graphOutput = null;
-			if (printPreColoredGraphs) {
-				graphOutput = simpleGraphsToString(colroedInterferenceGraphs);
-			}*/
-
-			printVerbose("Successfully allocated registers");
-
-			return allocatedFrags;
-
-		}
-		catch (Exception e) {
-			// TODO: proper exception
-			throw new CompilerException("Failed to generate interference graphs", e);
-		}
-
-	}
-
 	private <T> String simpleGraphsToString (List<SimpleGraph<T>> graphs) throws CompilerException {
 
 		StringBuilder graphOutput = new StringBuilder();
@@ -360,7 +327,8 @@ public class MiniJavaCompiler {
 		List<FragmentProc<TreeStm>> intermediate = Translator.translate(config, typedProgram, machineSpecifics);
 		List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = Canonicalizer.canonicalize(config, intermediate);
 		List<Fragment<List<Assem>>> assemFragments =  InstructionSelector.selectInstructions(config, intermediateCanonicalized, machineSpecifics);
-		List<Fragment<List<Assem>>> allocatedFragments = allocateRegisters(config, assemFragments);
+		List<Fragment<List<Assem>>> allocatedFragments = RegisterAllocator.allocateRegisters(assemFragments, machineSpecifics);
+		
 		String assembly = generateAssembly(config, allocatedFragments);
 		
 		compileAssembly(config, assembly);
