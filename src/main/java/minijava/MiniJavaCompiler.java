@@ -51,16 +51,39 @@ public class MiniJavaCompiler {
 		}
 	}
 	
-	public void compile(Configuration config) throws CompilerException {
+	public float compile(Configuration config) throws CompilerException {
 		
-		Program program = Parser.parse(config);
-		Program typedProgram = SemanticAnalyser.analyseSemantics(config, program);
-		List<FragmentProc<TreeStm>> intermediate = Translator.translate(config, typedProgram, machineSpecifics);
-		List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = Canonicalizer.canonicalize(config, intermediate);
-		List<Fragment<List<Assem>>> assemFragments =  InstructionSelector.selectInstructions(config, intermediateCanonicalized, machineSpecifics);
-		List<Fragment<List<Assem>>> allocatedFragments = RegisterAllocator.allocateRegisters(assemFragments, machineSpecifics);
-		String assembly = CodeEmitter.emitCode(config, allocatedFragments, machineSpecifics);
-		Assembler.assemble(config, assembly);
+		try {
+			Date startTime = new Date();
+			
+			Program program = Parser.parse(config);
+			Program typedProgram = SemanticAnalyser.analyseSemantics(config, program);
+			List<FragmentProc<TreeStm>> intermediate = Translator.translate(config, typedProgram, machineSpecifics);
+			List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = Canonicalizer.canonicalize(config, intermediate);
+			List<Fragment<List<Assem>>> assemFragments =  InstructionSelector.selectInstructions(config, intermediateCanonicalized, machineSpecifics);
+			List<Fragment<List<Assem>>> allocatedFragments = RegisterAllocator.allocateRegisters(assemFragments, machineSpecifics);
+			String assembly = CodeEmitter.emitCode(config, allocatedFragments, machineSpecifics);
+			Assembler.assemble(config, assembly);
+			
+			Date endTime = new Date();
+			float interval = (endTime.getTime()-startTime.getTime())/1000f;
+			
+			if (!config.silent) {
+				System.out.printf("Successfully compiled input file in %.1f seconds%n", interval);
+			}
+			
+			return interval;
+		}
+		catch(CompilerException e) {
+			if (config.debug) {
+				e.printStackTrace();
+			}
+			else if (!config.silent){
+				System.err.println("Failed to compile input file: " + e.getMessage());
+			}
+			
+			throw e;
+		}
 	}
 
 	public int runExecutable(Configuration config, int timeOut_s) throws RunException {
@@ -161,42 +184,31 @@ public class MiniJavaCompiler {
 
 	public static void main (String[] args) {
 		
-		Configuration config;
 		try{
-			config = new Configuration(args);
+			Configuration config = new Configuration(args);
+			
+			MiniJavaCompiler compiler = new MiniJavaCompiler(new I386MachineSpecifics());
+			
+			
+			try {
+				compiler.compile(config);
+			}
+			catch(CompilerException e) {
+				System.exit(-1);
+			}
+			
+			if (config.runExecutable) {
+				try {
+					compiler.runExecutable(config, 0);
+				}
+				catch (RunException e) {
+					e.printStackTrace();
+					System.exit(-1);
+				}
+			}
 		}
 		catch (IllegalArgumentException e) {
 			System.exit(-1);
-			return;
-		}
-		
-		MiniJavaCompiler compiler = new MiniJavaCompiler(new I386MachineSpecifics());
-		
-		
-		try {
-			Date startTime = new Date();
-			compiler.compile(config);
-			Date endTime = new Date();
-			System.out.printf("Successfully compiled input file in %.1f seconds%n", (endTime.getTime()-startTime.getTime())/1000f);
-		}
-		catch(CompilerException e) {
-			if (config.debug) {
-				e.printStackTrace();
-			}
-			else {
-				System.err.println("Failed to compile input file: " + e.getMessage());
-			}
-			System.exit(-1);
-		}
-		
-		if (config.runExecutable) {
-			try {
-				compiler.runExecutable(config, 0);
-			}
-			catch (RunException e) {
-				e.printStackTrace();
-				System.exit(-1);
-			}
 		}
 	}
 }
