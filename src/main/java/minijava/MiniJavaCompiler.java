@@ -525,7 +525,12 @@ public class MiniJavaCompiler {
 				System.out.printf("Successfully compiled input file in %.1f seconds%n", (endTime.getTime()-startTime.getTime())/1000f);
 			}
 			catch(CompilerException e) {
-				e.printStackTrace();
+				if (Configuration.getInstance().debug) {
+					e.printStackTrace();
+				}
+				else {
+					System.err.println("Failed to compile input file: " + e.getMessage());
+				}
 				System.exit(-1);
 			}
 			

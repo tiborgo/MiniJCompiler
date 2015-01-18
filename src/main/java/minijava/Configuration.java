@@ -39,6 +39,9 @@ public class Configuration {
 	@Option(name = "--print-pre-colored-graphs", aliases = {"-pg"},  depends = "--verbose")
 	public boolean printPreColoredGraphs;
 	
+	@Option(name = "--debug", aliases = {"-d"})
+	public boolean debug;
+	
 	private static Configuration instance;
 	
 	private Configuration() {
