@@ -35,8 +35,8 @@ public class MiniJavaCompilerTest {
 		outputs = new HashMap<>();
 		outputs.put("ArrayAccess", "5\n");
 		outputs.put("ArrSum", "55\n");
-		outputs.put("BinarySearch", "...");
-		outputs.put("BinaryTree", "...");
+		outputs.put("BinarySearch", "20\n21\n22\n23\n24\n25\n26\n27\n28\n29\n30\n31\n32\n33\n34\n35\n36\n37\n38\n99999\n0\n0\n1\n1\n1\n1\n0\n0\n999\n");
+		outputs.put("BinaryTree", "16\n100000000\n8\n16\n4\n8\n12\n14\n16\n20\n24\n28\n1\n1\n1\n0\n1\n4\n8\n14\n16\n20\n24\n28\n0\n0\n");
 		outputs.put("BubbleSort", "...");
 		outputs.put("Effects", "0\n");
 		outputs.put("Factorial", "3628800\n");
@@ -59,6 +59,9 @@ public class MiniJavaCompilerTest {
 		outputs.put("TestEq", "1\n0\n");
 		outputs.put("TrivialClass", "555\n");
 		outputs.put("While", "1\n3\n6\n10\n15\n21\n28\n36\n45\n55\n0\n");
+		
+		
+		
 	}
 	
 	public MiniJavaCompilerTest(File file, Class<? extends Exception> exceptionClass) {

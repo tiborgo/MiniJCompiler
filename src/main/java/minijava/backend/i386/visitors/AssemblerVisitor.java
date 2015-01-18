@@ -171,7 +171,9 @@ public class AssemblerVisitor implements
 
 				@Override
 				public Mem visit(Operand.Mem operand) {
-					return operand;
+					Temp t = new Temp();
+					emit(new AssemBinaryOp(Kind.MOV, new Operand.Reg(t), operand));
+					return new Operand.Mem(t);
 				}
 
 				@Override
