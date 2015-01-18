@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import minijava.MiniJavaCompiler.CompilerException;
+import minijava.MiniJavaCompiler.RunException;
 import minijava.backend.i386.I386MachineSpecifics;
 import minijava.intermediate.Label;
 
@@ -18,14 +20,14 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 @RunWith(Parameterized.class)
-public class MiniJavaCompilerTest {
+public class MiniJavaRunTest {
 
 	@Parameterized.Parameters
 	public static Collection<Object[]> files() throws IOException {
 		
 		List<Object[]> files = new ArrayList<>();
-		files.addAll(TestFiles.getWorkingFiles(TestFiles.EXAMPLE_PROGRAM_PATH_WORKING, TestFiles.EXAMPLE_PROGRAM_PATH_RUNTIME_FAILING));
-		files.addAll(TestFiles.getFailingFiles(TestFiles.EXAMPLE_PROGRAM_PATH_PARSE_FAILING, TestFiles.EXAMPLE_PROGRAM_PATH_TYPE_FAILING));
+		files.addAll(TestFiles.getWorkingFiles(TestFiles.EXAMPLE_PROGRAM_PATH_WORKING));
+		files.addAll(TestFiles.getFailingFiles(TestFiles.EXAMPLE_PROGRAM_PATH_RUNTIME_FAILING));
 		return files;
 	}
 
@@ -41,9 +43,9 @@ public class MiniJavaCompilerTest {
 
 	private File file;
 	private boolean works;
-	protected MiniJavaCompiler compiler;
+	private MiniJavaCompiler compiler;
 	
-	public MiniJavaCompilerTest(File file, boolean works) {
+	public MiniJavaRunTest(File file, boolean works) {
 		this.file = file;
 		this.works = works;
 	}
@@ -54,22 +56,28 @@ public class MiniJavaCompilerTest {
 	}
 	
 	@Test
-	public void testCompileExamples() throws IOException {
+	public void testRunExamples() throws IOException, CompilerException, RunException {
 
 		System.out.println("Testing compiler input from file \"" + file.toString() + "\"");
 		
 		Configuration.initialize(new String[]{file.toString()});
-
+		
+		compiler.compile();
+		
 		try {
-			compiler.compile();
-			if (!works) {
-				fail("The example " + file.toString() + " should have failed, but was accepted by the compiler.");
+			if(compiler.runExecutable(10) == 0) {
+				if (!works) {
+					fail("The example " + file.toString() + " should have failed, but ran successfully.");
+				}
+			}
+			else {
+				if (works) {
+					fail("The example " + file.toString() + " should have run successfully but failed.");
+				}
 			}
 		}
-		catch (Exception e) {
-			if (works) {
-				fail("The example " + file.toString() + " should have been accepted by the compiler but failed: " + e.getMessage());
-			}
+		catch (RunException e) {
+			fail("The execution of example " + file.toString() + " failed: " + e.getMessage());
 		}
 	}
 }
