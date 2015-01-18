@@ -8,8 +8,8 @@ import java.util.Map;
 
 import minijava.Configuration;
 import minijava.Logger;
-import minijava.backend.Assem;
-import minijava.backend.MachineSpecifics;
+import minijava.instructionselection.MachineSpecifics;
+import minijava.instructionselection.assems.Assem;
 import minijava.translate.layout.FragmentProc;
 import minijava.translate.layout.Temp;
 import minijava.util.Function;

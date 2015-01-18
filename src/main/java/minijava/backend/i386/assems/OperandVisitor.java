@@ -1,6 +1,5 @@
-package minijava.backend.i386.visitors;
+package minijava.backend.i386.assems;
 
-import minijava.backend.i386.Operand;
 
 public interface OperandVisitor<A, T extends Throwable> {
 	A visit(Operand.Imm operand) throws T;

@@ -1,13 +1,14 @@
-package minijava.backend.i386;
+package minijava.backend.i386.assems;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import minijava.backend.Assem;
-import minijava.backend.Instruction;
-import minijava.backend.i386.visitors.AssemVisitor;
+import minijava.backend.i386.I386MachineSpecifics;
+import minijava.backend.i386.visitors.I386PrintAssemblyVisitor;
+import minijava.instructionselection.assems.Assem;
+import minijava.instructionselection.assems.Instruction;
 import minijava.translate.layout.Label;
 import minijava.translate.layout.Temp;
 import minijava.util.Function;

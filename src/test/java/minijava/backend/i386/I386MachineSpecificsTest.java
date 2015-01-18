@@ -1,16 +1,19 @@
 package minijava.backend.i386;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
-import minijava.backend.Assem;
-import minijava.backend.i386.AssemBinaryOp.Kind;
-import minijava.backend.i386.Operand.Imm;
-import minijava.backend.i386.Operand.Reg;
+import minijava.backend.i386.I386Frame;
+import minijava.backend.i386.I386MachineSpecifics;
+import minijava.backend.i386.assems.AssemBinaryOp;
+import minijava.backend.i386.assems.Operand;
+import minijava.backend.i386.assems.StackAllocation;
+import minijava.backend.i386.assems.AssemBinaryOp.Kind;
+import minijava.instructionselection.assems.Assem;
 import minijava.translate.layout.Label;
 import minijava.translate.layout.Temp;
 

@@ -18,11 +18,12 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import minijava.backend.Assem;
-import minijava.backend.MachineSpecifics;
 import minijava.backend.i386.I386MachineSpecifics;
 import minijava.backend.registerallocation.Allocator;
 import minijava.canonicalize.Canonicalizer;
+import minijava.instructionselection.InstructionSelector;
+import minijava.instructionselection.MachineSpecifics;
+import minijava.instructionselection.assems.Assem;
 import minijava.parse.Parser;
 import minijava.parse.rules.Program;
 import minijava.semanticanalysis.SemanticAnalyser;
@@ -58,28 +59,7 @@ public class MiniJavaCompiler {
 
 	
 
-	private List<Fragment<List<Assem>>> generatePreAssembly (Configuration config, List<FragmentProc<List<TreeStm>>> intermediateCanonicalized) throws CompilerException {
-
-		try {
-			List<Fragment<List<Assem>>> assemFragments = new LinkedList<>();
-			for (FragmentProc<List<TreeStm>> fragment : intermediateCanonicalized) {
-				assemFragments.add(machineSpecifics.codeGen(fragment));
-			}
-
-			String assembly = null;
-			if (config.printPreAssembly) {
-				assembly = machineSpecifics.printAssembly(assemFragments);
-			}
-
-			printVerbose("Successfully generated assembly", assembly);
-
-			return assemFragments;
-		}
-		catch (Exception e) {
-			// TODO: proper exception
-			throw new CompilerException("Failed to generate assembly", e);
-		}
-	}
+	
 
 	/*private List<SimpleGraph<Temp>> generateInterferenceGraphs(List<SimpleGraph<Assem>> controlFlowGraphs) throws CompilerException {
 
@@ -379,7 +359,7 @@ public class MiniJavaCompiler {
 		Program typedProgram = SemanticAnalyser.analyseSemantics(config, program);
 		List<FragmentProc<TreeStm>> intermediate = Translator.translate(config, typedProgram, machineSpecifics);
 		List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = Canonicalizer.canonicalize(config, intermediate);
-		List<Fragment<List<Assem>>> assemFragments = generatePreAssembly(config, intermediateCanonicalized);
+		List<Fragment<List<Assem>>> assemFragments =  InstructionSelector.selectInstructions(config, intermediateCanonicalized, machineSpecifics);
 		//List<SimpleGraph<Assem>> controlFlowGraphs = generateControlFlowGraphs(assemFragments);
 		//List<SimpleGraph<Temp>> inferenceGraphs = generateInterferenceGraphs(controlFlowGraphs);
 

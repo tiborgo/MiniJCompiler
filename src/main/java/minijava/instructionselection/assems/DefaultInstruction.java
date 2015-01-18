@@ -1,9 +1,9 @@
-package minijava.backend;
+package minijava.instructionselection.assems;
 
 import java.util.Collections;
 import java.util.List;
 
-import minijava.backend.i386.Operand;
+import minijava.backend.i386.assems.Operand;
 import minijava.translate.layout.Label;
 import minijava.translate.layout.Temp;
 import minijava.util.Function;

@@ -1,8 +1,8 @@
-package minijava.backend;
+package minijava.instructionselection.assems;
 
 import java.util.List;
 
-import minijava.backend.i386.visitors.AssemVisitor;
+import minijava.backend.i386.assems.AssemVisitor;
 import minijava.translate.layout.Label;
 import minijava.translate.layout.Temp;
 import minijava.util.Function;

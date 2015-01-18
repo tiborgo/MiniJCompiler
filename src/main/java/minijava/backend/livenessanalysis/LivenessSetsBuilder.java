@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import minijava.backend.Assem;
+import minijava.instructionselection.assems.Assem;
 import minijava.translate.layout.Temp;
 import minijava.util.SimpleGraph;
 

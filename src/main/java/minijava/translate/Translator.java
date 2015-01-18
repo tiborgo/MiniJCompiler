@@ -4,7 +4,7 @@ import java.util.List;
 
 import minijava.Configuration;
 import minijava.Logger;
-import minijava.backend.MachineSpecifics;
+import minijava.instructionselection.MachineSpecifics;
 import minijava.parse.rules.Program;
 import minijava.translate.layout.FragmentProc;
 import minijava.translate.tree.TreeStm;

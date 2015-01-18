@@ -18,7 +18,8 @@ public class Pair<A, B> {
     if (getClass() != obj.getClass()) {
       return false;
     }
-    final Pair<A, B> other = (Pair<A, B>) obj;
+    @SuppressWarnings("unchecked")
+	final Pair<A, B> other = (Pair<A, B>) obj;
     if (this.fst != other.fst && (this.fst == null || !this.fst.equals(other.fst))) {
       return false;
     }

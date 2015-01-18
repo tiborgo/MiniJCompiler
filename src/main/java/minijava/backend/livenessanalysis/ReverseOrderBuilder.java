@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import minijava.backend.Assem;
+import minijava.instructionselection.assems.Assem;
 import minijava.util.Function;
 import minijava.util.SimpleGraph;
 

@@ -1,13 +1,21 @@
-package minijava.backend.i386;
+package minijava.backend.i386.visitors;
 
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import minijava.backend.Assem;
-import minijava.backend.i386.AssemBinaryOp.Kind;
-import minijava.backend.i386.Operand.Mem;
-import minijava.backend.i386.visitors.OperandVisitor;
+import minijava.backend.i386.I386MachineSpecifics;
+import minijava.backend.i386.assems.AssemBinaryOp;
+import minijava.backend.i386.assems.AssemInstr;
+import minijava.backend.i386.assems.AssemJump;
+import minijava.backend.i386.assems.AssemLabel;
+import minijava.backend.i386.assems.AssemUnaryOp;
+import minijava.backend.i386.assems.Operand;
+import minijava.backend.i386.assems.OperandVisitor;
+import minijava.backend.i386.assems.StackAllocation;
+import minijava.backend.i386.assems.AssemBinaryOp.Kind;
+import minijava.backend.i386.assems.Operand.Mem;
+import minijava.instructionselection.assems.Assem;
 import minijava.translate.layout.FragmentProc;
 import minijava.translate.layout.FragmentVisitor;
 import minijava.translate.layout.Temp;
@@ -90,7 +98,7 @@ public class AssemblerVisitor implements
 		return new FragmentProc<List<Assem>>(fragProc.frame, instructions);
 	}
 
-	protected static class StatementExpressionVisitor implements
+	public static class StatementExpressionVisitor implements
 	TreeStmVisitor<Void, RuntimeException>,
  	TreeExpVisitor<Operand, RuntimeException> {
 		private final List<Assem> instructions;

@@ -1,11 +1,10 @@
-package minijava.backend.i386;
+package minijava.backend.i386.assems;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import minijava.backend.i386.visitors.OperandVisitor;
 import minijava.translate.layout.Temp;
 import minijava.util.Function;
 
