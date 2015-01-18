@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import minijava.translate.Label;
+import minijava.translate.layout.Label;
 import minijava.translate.tree.TreeStm;
 import minijava.translate.tree.TreeStmCJUMP;
 import minijava.translate.tree.TreeStmJUMP;

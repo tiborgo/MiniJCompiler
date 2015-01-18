@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import minijava.backend.Assem;
-import minijava.translate.Temp;
+import minijava.translate.layout.Temp;
 import minijava.util.Pair;
 import minijava.util.SimpleGraph;
 

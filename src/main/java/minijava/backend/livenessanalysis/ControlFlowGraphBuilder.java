@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import minijava.backend.Assem;
-import minijava.translate.FragmentProc;
-import minijava.translate.Label;
+import minijava.translate.layout.FragmentProc;
+import minijava.translate.layout.Label;
 import minijava.util.SimpleGraph;
 
 public class ControlFlowGraphBuilder {

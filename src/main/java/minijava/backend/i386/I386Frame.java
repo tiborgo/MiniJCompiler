@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import minijava.translate.Frame;
-import minijava.translate.Label;
-import minijava.translate.Temp;
+import minijava.translate.layout.Frame;
+import minijava.translate.layout.Label;
+import minijava.translate.layout.Temp;
 import minijava.translate.tree.TreeExp;
 import minijava.translate.tree.TreeExpCONST;
 import minijava.translate.tree.TreeExpMEM;

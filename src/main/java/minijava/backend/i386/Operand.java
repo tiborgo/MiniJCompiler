@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import minijava.backend.i386.visitors.OperandVisitor;
-import minijava.translate.Temp;
+import minijava.translate.layout.Temp;
 import minijava.util.Function;
 
 public abstract class Operand {
@@ -105,9 +105,9 @@ public abstract class Operand {
 	}
 
 	public static class Label extends Operand {
-		public final minijava.translate.Label label;
+		public final minijava.translate.layout.Label label;
 
-		public Label(minijava.translate.Label label) {
+		public Label(minijava.translate.layout.Label label) {
 			this.label = label;
 		}
 

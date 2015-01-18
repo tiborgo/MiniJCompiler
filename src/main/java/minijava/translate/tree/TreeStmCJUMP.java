@@ -1,7 +1,6 @@
 package minijava.translate.tree;
 
-import minijava.translate.Label;
-import minijava.translate.visitors.TreeStmVisitor;
+import minijava.translate.layout.Label;
 
 public class TreeStmCJUMP extends TreeStm {
 

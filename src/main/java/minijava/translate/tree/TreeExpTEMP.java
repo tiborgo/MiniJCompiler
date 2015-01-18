@@ -1,7 +1,6 @@
 package minijava.translate.tree;
 
-import minijava.translate.Temp;
-import minijava.translate.visitors.TreeExpVisitor;
+import minijava.translate.layout.Temp;
 
 public class TreeExpTEMP extends TreeExp {
  public final Temp temp;

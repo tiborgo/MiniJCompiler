@@ -4,15 +4,15 @@ import java.util.List;
 
 import minijava.backend.MachineSpecifics;
 import minijava.backend.Assem;
-import minijava.translate.Fragment;
-import minijava.translate.Frame;
-import minijava.translate.Label;
-import minijava.translate.Temp;
+import minijava.translate.layout.Fragment;
+import minijava.translate.layout.Frame;
+import minijava.translate.layout.Label;
+import minijava.translate.layout.Temp;
 import minijava.translate.tree.TreeStm;
 
 /**
  * Dummy compiler target that does nothing.
- * All methods will raise an exception, except for {@link #getWordSize()} and {@link #newFrame(minijava.translate.Label, int)}.
+ * All methods will raise an exception, except for {@link #getWordSize()} and {@link #newFrame(minijava.translate.layout.Label, int)}.
  */
 public class DummyMachineSpecifics implements MachineSpecifics {
 

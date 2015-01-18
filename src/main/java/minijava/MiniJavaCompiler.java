@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -23,22 +22,15 @@ import minijava.backend.Assem;
 import minijava.backend.MachineSpecifics;
 import minijava.backend.i386.I386MachineSpecifics;
 import minijava.backend.registerallocation.Allocator;
+import minijava.canonicalize.Canonicalizer;
 import minijava.parse.Parser;
 import minijava.parse.rules.Program;
 import minijava.semanticanalysis.SemanticAnalyser;
-import minijava.semanticanalysis.visitors.TypeCheckVisitor;
-import minijava.semanticanalysis.visitors.TypeInferenceVisitor;
-import minijava.translate.Fragment;
-import minijava.translate.FragmentProc;
-import minijava.translate.Label;
-import minijava.translate.baseblocks.BaseBlock;
-import minijava.translate.baseblocks.Generator;
-import minijava.translate.baseblocks.ToTreeStmConverter;
-import minijava.translate.baseblocks.Tracer;
-import minijava.translate.canon.Canon;
+import minijava.translate.Translator;
+import minijava.translate.layout.Fragment;
+import minijava.translate.layout.FragmentProc;
+import minijava.translate.layout.Label;
 import minijava.translate.tree.TreeStm;
-import minijava.translate.visitors.IntermediatePrettyPrintVisitor;
-import minijava.translate.visitors.IntermediateVisitor;
 import minijava.util.SimpleGraph;
 
 //import java.nio.file.Files;
@@ -62,61 +54,9 @@ public class MiniJavaCompiler {
 
 	
 
-	private List<FragmentProc<TreeStm>> generateIntermediate(Configuration config, Program program) throws CompilerException {
+	
 
-		try {
-			IntermediateVisitor intermediateVisitor = new IntermediateVisitor(machineSpecifics, program);
-			List<FragmentProc<TreeStm>> procFragements = program.accept(intermediateVisitor);
-
-			if (config.verbose) {
-				String output = "";
-				for (FragmentProc<TreeStm> frag : procFragements) {
-					output += frag.body.accept(new IntermediatePrettyPrintVisitor()) + System.lineSeparator() + "-----" + System.lineSeparator();
-				}
-				System.out.println(output);
-			}
-
-			printVerbose("Successfully generated intermediate language");
-
-			return procFragements;
-		}
-		catch (Exception e) {
-			// TODO: proper exceptions
-			throw new CompilerException("Failed to generate intermediate language", e);
-		}
-	}
-
-	private List<FragmentProc<List<TreeStm>>> canonicalize(Configuration config, List<FragmentProc<TreeStm>> intermediate) throws CompilerException {
-
-		try {
-			List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = new ArrayList<>(intermediate.size());
-			for (FragmentProc<TreeStm> fragment : intermediate) {
-				FragmentProc<List<TreeStm>> canonFrag = (FragmentProc<List<TreeStm>>) fragment.accept(new Canon());
-
-				if (config.verbose) {
-					String output = "*******" + System.lineSeparator();
-					for (TreeStm stm : canonFrag.body) {
-						output += stm.accept(new IntermediatePrettyPrintVisitor()) + System.lineSeparator() + "-----" + System.lineSeparator();
-					}
-					System.out.println(output);
-				}
-
-				Generator.BaseBlockContainer baseBlocks = Generator.generate(canonFrag.body);
-				List<BaseBlock> tracedBaseBlocks = Tracer.trace(baseBlocks);
-				List<TreeStm> tracedBody = ToTreeStmConverter.convert(tracedBaseBlocks, baseBlocks.startLabel, baseBlocks.endLabel);
-
-				intermediateCanonicalized.add(new FragmentProc<List<TreeStm>>(canonFrag.frame, tracedBody));
-			}
-
-			printVerbose("Successfully canonicalized intermediate language");
-
-			return intermediateCanonicalized;
-		}
-		catch (Exception e) {
-			// TODO: proper exception
-			throw new CompilerException("Failed to canonicalize intermediate language", e);
-		}
-	}
+	
 
 	private List<Fragment<List<Assem>>> generatePreAssembly (Configuration config, List<FragmentProc<List<TreeStm>>> intermediateCanonicalized) throws CompilerException {
 
@@ -434,10 +374,11 @@ public class MiniJavaCompiler {
 	}
 	
 	public void compile(Configuration config) throws CompilerException {
+		
 		Program program = Parser.parse(config);
 		Program typedProgram = SemanticAnalyser.analyseSemantics(config, program);
-		List<FragmentProc<TreeStm>> intermediate = generateIntermediate(config, typedProgram);
-		List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = canonicalize(config, intermediate);
+		List<FragmentProc<TreeStm>> intermediate = Translator.translate(config, typedProgram, machineSpecifics);
+		List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = Canonicalizer.canonicalize(config, intermediate);
 		List<Fragment<List<Assem>>> assemFragments = generatePreAssembly(config, intermediateCanonicalized);
 		//List<SimpleGraph<Assem>> controlFlowGraphs = generateControlFlowGraphs(assemFragments);
 		//List<SimpleGraph<Temp>> inferenceGraphs = generateInterferenceGraphs(controlFlowGraphs);

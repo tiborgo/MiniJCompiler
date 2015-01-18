@@ -1,7 +1,12 @@
 package minijava.backend;
 
 import java.util.List;
+
 import minijava.translate.*;
+import minijava.translate.layout.Fragment;
+import minijava.translate.layout.Frame;
+import minijava.translate.layout.Label;
+import minijava.translate.layout.Temp;
 import minijava.translate.tree.TreeStm;
 
 /**

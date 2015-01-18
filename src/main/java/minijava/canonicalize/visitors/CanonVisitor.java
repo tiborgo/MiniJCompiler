@@ -1,20 +1,29 @@
-package minijava.translate.canon;
+package minijava.canonicalize.visitors;
 
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import minijava.translate.*;
-import minijava.translate.tree.*;
+import minijava.translate.layout.Fragment;
+import minijava.translate.layout.FragmentProc;
+import minijava.translate.layout.FragmentVisitor;
+import minijava.translate.layout.Temp;
+import minijava.translate.tree.TreeExp;
+import minijava.translate.tree.TreeExpCONST;
+import minijava.translate.tree.TreeExpNAME;
+import minijava.translate.tree.TreeExpTEMP;
+import minijava.translate.tree.TreeStm;
+import minijava.translate.tree.TreeStmEXP;
+import minijava.translate.tree.TreeStmMOVE;
 import minijava.util.Pair;
 
-public class Canon implements FragmentVisitor<TreeStm, Fragment<List<TreeStm>>> {
+public class CanonVisitor implements FragmentVisitor<TreeStm, Fragment<List<TreeStm>>> {
 
   @Override
   public Fragment<List<TreeStm>> visit(FragmentProc<TreeStm> fragProc) {
 
     List<TreeStm> canonBody = new LinkedList<TreeStm>();
-    canonBody.addAll(fragProc.body.accept(new CanonStm()));
+    canonBody.addAll(fragProc.body.accept(new CanonStmVisitor()));
     return new FragmentProc<List<TreeStm>>(fragProc.frame, canonBody);
   }
 

@@ -1,4 +1,4 @@
-package minijava.translate;
+package minijava.translate.layout;
 
 /**
  * Represents a piece of code that stores statements and their respective frame.

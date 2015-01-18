@@ -6,7 +6,7 @@ import java.util.List;
 
 import minijava.backend.i386.Operand;
 import minijava.backend.i386.visitors.AssemVisitor;
-import minijava.translate.Temp;
+import minijava.translate.layout.Temp;
 
 /**
  * Represents an assembly instruction with an arbitrary number of operands.

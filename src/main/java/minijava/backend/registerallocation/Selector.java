@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import minijava.translate.Temp;
+import minijava.translate.layout.Temp;
 import minijava.util.SimpleGraph;
 
 public class Selector {

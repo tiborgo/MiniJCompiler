@@ -1,7 +1,6 @@
 package minijava.translate.tree;
 
-import minijava.translate.Label;
-import minijava.translate.visitors.TreeExpVisitor;
+import minijava.translate.layout.Label;
 
 import java.util.Arrays;
 import java.util.LinkedList;
