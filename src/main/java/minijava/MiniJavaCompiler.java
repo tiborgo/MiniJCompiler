@@ -19,13 +19,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import minijava.backend.i386.I386MachineSpecifics;
-import minijava.backend.registerallocation.Allocator;
 import minijava.canonicalize.Canonicalizer;
 import minijava.instructionselection.InstructionSelector;
 import minijava.instructionselection.MachineSpecifics;
 import minijava.instructionselection.assems.Assem;
 import minijava.parse.Parser;
 import minijava.parse.rules.Program;
+import minijava.registerallocation.RegisterAllocator;
 import minijava.semanticanalysis.SemanticAnalyser;
 import minijava.translate.Translator;
 import minijava.translate.layout.Fragment;
@@ -118,7 +118,7 @@ public class MiniJavaCompiler {
 				//SimpleGraph<Temp> interferenceGraph = interferenceGraphs.get(i);
 				try {
 					FragmentProc<List<Assem>> frag = (FragmentProc<List<Assem>>)frags.get(i);
-					allocatedFrags.add(Allocator.allocate(frag, machineSpecifics));
+					allocatedFrags.add(RegisterAllocator.allocateRegisters(frag, machineSpecifics));
 				}
 				catch (ClassCastException e) {
 					throw new CompilerException("Can only alocate registers for FragementProc");
@@ -360,12 +360,8 @@ public class MiniJavaCompiler {
 		List<FragmentProc<TreeStm>> intermediate = Translator.translate(config, typedProgram, machineSpecifics);
 		List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = Canonicalizer.canonicalize(config, intermediate);
 		List<Fragment<List<Assem>>> assemFragments =  InstructionSelector.selectInstructions(config, intermediateCanonicalized, machineSpecifics);
-		//List<SimpleGraph<Assem>> controlFlowGraphs = generateControlFlowGraphs(assemFragments);
-		//List<SimpleGraph<Temp>> inferenceGraphs = generateInterferenceGraphs(controlFlowGraphs);
-
-		List<Fragment<List<Assem>>> allocatedFrags = allocateRegisters(config, assemFragments);
-
-		String assembly = generateAssembly(config, allocatedFrags);
+		List<Fragment<List<Assem>>> allocatedFragments = allocateRegisters(config, assemFragments);
+		String assembly = generateAssembly(config, allocatedFragments);
 		
 		compileAssembly(config, assembly);
 	}

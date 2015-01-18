@@ -1,4 +1,4 @@
-package minijava.backend.livenessanalysis;
+package minijava.flowanalysis;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -11,8 +11,8 @@ import minijava.translate.layout.FragmentProc;
 import minijava.translate.layout.Label;
 import minijava.util.SimpleGraph;
 
-public class ControlFlowGraphBuilder {
-	public static SimpleGraph<Assem> build(FragmentProc<List<Assem>> frag) {
+class ControlFlowGraphBuilder {
+	static SimpleGraph<Assem> build(FragmentProc<List<Assem>> frag) {
 
 		SimpleGraph<Assem> graph = new SimpleGraph<>(frag.frame.getName().toString());
 		List<SimpleGraph.Node<Assem>> jumps = new LinkedList<>();

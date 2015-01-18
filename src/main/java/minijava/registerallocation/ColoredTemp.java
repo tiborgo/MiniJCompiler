@@ -1,21 +1,21 @@
-package minijava.backend.registerallocation;
+package minijava.registerallocation;
 
 import minijava.translate.layout.Temp;
 
-public class ColoredTemp {
+class ColoredTemp {
 	public Temp color;
 	public final Temp temp;
 	
-	public ColoredTemp(Temp temp) {
+	ColoredTemp(Temp temp) {
 		this(temp, null);
 	}
 	
-	public ColoredTemp(Temp temp, Temp color) {
+	ColoredTemp(Temp temp, Temp color) {
 		this.color = color;
 		this.temp = temp;
 	}
 	
-	public boolean isColored() {
+	boolean isColored() {
 		return color != null;
 	}
  	
