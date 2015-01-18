@@ -25,7 +25,8 @@ public class Configuration {
 	@Option(name = "--debug", aliases = {"-d"}, usage = "Print information in case of exceptions")
 	public boolean debug;
 	
-	@Option(name = "--run-executable", aliases = {"-e"}, usage = "Runs the compiled executable", depends = {"--assembler"})
+	@Option(name = "--run-executable", aliases = {"-e"}, usage = "Runs the compiled executable",
+			forbids = {"--parse", "--semantic-analysis", "--translate", "--canonicalize", "--instruction-selection", "--register-allocation", "--code-emission"})
 	public boolean runExecutable;
 	
 	// steps of the compilation pipeline
