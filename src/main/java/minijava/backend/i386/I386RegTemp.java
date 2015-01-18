@@ -1,6 +1,6 @@
 package minijava.backend.i386;
 
-import minijava.intermediate.Temp;
+import minijava.translate.Temp;
 
 public class I386RegTemp extends Temp {
 	public final String name;

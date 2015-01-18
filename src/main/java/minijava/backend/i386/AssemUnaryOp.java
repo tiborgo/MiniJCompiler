@@ -8,8 +8,8 @@ import java.util.List;
 import minijava.backend.Assem;
 import minijava.backend.Instruction;
 import minijava.backend.i386.visitors.AssemVisitor;
-import minijava.intermediate.Label;
-import minijava.intermediate.Temp;
+import minijava.translate.Label;
+import minijava.translate.Temp;
 import minijava.util.Function;
 import minijava.util.Pair;
 

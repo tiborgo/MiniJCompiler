@@ -3,14 +3,14 @@ package minijava.backend.dummymachine;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import minijava.intermediate.Frame;
-import minijava.intermediate.Temp;
-import minijava.intermediate.Label;
-import minijava.intermediate.tree.TreeExp;
-import minijava.intermediate.tree.TreeExpTEMP;
-import minijava.intermediate.tree.TreeStm;
-import minijava.intermediate.tree.TreeStmMOVE;
-import minijava.intermediate.tree.TreeStmSEQ;
+import minijava.translate.Frame;
+import minijava.translate.Temp;
+import minijava.translate.Label;
+import minijava.translate.tree.TreeExp;
+import minijava.translate.tree.TreeExpTEMP;
+import minijava.translate.tree.TreeStm;
+import minijava.translate.tree.TreeStmMOVE;
+import minijava.translate.tree.TreeStmSEQ;
 
 final class DummyMachineFrame implements Frame {
 

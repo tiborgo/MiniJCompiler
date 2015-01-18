@@ -1,8 +1,8 @@
 package minijava.backend;
 
 import java.util.List;
-import minijava.intermediate.*;
-import minijava.intermediate.tree.TreeStm;
+import minijava.translate.*;
+import minijava.translate.tree.TreeStm;
 
 /**
  * Provides information about the target architecture of the compiler backend.

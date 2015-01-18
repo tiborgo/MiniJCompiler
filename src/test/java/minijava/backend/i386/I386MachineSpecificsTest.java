@@ -11,8 +11,8 @@ import minijava.backend.Assem;
 import minijava.backend.i386.AssemBinaryOp.Kind;
 import minijava.backend.i386.Operand.Imm;
 import minijava.backend.i386.Operand.Reg;
-import minijava.intermediate.Label;
-import minijava.intermediate.Temp;
+import minijava.translate.Label;
+import minijava.translate.Temp;
 
 import org.junit.Before;
 import org.junit.Test;

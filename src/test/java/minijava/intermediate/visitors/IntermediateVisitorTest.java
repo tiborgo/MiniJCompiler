@@ -21,11 +21,12 @@ import minijava.MiniJavaLexer;
 import minijava.MiniJavaParser;
 import minijava.backend.dummymachine.DummyMachineSpecifics;
 import minijava.backend.dummymachine.IntermediateToCmm;
-import minijava.intermediate.FragmentProc;
-import minijava.intermediate.canon.Canon;
-import minijava.intermediate.tree.TreeStm;
 import minijava.parse.rules.Program;
 import minijava.parse.visitors.ASTVisitor;
+import minijava.translate.FragmentProc;
+import minijava.translate.canon.Canon;
+import minijava.translate.tree.TreeStm;
+import minijava.translate.visitors.IntermediateVisitor;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CharStream;
