@@ -8,14 +8,14 @@ import java.util.Map;
 import minijava.backend.Assem;
 import minijava.backend.MachineSpecifics;
 import minijava.backend.i386.AssemBinaryOp.Kind;
-import minijava.intermediate.Fragment;
-import minijava.intermediate.FragmentProc;
-import minijava.intermediate.Frame;
-import minijava.intermediate.Frame.Location;
-import minijava.intermediate.Label;
-import minijava.intermediate.Temp;
-import minijava.intermediate.tree.TreeExp;
-import minijava.intermediate.tree.TreeStm;
+import minijava.translate.Fragment;
+import minijava.translate.FragmentProc;
+import minijava.translate.Frame;
+import minijava.translate.Label;
+import minijava.translate.Temp;
+import minijava.translate.Frame.Location;
+import minijava.translate.tree.TreeExp;
+import minijava.translate.tree.TreeStm;
 import minijava.util.Function;
 
 public class I386MachineSpecifics implements MachineSpecifics {

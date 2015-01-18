@@ -4,18 +4,18 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import minijava.intermediate.Frame;
-import minijava.intermediate.Label;
-import minijava.intermediate.Temp;
-import minijava.intermediate.tree.TreeExp;
-import minijava.intermediate.tree.TreeExpMEM;
-import minijava.intermediate.tree.TreeExpOP;
-import minijava.intermediate.tree.TreeExpTEMP;
-import minijava.intermediate.tree.TreeExpCONST;
-import minijava.intermediate.tree.TreeExpOP.Op;
-import minijava.intermediate.tree.TreeStm;
-import minijava.intermediate.tree.TreeStmMOVE;
-import minijava.intermediate.tree.TreeStmSEQ;
+import minijava.translate.Frame;
+import minijava.translate.Label;
+import minijava.translate.Temp;
+import minijava.translate.tree.TreeExp;
+import minijava.translate.tree.TreeExpCONST;
+import minijava.translate.tree.TreeExpMEM;
+import minijava.translate.tree.TreeExpOP;
+import minijava.translate.tree.TreeExpTEMP;
+import minijava.translate.tree.TreeStm;
+import minijava.translate.tree.TreeStmMOVE;
+import minijava.translate.tree.TreeStmSEQ;
+import minijava.translate.tree.TreeExpOP.Op;
 
 final class I386Frame implements Frame {
 

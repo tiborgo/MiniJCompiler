@@ -11,8 +11,8 @@ import minijava.backend.i386.I386PrintAssemblyVisitor;
 import minijava.backend.livenessanalysis.ControlFlowGraphBuilder;
 import minijava.backend.livenessanalysis.InterferenceGraphBuilder;
 import minijava.backend.livenessanalysis.LivenessSetsBuilder;
-import minijava.intermediate.FragmentProc;
-import minijava.intermediate.Temp;
+import minijava.translate.FragmentProc;
+import minijava.translate.Temp;
 import minijava.util.SimpleGraph;
 
 import org.apache.commons.lang3.StringUtils;

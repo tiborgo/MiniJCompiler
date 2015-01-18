@@ -10,8 +10,8 @@ import minijava.Configuration;
 import minijava.Logger;
 import minijava.backend.Assem;
 import minijava.backend.MachineSpecifics;
-import minijava.intermediate.FragmentProc;
-import minijava.intermediate.Temp;
+import minijava.translate.FragmentProc;
+import minijava.translate.Temp;
 import minijava.util.Function;
 import minijava.util.SimpleGraph;
 

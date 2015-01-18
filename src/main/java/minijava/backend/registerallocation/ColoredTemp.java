@@ -1,6 +1,6 @@
 package minijava.backend.registerallocation;
 
-import minijava.intermediate.Temp;
+import minijava.translate.Temp;
 
 public class ColoredTemp {
 	public Temp color;

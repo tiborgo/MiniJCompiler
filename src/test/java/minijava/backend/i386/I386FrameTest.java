@@ -1,9 +1,8 @@
 package minijava.backend.i386;
 
 import static org.junit.Assert.*;
-
-import minijava.intermediate.Frame.Location;
-import minijava.intermediate.Label;
+import minijava.translate.Label;
+import minijava.translate.Frame.Location;
 
 import org.junit.Before;
 import org.junit.Test;

@@ -3,16 +3,16 @@ package minijava.backend.dummymachine;
 import java.util.List;
 
 import minijava.backend.MachineSpecifics;
-import minijava.intermediate.Fragment;
-import minijava.intermediate.Frame;
-import minijava.intermediate.Temp;
-import minijava.intermediate.Label;
 import minijava.backend.Assem;
-import minijava.intermediate.tree.TreeStm;
+import minijava.translate.Fragment;
+import minijava.translate.Frame;
+import minijava.translate.Label;
+import minijava.translate.Temp;
+import minijava.translate.tree.TreeStm;
 
 /**
  * Dummy compiler target that does nothing.
- * All methods will raise an exception, except for {@link #getWordSize()} and {@link #newFrame(minijava.intermediate.Label, int)}.
+ * All methods will raise an exception, except for {@link #getWordSize()} and {@link #newFrame(minijava.translate.Label, int)}.
  */
 public class DummyMachineSpecifics implements MachineSpecifics {
 

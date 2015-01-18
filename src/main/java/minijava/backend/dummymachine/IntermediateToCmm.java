@@ -6,27 +6,27 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import minijava.intermediate.Fragment;
-import minijava.intermediate.FragmentProc;
-import minijava.intermediate.FragmentVisitor;
-import minijava.intermediate.Temp;
-import minijava.intermediate.tree.TreeExp;
-import minijava.intermediate.tree.TreeExpCALL;
-import minijava.intermediate.tree.TreeExpCONST;
-import minijava.intermediate.tree.TreeExpESEQ;
-import minijava.intermediate.tree.TreeExpMEM;
-import minijava.intermediate.tree.TreeExpNAME;
-import minijava.intermediate.tree.TreeExpOP;
-import minijava.intermediate.tree.TreeExpTEMP;
-import minijava.intermediate.tree.TreeStm;
-import minijava.intermediate.tree.TreeStmCJUMP;
-import minijava.intermediate.tree.TreeStmEXP;
-import minijava.intermediate.tree.TreeStmJUMP;
-import minijava.intermediate.tree.TreeStmLABEL;
-import minijava.intermediate.tree.TreeStmMOVE;
-import minijava.intermediate.tree.TreeStmSEQ;
-import minijava.intermediate.visitors.TreeExpVisitor;
-import minijava.intermediate.visitors.TreeStmVisitor;
+import minijava.translate.Fragment;
+import minijava.translate.FragmentProc;
+import minijava.translate.FragmentVisitor;
+import minijava.translate.Temp;
+import minijava.translate.tree.TreeExp;
+import minijava.translate.tree.TreeExpCALL;
+import minijava.translate.tree.TreeExpCONST;
+import minijava.translate.tree.TreeExpESEQ;
+import minijava.translate.tree.TreeExpMEM;
+import minijava.translate.tree.TreeExpNAME;
+import minijava.translate.tree.TreeExpOP;
+import minijava.translate.tree.TreeExpTEMP;
+import minijava.translate.tree.TreeStm;
+import minijava.translate.tree.TreeStmCJUMP;
+import minijava.translate.tree.TreeStmEXP;
+import minijava.translate.tree.TreeStmJUMP;
+import minijava.translate.tree.TreeStmLABEL;
+import minijava.translate.tree.TreeStmMOVE;
+import minijava.translate.tree.TreeStmSEQ;
+import minijava.translate.visitors.TreeExpVisitor;
+import minijava.translate.visitors.TreeStmVisitor;
 
 public class IntermediateToCmm {
 	
