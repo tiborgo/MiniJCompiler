@@ -4,8 +4,8 @@ import java.util.Collections;
 import java.util.List;
 
 import minijava.backend.i386.Operand;
-import minijava.translate.Label;
-import minijava.translate.Temp;
+import minijava.translate.layout.Label;
+import minijava.translate.layout.Temp;
 import minijava.util.Function;
 import minijava.util.Pair;
 

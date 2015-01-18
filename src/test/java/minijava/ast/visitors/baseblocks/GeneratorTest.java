@@ -5,8 +5,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import minijava.translate.Label;
 import minijava.translate.baseblocks.Generator;
+import minijava.translate.layout.Label;
 import minijava.translate.tree.TreeExpNAME;
 import minijava.translate.tree.TreeStm;
 import minijava.translate.tree.TreeStmJUMP;

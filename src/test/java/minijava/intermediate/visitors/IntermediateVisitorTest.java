@@ -21,10 +21,10 @@ import minijava.MiniJavaLexer;
 import minijava.MiniJavaParser;
 import minijava.backend.dummymachine.DummyMachineSpecifics;
 import minijava.backend.dummymachine.IntermediateToCmm;
+import minijava.canonicalize.visitors.CanonVisitor;
 import minijava.parse.rules.Program;
 import minijava.parse.visitors.ASTVisitor;
-import minijava.translate.FragmentProc;
-import minijava.translate.canon.Canon;
+import minijava.translate.layout.FragmentProc;
 import minijava.translate.tree.TreeStm;
 import minijava.translate.visitors.IntermediateVisitor;
 
@@ -67,7 +67,7 @@ public class IntermediateVisitorTest {
 				// TODO: Remove canonicalization step from test
 				List<FragmentProc<List<TreeStm>>> fragmentListCanonicalized = new ArrayList<>(fragmentList.size());
 				for (FragmentProc<TreeStm> fragment : fragmentList) {
-					fragmentListCanonicalized.add((FragmentProc<List<TreeStm>>) fragment.accept(new Canon()));
+					fragmentListCanonicalized.add((FragmentProc<List<TreeStm>>) fragment.accept(new CanonVisitor()));
 				}
 				String cCode = IntermediateToCmm.stmListFragmentsToCmm(fragmentListCanonicalized);
 				// -xc specifies the input language as C and is required for GCC to read from stdin

@@ -2,8 +2,7 @@ package minijava.translate.tree;
 
 import java.util.List;
 
-import minijava.translate.Label;
-import minijava.translate.visitors.TreeStmVisitor;
+import minijava.translate.layout.Label;
 
 public abstract class TreeStm {
 

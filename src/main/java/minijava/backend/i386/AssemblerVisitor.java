@@ -8,9 +8,9 @@ import minijava.backend.Assem;
 import minijava.backend.i386.AssemBinaryOp.Kind;
 import minijava.backend.i386.Operand.Mem;
 import minijava.backend.i386.visitors.OperandVisitor;
-import minijava.translate.FragmentProc;
-import minijava.translate.FragmentVisitor;
-import minijava.translate.Temp;
+import minijava.translate.layout.FragmentProc;
+import minijava.translate.layout.FragmentVisitor;
+import minijava.translate.layout.Temp;
 import minijava.translate.tree.TreeExp;
 import minijava.translate.tree.TreeExpCALL;
 import minijava.translate.tree.TreeExpCONST;
@@ -19,6 +19,7 @@ import minijava.translate.tree.TreeExpMEM;
 import minijava.translate.tree.TreeExpNAME;
 import minijava.translate.tree.TreeExpOP;
 import minijava.translate.tree.TreeExpTEMP;
+import minijava.translate.tree.TreeExpVisitor;
 import minijava.translate.tree.TreeStm;
 import minijava.translate.tree.TreeStmCJUMP;
 import minijava.translate.tree.TreeStmEXP;
@@ -26,8 +27,7 @@ import minijava.translate.tree.TreeStmJUMP;
 import minijava.translate.tree.TreeStmLABEL;
 import minijava.translate.tree.TreeStmMOVE;
 import minijava.translate.tree.TreeStmSEQ;
-import minijava.translate.visitors.TreeExpVisitor;
-import minijava.translate.visitors.TreeStmVisitor;
+import minijava.translate.tree.TreeStmVisitor;
 
 public class AssemblerVisitor implements
 	FragmentVisitor<List<TreeStm>, FragmentProc<List<Assem>>> {

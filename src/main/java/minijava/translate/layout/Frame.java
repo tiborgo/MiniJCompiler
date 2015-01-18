@@ -1,4 +1,4 @@
-package minijava.translate;
+package minijava.translate.layout;
 
 import minijava.translate.tree.TreeExp;
 import minijava.translate.tree.TreeStm;

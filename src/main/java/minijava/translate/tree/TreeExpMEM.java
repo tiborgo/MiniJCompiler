@@ -1,6 +1,5 @@
 package minijava.translate.tree;
 
-import minijava.translate.visitors.TreeExpVisitor;
 
 public class TreeExpMEM extends TreeExp {
   public final TreeExp addr;

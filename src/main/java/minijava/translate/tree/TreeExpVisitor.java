@@ -1,12 +1,5 @@
-package minijava.translate.visitors;
+package minijava.translate.tree;
 
-import minijava.translate.tree.TreeExpCALL;
-import minijava.translate.tree.TreeExpCONST;
-import minijava.translate.tree.TreeExpESEQ;
-import minijava.translate.tree.TreeExpMEM;
-import minijava.translate.tree.TreeExpNAME;
-import minijava.translate.tree.TreeExpOP;
-import minijava.translate.tree.TreeExpTEMP;
 
 public interface TreeExpVisitor<A, T extends Throwable> {
 

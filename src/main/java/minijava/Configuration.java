@@ -21,6 +21,12 @@ public class Configuration {
 	@Option(name = "--print-source-code", aliases = {"-sc"}, usage = "Pretty print the input source code", depends = "--verbose")
 	public boolean printSourceCode;
 	
+	@Option(name = "--print-intermediate", aliases = {"-i"}, usage = "Pretty print the input source code", depends = "--verbose")
+	public boolean printIntermediate;
+	
+	@Option(name = "--print-canonicalized-intermediate", aliases = {"-ci"}, usage = "Pretty print the input source code", depends = "--verbose")
+	public boolean printCanonicalzedIntermediate;
+	
 	@Option(name = "--print-pre-assembly", aliases = {"-pa"}, usage = "Prints the assembly with temporiaries and unspecified frame size", depends = "--verbose")
 	public boolean printPreAssembly;
 	

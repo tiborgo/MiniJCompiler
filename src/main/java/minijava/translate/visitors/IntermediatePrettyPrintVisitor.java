@@ -11,6 +11,7 @@ import minijava.translate.tree.TreeExpMEM;
 import minijava.translate.tree.TreeExpNAME;
 import minijava.translate.tree.TreeExpOP;
 import minijava.translate.tree.TreeExpTEMP;
+import minijava.translate.tree.TreeExpVisitor;
 import minijava.translate.tree.TreeStm;
 import minijava.translate.tree.TreeStmCJUMP;
 import minijava.translate.tree.TreeStmEXP;
@@ -18,6 +19,7 @@ import minijava.translate.tree.TreeStmJUMP;
 import minijava.translate.tree.TreeStmLABEL;
 import minijava.translate.tree.TreeStmMOVE;
 import minijava.translate.tree.TreeStmSEQ;
+import minijava.translate.tree.TreeStmVisitor;
 
 public class IntermediatePrettyPrintVisitor implements
 	TreeExpVisitor<String, RuntimeException>,

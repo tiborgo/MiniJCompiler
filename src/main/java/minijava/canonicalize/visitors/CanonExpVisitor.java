@@ -1,9 +1,9 @@
-package minijava.translate.canon;
+package minijava.canonicalize.visitors;
 
 import java.util.LinkedList;
 import java.util.List;
 
-import minijava.translate.Temp;
+import minijava.translate.layout.Temp;
 import minijava.translate.tree.TreeExp;
 import minijava.translate.tree.TreeExpCALL;
 import minijava.translate.tree.TreeExpCONST;
@@ -12,12 +12,12 @@ import minijava.translate.tree.TreeExpMEM;
 import minijava.translate.tree.TreeExpNAME;
 import minijava.translate.tree.TreeExpOP;
 import minijava.translate.tree.TreeExpTEMP;
+import minijava.translate.tree.TreeExpVisitor;
 import minijava.translate.tree.TreeStm;
 import minijava.translate.tree.TreeStmMOVE;
-import minijava.translate.visitors.TreeExpVisitor;
 import minijava.util.Pair;
 
-public class CanonExp implements TreeExpVisitor<Pair<List<TreeStm>, TreeExp>, RuntimeException> {
+public class CanonExpVisitor implements TreeExpVisitor<Pair<List<TreeStm>, TreeExp>, RuntimeException> {
 
   // canonicalize e and remove toplevel call
   Pair<List<TreeStm>, TreeExp> canonNoTopCALL(TreeExp e) {
@@ -58,7 +58,7 @@ public class CanonExp implements TreeExpVisitor<Pair<List<TreeStm>, TreeExp>, Ru
   public Pair<List<TreeStm>, TreeExp> visit(TreeExpOP expOP) {
     Pair<List<TreeStm>, TreeExp> cleft = canonNoTopCALL(expOP.left);
     Pair<List<TreeStm>, TreeExp> cright = canonNoTopCALL(expOP.right);
-    Pair<List<TreeStm>, Pair<TreeExp, TreeExp>> c = Canon.compose(cleft, cright);
+    Pair<List<TreeStm>, Pair<TreeExp, TreeExp>> c = CanonVisitor.compose(cleft, cright);
     return new Pair<List<TreeStm>, TreeExp>(c.fst, new TreeExpOP(expOP.op, c.snd.fst, c.snd.snd));
   }
 
@@ -72,9 +72,9 @@ public class CanonExp implements TreeExpVisitor<Pair<List<TreeStm>, TreeExp>, Ru
       cargs.add(canonNoTopCALL(arg));
     }
 
-    Pair<List<TreeStm>, List<TreeExp>> joinedArgs = Canon.compose(cargs);
+    Pair<List<TreeStm>, List<TreeExp>> joinedArgs = CanonVisitor.compose(cargs);
     Pair<List<TreeStm>, Pair<TreeExp, List<TreeExp>>> joinedFuncArgs =
-            Canon.compose(cfunc, joinedArgs);
+            CanonVisitor.compose(cfunc, joinedArgs);
 
     return new Pair<List<TreeStm>, TreeExp>(joinedFuncArgs.fst,
             new TreeExpCALL(joinedFuncArgs.snd.fst, joinedFuncArgs.snd.snd));
@@ -82,7 +82,7 @@ public class CanonExp implements TreeExpVisitor<Pair<List<TreeStm>, TreeExp>, Ru
 
   @Override
   public Pair<List<TreeStm>, TreeExp> visit(TreeExpESEQ expESEQ) {
-    List<TreeStm> cstm = expESEQ.stm.accept(new CanonStm());
+    List<TreeStm> cstm = expESEQ.stm.accept(new CanonStmVisitor());
     Pair<List<TreeStm>, TreeExp> cres = canonNoTopCALL(expESEQ.res);
     List<TreeStm> stms = new LinkedList<TreeStm>(cstm);
     stms.addAll(cres.fst);

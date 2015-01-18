@@ -1,4 +1,4 @@
-package minijava.translate;
+package minijava.translate.layout;
 
 public final class Label {
 

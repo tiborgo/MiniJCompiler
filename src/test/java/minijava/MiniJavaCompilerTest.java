@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.List;
 
 import minijava.backend.i386.I386MachineSpecifics;
-import minijava.translate.Label;
+import minijava.translate.layout.Label;
 
 import org.junit.Before;
 import org.junit.BeforeClass;

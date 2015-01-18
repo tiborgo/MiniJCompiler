@@ -1,4 +1,4 @@
-package minijava.translate.canon;
+package minijava.canonicalize.visitors;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -14,10 +14,10 @@ import minijava.translate.tree.TreeStmJUMP;
 import minijava.translate.tree.TreeStmLABEL;
 import minijava.translate.tree.TreeStmMOVE;
 import minijava.translate.tree.TreeStmSEQ;
-import minijava.translate.visitors.TreeStmVisitor;
+import minijava.translate.tree.TreeStmVisitor;
 import minijava.util.Pair;
 
-public class CanonStm implements TreeStmVisitor<List<TreeStm>, RuntimeException> {
+public class CanonStmVisitor implements TreeStmVisitor<List<TreeStm>, RuntimeException> {
 
   private List<TreeStm> canon(TreeStm s) {
     return s.accept(this);
@@ -25,12 +25,12 @@ public class CanonStm implements TreeStmVisitor<List<TreeStm>, RuntimeException>
 
   // canonicalize expression e, without removing top-level call
   private Pair<List<TreeStm>, TreeExp> canon(TreeExp e) {
-    return e.accept(new CanonExp());
+    return e.accept(new CanonExpVisitor());
   }
 
   // canonicalize expression e, removing top-level call
   private Pair<List<TreeStm>, TreeExp> canonNoTopCALL(TreeExp e) {
-    CanonExp ce = new CanonExp();
+    CanonExpVisitor ce = new CanonExpVisitor();
     return ce.canonNoTopCALL(e);
   }
 
@@ -40,7 +40,7 @@ public class CanonStm implements TreeStmVisitor<List<TreeStm>, RuntimeException>
       TreeExp addr = ((TreeExpMEM) stmMOVE.dest).addr;
       Pair<List<TreeStm>, TreeExp> caddr = canonNoTopCALL(addr);
       Pair<List<TreeStm>, TreeExp> csrc = canonNoTopCALL(stmMOVE.src);
-      Pair<List<TreeStm>, Pair<TreeExp, TreeExp>> c = Canon.compose(caddr, csrc);
+      Pair<List<TreeStm>, Pair<TreeExp, TreeExp>> c = CanonVisitor.compose(caddr, csrc);
       List<TreeStm> stms = new LinkedList<TreeStm>();
       stms.addAll(c.fst);
       stms.add(new TreeStmMOVE(new TreeExpMEM(c.snd.fst), c.snd.snd));
@@ -79,7 +79,7 @@ public class CanonStm implements TreeStmVisitor<List<TreeStm>, RuntimeException>
   public List<TreeStm> visit(TreeStmCJUMP stmCJUMP) {
     Pair<List<TreeStm>, TreeExp> cleft = canonNoTopCALL(stmCJUMP.left);
     Pair<List<TreeStm>, TreeExp> cright = canonNoTopCALL(stmCJUMP.right);
-    Pair<List<TreeStm>, Pair<TreeExp, TreeExp>> j = Canon.compose(cleft, cright);
+    Pair<List<TreeStm>, Pair<TreeExp, TreeExp>> j = CanonVisitor.compose(cleft, cright);
     TreeExp jleft = j.snd.fst;
     TreeExp jright = j.snd.snd;
     List<TreeStm> stms = new LinkedList<TreeStm>(j.fst);
