@@ -9,10 +9,8 @@ import java.util.Collection;
 import java.util.List;
 
 import minijava.backend.i386.I386MachineSpecifics;
-import minijava.translate.layout.Label;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -27,16 +25,6 @@ public class MiniJavaRunTest {
 		files.addAll(TestFiles.getWorkingFiles(TestFiles.EXAMPLE_PROGRAM_PATH_WORKING));
 		files.addAll(TestFiles.getFailingFiles(TestFiles.EXAMPLE_PROGRAM_PATH_RUNTIME_FAILING));
 		return files;
-	}
-
-	@BeforeClass
-	public static void setUpClass() {
-		String osName = System.getProperty("os.name").toLowerCase();
-		if (osName.contains("mac")) {
-			Label.leadingUnderscore = true;
-		} else {
-			Label.leadingUnderscore = false;
-		}
 	}
 
 	private File file;
