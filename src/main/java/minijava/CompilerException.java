@@ -3,9 +3,9 @@ package minijava;
 public class CompilerException extends Exception {
 
 	/**
-	 *
+	 * 
 	 */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 819352314221235648L;
 
 	public CompilerException(String message) {
 		super(message);

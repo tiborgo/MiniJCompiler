@@ -23,38 +23,38 @@ import minijava.MiniJavaParser.StatementContext;
 import minijava.MiniJavaParser.ThisExpressionContext;
 import minijava.MiniJavaParser.TrueExpressionContext;
 import minijava.MiniJavaParser.VarDeclarationContext;
-import minijava.ast.rules.declarations.Main;
-import minijava.ast.rules.declarations.Method;
-import minijava.ast.rules.declarations.Variable;
-import minijava.ast.rules.expressions.Expression;
-import minijava.ast.rules.expressions.ArrayGet;
-import minijava.ast.rules.expressions.ArrayLength;
-import minijava.ast.rules.expressions.BinOp;
-import minijava.ast.rules.expressions.False;
-import minijava.ast.rules.expressions.Id;
-import minijava.ast.rules.expressions.IntConstant;
-import minijava.ast.rules.expressions.Invoke;
-import minijava.ast.rules.expressions.Negate;
-import minijava.ast.rules.expressions.New;
-import minijava.ast.rules.expressions.NewIntArray;
-import minijava.ast.rules.expressions.This;
-import minijava.ast.rules.expressions.True;
-import minijava.ast.rules.Parameter;
-import minijava.ast.rules.Program;
-import minijava.ast.rules.statements.Statement;
-import minijava.ast.rules.statements.ArrayAssignment;
-import minijava.ast.rules.statements.Assignment;
-import minijava.ast.rules.statements.If;
-import minijava.ast.rules.statements.StatementList;
-import minijava.ast.rules.statements.PrintChar;
-import minijava.ast.rules.statements.PrintlnInt;
-import minijava.ast.rules.statements.While;
-import minijava.ast.rules.types.Type;
-import minijava.ast.rules.types.Array;
-import minijava.ast.rules.types.Boolean;
-import minijava.ast.rules.types.Class;
-import minijava.ast.rules.types.Integer;
-import minijava.ast.rules.expressions.BinOp.Op;
+import minijava.parse.rules.Parameter;
+import minijava.parse.rules.Program;
+import minijava.parse.rules.declarations.Main;
+import minijava.parse.rules.declarations.Method;
+import minijava.parse.rules.declarations.Variable;
+import minijava.parse.rules.expressions.ArrayGet;
+import minijava.parse.rules.expressions.ArrayLength;
+import minijava.parse.rules.expressions.BinOp;
+import minijava.parse.rules.expressions.Expression;
+import minijava.parse.rules.expressions.False;
+import minijava.parse.rules.expressions.Id;
+import minijava.parse.rules.expressions.IntConstant;
+import minijava.parse.rules.expressions.Invoke;
+import minijava.parse.rules.expressions.Negate;
+import minijava.parse.rules.expressions.New;
+import minijava.parse.rules.expressions.NewIntArray;
+import minijava.parse.rules.expressions.This;
+import minijava.parse.rules.expressions.True;
+import minijava.parse.rules.expressions.BinOp.Op;
+import minijava.parse.rules.statements.ArrayAssignment;
+import minijava.parse.rules.statements.Assignment;
+import minijava.parse.rules.statements.If;
+import minijava.parse.rules.statements.PrintChar;
+import minijava.parse.rules.statements.PrintlnInt;
+import minijava.parse.rules.statements.Statement;
+import minijava.parse.rules.statements.StatementList;
+import minijava.parse.rules.statements.While;
+import minijava.parse.rules.types.Array;
+import minijava.parse.rules.types.Boolean;
+import minijava.parse.rules.types.Class;
+import minijava.parse.rules.types.Integer;
+import minijava.parse.rules.types.Type;
 
 import org.antlr.v4.runtime.misc.NotNull;
 
@@ -63,9 +63,9 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 	@Override
 	public Object visitProg(@NotNull MiniJavaParser.ProgContext ctx) {
 
-		LinkedList<minijava.ast.rules.declarations.Class> classes = new LinkedList<>();
+		LinkedList<minijava.parse.rules.declarations.Class> classes = new LinkedList<>();
 		for (ClassDeclarationContext classDeclCtx : ctx.classDeclaration()) {
-			classes.add((minijava.ast.rules.declarations.Class) visit(classDeclCtx));
+			classes.add((minijava.parse.rules.declarations.Class) visit(classDeclCtx));
 		}
 		
 		Main mainClass = (Main) visit(ctx.mainClass());
@@ -234,7 +234,7 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 			Method method = (Method) visit(methodRaw);
 			methods.add(method);
 		}
-		return new minijava.ast.rules.declarations.Class(className, superClassName, fields, methods);
+		return new minijava.parse.rules.declarations.Class(className, superClassName, fields, methods);
 	}
 
 	@Override
