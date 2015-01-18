@@ -30,8 +30,8 @@ public class Allocator {
 		SimpleGraph<ColoredTemp> graph;
 
 		do {
-			//Logger.logVerbose("#################");
-			//Logger.logVerbose(frag.frame.getName().toString());
+			Logger.logVerbose("#################");
+			Logger.logVerbose(frag.frame.getName().toString());
 
 			// BUILD
 			graph = Builder.build(colors, allocatedFrag);
@@ -68,7 +68,7 @@ public class Allocator {
 			// rewrite program
 			allocatedFrag = new FragmentProc<>(allocatedFrag.frame, machineSpecifics.spill(allocatedFrag.frame, allocatedFrag.body, spillNodes));
 
-			//Logger.logVerbose("Register allocator round " + counter + ", " + spillNodes.size() + " spill nodes " + spillNodes);
+			Logger.logVerbose("Register allocator round " + counter + ", " + spillNodes.size() + " spill nodes " + spillNodes);
 			//System.out.println(machineSpecifics.printAssembly(Arrays.<Fragment<List<Assem>>>asList(allocatedFrag)));+
 
 			// START OVER
