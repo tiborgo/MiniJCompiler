@@ -19,7 +19,8 @@ public class Translator {
 			IntermediateVisitor intermediateVisitor = new IntermediateVisitor(machineSpecifics, program);
 			List<FragmentProc<TreeStm>> procFragements = program.accept(intermediateVisitor);
 
-			String intermediateOutput = null;
+			Logger.logVerbosely("Successfully generated intermediate language");
+			
 			if (config.printIntermediate) {
 				StringBuilder intermediateOutputBuilder = new StringBuilder();
 				for (FragmentProc<TreeStm> frag : procFragements) {
@@ -29,10 +30,8 @@ public class Translator {
 						.append("-----")
 						.append(System.lineSeparator());
 				}
-				intermediateOutput = intermediateOutputBuilder.toString();
+				Logger.log(intermediateOutputBuilder.toString());
 			}
-
-			Logger.logVerbosely("Successfully generated intermediate language", intermediateOutput);
 
 			return procFragements;
 		}

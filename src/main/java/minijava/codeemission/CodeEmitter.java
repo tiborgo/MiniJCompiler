@@ -24,7 +24,11 @@ public class CodeEmitter {
 				out.close();
 			}
 			
-			Logger.logVerbosely("Successfully generated assembly", (config.printAssembly) ? assembly : null);
+			Logger.logVerbosely("Successfully generated assembly");
+			
+			if (config.printAssembly) {
+				Logger.log(assembly);
+			}
 			
 			return assembly;
 		}

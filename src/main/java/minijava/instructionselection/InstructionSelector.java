@@ -23,12 +23,11 @@ public class InstructionSelector {
 				assemFragments.add(machineSpecifics.codeGen(fragment));
 			}
 
-			String assembly = null;
+			Logger.logVerbosely("Successfully generated assembly");
+			
 			if (config.printPreAssembly) {
-				assembly = machineSpecifics.printAssembly(assemFragments);
+				Logger.log(machineSpecifics.printAssembly(assemFragments));
 			}
-
-			Logger.logVerbosely("Successfully generated assembly", assembly);
 
 			return assemFragments;
 		}

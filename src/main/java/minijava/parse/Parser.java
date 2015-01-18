@@ -28,12 +28,11 @@ public class Parser {
 			ASTVisitor astVisitor = new ASTVisitor();
 			Program program = (Program) astVisitor.visit(parseTree);
 			
-			String sourceCodeOutput = null;
+			Logger.logVerbosely("Successfully parsed input file");
+			
 			if (config.printSourceCode) {
-				sourceCodeOutput = program.accept(new PrettyPrintVisitor(""));
+				Logger.log(program.accept(new PrettyPrintVisitor("")));
 			}
-
-			Logger.logVerbosely("Successfully parsed input file", sourceCodeOutput);
 			
 			return program;
 		}
