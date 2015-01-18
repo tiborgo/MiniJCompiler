@@ -4,11 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -18,8 +16,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import minijava.assembler.Assembler;
 import minijava.backend.i386.I386MachineSpecifics;
 import minijava.canonicalize.Canonicalizer;
+import minijava.codeemission.CodeEmitter;
 import minijava.instructionselection.InstructionSelector;
 import minijava.instructionselection.MachineSpecifics;
 import minijava.instructionselection.assems.Assem;
@@ -37,18 +37,12 @@ import minijava.util.SimpleGraph;
 //import java.nio.file.Files;
 
 public class MiniJavaCompiler {
-	private static final Path RUNTIME_DIRECTORY = Paths.get("src/main/resources/minijava/runtime");
+	public static final Path RUNTIME_DIRECTORY = Paths.get("src/main/resources/minijava/runtime");
+	
 	private final MachineSpecifics machineSpecifics;
 
 	public MiniJavaCompiler(MachineSpecifics machineSpecifics) {
 		this.machineSpecifics = machineSpecifics;
-	}
-
-	/**
-	 * @deprecated
-	 */
-	private void printVerbose(String... infos) {	
-		Logger.logVerbosely(infos);
 	}
 
 	// Compiler pipeline
@@ -165,61 +159,17 @@ public class MiniJavaCompiler {
 
 		return graphOutput.toString();
 	}
-
-	private String generateAssembly (Configuration config, List<Fragment<List<Assem>>> assemFragments) throws CompilerException {
-		try {
-
-			String assembly = machineSpecifics.printAssembly(assemFragments);;
-			
-			printVerbose("Successfully generated assembly", (config.printAssembly) ? assembly : null);
-			
-			return assembly;
-		}
-		catch (Exception e) {
-			// TODO: proper exception
-			throw new CompilerException("Failed to generate assembly", e);
-		}
-	}
 	
-	private void compileAssembly (Configuration config, String assembly) throws CompilerException {
+	public void compile(Configuration config) throws CompilerException {
 		
-		try {
-			// -xc specifies the input language as C and is required for GCC to read from stdin
-			ProcessBuilder processBuilder = new ProcessBuilder("gcc", "-o", config.outputFile, "-m32", "-xc", "runtime_32.c", "-m32", "-xassembler", "-");
-			processBuilder.directory(RUNTIME_DIRECTORY.toFile());
-			Process gccCall = processBuilder.start();
-			// Write C code to stdin of C Compiler
-			OutputStream stdin = gccCall.getOutputStream();
-			stdin.write(assembly.getBytes());
-			stdin.close();
-
-			gccCall.waitFor();
-
-			// Print error messages of GCC
-			if (gccCall.exitValue() != 0) {
-
-				StringBuilder errOutput = new StringBuilder();
-				InputStream stderr = gccCall.getErrorStream();
-				String line;
-				BufferedReader bufferedStderr = new BufferedReader(new InputStreamReader(stderr));
-				while ((line = bufferedStderr.readLine()) != null) {
-					errOutput.append(line + System.lineSeparator());
-				}
-				bufferedStderr.close();
-				stderr.close();
-
-				throw new CompilerException("Failed to compile assembly:" + System.lineSeparator() + errOutput.toString());
-			}
-
-			printVerbose("Successfully compiled assembly");
-		}
-		catch (IOException e) {
-			throw new CompilerException("Failed to transfer assembly to gcc", e);
-		}
-		catch (InterruptedException e) {
-			throw new CompilerException("Failed to invoke gcc", e);
-		}
-
+		Program program = Parser.parse(config);
+		Program typedProgram = SemanticAnalyser.analyseSemantics(config, program);
+		List<FragmentProc<TreeStm>> intermediate = Translator.translate(config, typedProgram, machineSpecifics);
+		List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = Canonicalizer.canonicalize(config, intermediate);
+		List<Fragment<List<Assem>>> assemFragments =  InstructionSelector.selectInstructions(config, intermediateCanonicalized, machineSpecifics);
+		List<Fragment<List<Assem>>> allocatedFragments = RegisterAllocator.allocateRegisters(assemFragments, machineSpecifics);
+		String assembly = CodeEmitter.emitCode(config, allocatedFragments, machineSpecifics);
+		Assembler.assemble(config, assembly);
 	}
 
 	public int runExecutable(Configuration config, int timeOut_s) throws RunException {
@@ -266,8 +216,6 @@ public class MiniJavaCompiler {
 			finally {
 			    service.shutdown();
 			}
-
-			
 
 			String line;
 
@@ -319,22 +267,6 @@ public class MiniJavaCompiler {
 			throw new RunException("Failed to read output of compiled executable", e);
 		}
 	}
-	
-	public void compile(Configuration config) throws CompilerException {
-		
-		Program program = Parser.parse(config);
-		Program typedProgram = SemanticAnalyser.analyseSemantics(config, program);
-		List<FragmentProc<TreeStm>> intermediate = Translator.translate(config, typedProgram, machineSpecifics);
-		List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = Canonicalizer.canonicalize(config, intermediate);
-		List<Fragment<List<Assem>>> assemFragments =  InstructionSelector.selectInstructions(config, intermediateCanonicalized, machineSpecifics);
-		List<Fragment<List<Assem>>> allocatedFragments = RegisterAllocator.allocateRegisters(assemFragments, machineSpecifics);
-		
-		String assembly = generateAssembly(config, allocatedFragments);
-		
-		compileAssembly(config, assembly);
-	}
-
-
 
 	public static void main (String[] args) {
 		
