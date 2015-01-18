@@ -42,23 +42,15 @@ public class Configuration {
 	@Option(name = "--debug", aliases = {"-d"})
 	public boolean debug;
 	
-	private static Configuration instance;
-	
-	private Configuration() {
+	public Configuration(String[] args) {
 		
-	}
-	
-	public static boolean initialize(String[] args) {
-		
-		instance = new Configuration();
-		CmdLineParser commandLineParser = new CmdLineParser(instance);
+		CmdLineParser commandLineParser = new CmdLineParser(this);
 		
 		if (args.length == 0) {
 	    	System.out.println("java MiniJavaCompiler [options...] input_file");
 			System.out.println("Options:");
 			commandLineParser.printUsage(System.out);
-			instance = null;
-			return false;
+			throw new IllegalArgumentException("Not enough arguments");
 	    }
 	    else {
 			
@@ -68,20 +60,10 @@ public class Configuration {
 			}
 			catch(CmdLineException e) {
 				System.err.println(e.getMessage());
-				instance = null;
-				return false;
+				throw new IllegalArgumentException("Failed parsing arguments", e);
 			}
 			
-			return true;
+			Logger.setVerbose(verbose);
 	    }
-	}
-	
-	public static Configuration getInstance() {
-		if (instance != null) {
-			return instance;
-		}
-		else {
-			throw new IllegalStateException("Configuration has not been initialized");
-		}
 	}
 }

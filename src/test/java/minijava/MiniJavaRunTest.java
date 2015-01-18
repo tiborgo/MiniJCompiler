@@ -58,12 +58,12 @@ public class MiniJavaRunTest {
 
 		System.out.println("Testing compiler input from file \"" + file.toString() + "\"");
 		
-		Configuration.initialize(new String[]{file.toString()});
+		Configuration config = new Configuration(new String[]{file.toString()});
 		
-		compiler.compile(Configuration.getInstance());
+		compiler.compile(config);
 		
 		try {
-			if(compiler.runExecutable(10) == 0) {
+			if(compiler.runExecutable(config, 10) == 0) {
 				if (!works) {
 					fail("The example " + file.toString() + " should have failed, but ran successfully.");
 				}
