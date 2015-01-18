@@ -62,7 +62,7 @@ public class Builder {
 			.append("Max interference: ")
 			.append(maxInterference);
 		
-		Logger.logVerbose(inOutStringBuilder.toString());
+		Logger.logVerbosely(inOutStringBuilder.toString());
 
 
 		SimpleGraph<ColoredTemp> preColoredGraph = new SimpleGraph<>(interferenceGraph.getName());

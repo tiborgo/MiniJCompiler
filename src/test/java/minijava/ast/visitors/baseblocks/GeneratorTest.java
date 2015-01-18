@@ -5,12 +5,13 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-
 import minijava.intermediate.Label;
+import minijava.intermediate.baseblocks.Generator;
 import minijava.intermediate.tree.TreeExpNAME;
 import minijava.intermediate.tree.TreeStm;
 import minijava.intermediate.tree.TreeStmJUMP;
 import minijava.intermediate.tree.TreeStmLABEL;
+
 import org.junit.Test;
 
 public class GeneratorTest {

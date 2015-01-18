@@ -8,36 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import minijava.ast.rules.Program;
-import minijava.ast.rules.ProgramVisitor;
-import minijava.ast.rules.declarations.DeclarationVisitor;
-import minijava.ast.rules.declarations.Main;
-import minijava.ast.rules.declarations.MainMethod;
-import minijava.ast.rules.declarations.Method;
-import minijava.ast.rules.declarations.Variable;
-import minijava.ast.rules.expressions.ArrayGet;
-import minijava.ast.rules.expressions.ArrayLength;
-import minijava.ast.rules.expressions.BinOp;
-import minijava.ast.rules.expressions.Expression;
-import minijava.ast.rules.expressions.ExpressionVisitor;
-import minijava.ast.rules.expressions.False;
-import minijava.ast.rules.expressions.Id;
-import minijava.ast.rules.expressions.IntConstant;
-import minijava.ast.rules.expressions.Invoke;
-import minijava.ast.rules.expressions.Negate;
-import minijava.ast.rules.expressions.New;
-import minijava.ast.rules.expressions.NewIntArray;
-import minijava.ast.rules.expressions.This;
-import minijava.ast.rules.expressions.True;
-import minijava.ast.rules.statements.ArrayAssignment;
-import minijava.ast.rules.statements.Assignment;
-import minijava.ast.rules.statements.If;
-import minijava.ast.rules.statements.PrintChar;
-import minijava.ast.rules.statements.PrintlnInt;
-import minijava.ast.rules.statements.Statement;
-import minijava.ast.rules.statements.StatementList;
-import minijava.ast.rules.statements.StatementVisitor;
-import minijava.ast.rules.statements.While;
 import minijava.backend.MachineSpecifics;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.Frame;
@@ -60,12 +30,42 @@ import minijava.intermediate.tree.TreeStmJUMP;
 import minijava.intermediate.tree.TreeStmLABEL;
 import minijava.intermediate.tree.TreeStmMOVE;
 import minijava.intermediate.tree.TreeStmSEQ;
+import minijava.parse.rules.Program;
+import minijava.parse.rules.ProgramVisitor;
+import minijava.parse.rules.declarations.DeclarationVisitor;
+import minijava.parse.rules.declarations.Main;
+import minijava.parse.rules.declarations.MainMethod;
+import minijava.parse.rules.declarations.Method;
+import minijava.parse.rules.declarations.Variable;
+import minijava.parse.rules.expressions.ArrayGet;
+import minijava.parse.rules.expressions.ArrayLength;
+import minijava.parse.rules.expressions.BinOp;
+import minijava.parse.rules.expressions.Expression;
+import minijava.parse.rules.expressions.ExpressionVisitor;
+import minijava.parse.rules.expressions.False;
+import minijava.parse.rules.expressions.Id;
+import minijava.parse.rules.expressions.IntConstant;
+import minijava.parse.rules.expressions.Invoke;
+import minijava.parse.rules.expressions.Negate;
+import minijava.parse.rules.expressions.New;
+import minijava.parse.rules.expressions.NewIntArray;
+import minijava.parse.rules.expressions.This;
+import minijava.parse.rules.expressions.True;
+import minijava.parse.rules.statements.ArrayAssignment;
+import minijava.parse.rules.statements.Assignment;
+import minijava.parse.rules.statements.If;
+import minijava.parse.rules.statements.PrintChar;
+import minijava.parse.rules.statements.PrintlnInt;
+import minijava.parse.rules.statements.Statement;
+import minijava.parse.rules.statements.StatementList;
+import minijava.parse.rules.statements.StatementVisitor;
+import minijava.parse.rules.statements.While;
 
 public class IntermediateVisitor implements
 		ProgramVisitor<List<FragmentProc<TreeStm>>, RuntimeException>,
 		DeclarationVisitor<List<FragmentProc<TreeStm>>, RuntimeException> {
 	
-	private minijava.ast.rules.declarations.Class classContext;
+	private minijava.parse.rules.declarations.Class classContext;
 	private Method methodContext;
 	private final MachineSpecifics  machineSpecifics;
 	private final Map<String, TreeExp> classTemps;
@@ -82,12 +82,12 @@ public class IntermediateVisitor implements
 	@Override
 	public List<FragmentProc<TreeStm>> visit(Program p) throws RuntimeException {
 
-		for(minijava.ast.rules.declarations.Class clazz : p.getClasses()) {
+		for(minijava.parse.rules.declarations.Class clazz : p.getClasses()) {
 			memoryFootprint.put(clazz.className, clazz.fields.size() * machineSpecifics.getWordSize() + 4);
 		}
 
 		List<FragmentProc<TreeStm>> classes = new LinkedList<>();
-		for(minijava.ast.rules.declarations.Class clazz : p.getClasses()) {
+		for(minijava.parse.rules.declarations.Class clazz : p.getClasses()) {
 			classes.addAll(clazz.accept(this));
 		}
 
@@ -95,7 +95,7 @@ public class IntermediateVisitor implements
 	}
 
 	@Override
-	public List<FragmentProc<TreeStm>> visit(minijava.ast.rules.declarations.Class c) throws RuntimeException {
+	public List<FragmentProc<TreeStm>> visit(minijava.parse.rules.declarations.Class c) throws RuntimeException {
 		classContext = c;
 
 		// Methods
@@ -112,7 +112,7 @@ public class IntermediateVisitor implements
 	@Override
 	public List<FragmentProc<TreeStm>> visit(Main d) throws RuntimeException {
 		// Treat main class like a regular class
-		return visit((minijava.ast.rules.declarations.Class) d);
+		return visit((minijava.parse.rules.declarations.Class) d);
 	}
 
 	@Override
@@ -214,7 +214,7 @@ public class IntermediateVisitor implements
 
 		public IntermediateVisitorExpStm(Map<String, TreeExp> temps,
 				MachineSpecifics machineSpecifics,
-				minijava.ast.rules.declarations.Class classContext,
+				minijava.parse.rules.declarations.Class classContext,
 				Method methodContext,
 				Map<String, java.lang.Integer> memoryFootprint,
 				Program symbolTable,
@@ -418,7 +418,7 @@ public class IntermediateVisitor implements
 			
 			TreeExp object = e.obj.accept(this);
 			
-			String className = ((minijava.ast.rules.types.Class) e.obj.type).c;
+			String className = ((minijava.parse.rules.types.Class) e.obj.type).c;
 			String methodName = e.method;
 
 			TreeExp function = new TreeExpNAME(new Label(mangle(className,

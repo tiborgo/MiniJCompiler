@@ -6,9 +6,9 @@ import minijava.Configuration;
 import minijava.Logger;
 import minijava.MiniJavaLexer;
 import minijava.MiniJavaParser;
-import minijava.ast.rules.Program;
-import minijava.ast.visitors.PrettyPrintVisitor;
+import minijava.parse.rules.Program;
 import minijava.parse.visitors.ASTVisitor;
+import minijava.parse.visitors.PrettyPrintVisitor;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CharStream;
@@ -33,7 +33,7 @@ public class Parser {
 				sourceCodeOutput = program.accept(new PrettyPrintVisitor(""));
 			}
 
-			Logger.logVerbose("Successfully parsed input file", sourceCodeOutput);
+			Logger.logVerbosely("Successfully parsed input file", sourceCodeOutput);
 			
 			return program;
 		}

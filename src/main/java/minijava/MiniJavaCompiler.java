@@ -19,26 +19,26 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import minijava.ast.rules.Program;
-import minijava.ast.visitors.TypeCheckVisitor;
-import minijava.ast.visitors.TypeInferenceVisitor;
-import minijava.ast.visitors.baseblocks.BaseBlock;
-import minijava.ast.visitors.baseblocks.Generator;
-import minijava.ast.visitors.baseblocks.ToTreeStmConverter;
-import minijava.ast.visitors.baseblocks.Tracer;
 import minijava.backend.Assem;
 import minijava.backend.MachineSpecifics;
 import minijava.backend.i386.I386MachineSpecifics;
-import minijava.backend.livenessanalysis.ControlFlowGraphBuilder;
 import minijava.backend.registerallocation.Allocator;
 import minijava.intermediate.Fragment;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.Label;
+import minijava.intermediate.baseblocks.BaseBlock;
+import minijava.intermediate.baseblocks.Generator;
+import minijava.intermediate.baseblocks.ToTreeStmConverter;
+import minijava.intermediate.baseblocks.Tracer;
 import minijava.intermediate.canon.Canon;
 import minijava.intermediate.tree.TreeStm;
 import minijava.intermediate.visitors.IntermediatePrettyPrintVisitor;
 import minijava.intermediate.visitors.IntermediateVisitor;
 import minijava.parse.Parser;
+import minijava.parse.rules.Program;
+import minijava.semanticanalysis.SemanticAnalyser;
+import minijava.semanticanalysis.visitors.TypeCheckVisitor;
+import minijava.semanticanalysis.visitors.TypeInferenceVisitor;
 import minijava.util.SimpleGraph;
 
 //import java.nio.file.Files;
@@ -55,39 +55,12 @@ public class MiniJavaCompiler {
 	 * @deprecated
 	 */
 	private void printVerbose(String... infos) {	
-		Logger.logVerbose(infos);
+		Logger.logVerbosely(infos);
 	}
 
 	// Compiler pipeline
 
-	private Program inferTypes(Configuration config, Program program) throws CompilerException {
-
-		try {
-			TypeInferenceVisitor typeInferenceVisitor = new TypeInferenceVisitor();
-			program.accept(typeInferenceVisitor);
-
-			printVerbose("Successfully built symbol table");
-
-			return program;
-		}
-		catch (Exception e) {
-			// TODO: Proper exceptions
-			throw new CompilerException("Failed to create symbol table", e);
-		}
-	}
-
-	private void checkTypes(Configuration config, Program program) throws CompilerException {
-
-		TypeCheckVisitor typeCheckVisitor = new TypeCheckVisitor();
-		if (program.accept(typeCheckVisitor)) {
-
-			printVerbose("Successfully checked types");
-
-		} else {
-			// TODO: Proper exceptions
-			throw new CompilerException("Type check failed");
-		}
-	}
+	
 
 	private List<FragmentProc<TreeStm>> generateIntermediate(Configuration config, Program program) throws CompilerException {
 
@@ -165,29 +138,6 @@ public class MiniJavaCompiler {
 		catch (Exception e) {
 			// TODO: proper exception
 			throw new CompilerException("Failed to generate assembly", e);
-		}
-	}
-
-	private List<SimpleGraph<Assem>> generateControlFlowGraphs (Configuration config, List<Fragment<List<Assem>>> assemFragments) throws CompilerException {
-
-		try {
-			List<SimpleGraph<Assem>> controlFlowGraphs = new ArrayList<>(assemFragments.size());
-			for (Fragment<List<Assem>> frag : assemFragments) {
-				controlFlowGraphs.add(ControlFlowGraphBuilder.build((FragmentProc<List<Assem>>) frag));
-			}
-
-			String graphOutput = null;
-			if (config.printControlFlowGraphs) {
-				graphOutput = simpleGraphsToString(controlFlowGraphs);
-			}
-
-			printVerbose("Successfully generated control flow graphs", graphOutput);
-
-			return controlFlowGraphs;
-		}
-		catch (Exception e) {
-			// TODO: proper exception
-			throw new CompilerException("Failed to generate control flow graph", e);
 		}
 	}
 
@@ -485,9 +435,8 @@ public class MiniJavaCompiler {
 	
 	public void compile(Configuration config) throws CompilerException {
 		Program program = Parser.parse(config);
-		Program symbolTable = inferTypes(config, program);
-		checkTypes(config, program);
-		List<FragmentProc<TreeStm>> intermediate = generateIntermediate(config, program);
+		Program typedProgram = SemanticAnalyser.analyseSemantics(config, program);
+		List<FragmentProc<TreeStm>> intermediate = generateIntermediate(config, typedProgram);
 		List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = canonicalize(config, intermediate);
 		List<Fragment<List<Assem>>> assemFragments = generatePreAssembly(config, intermediateCanonicalized);
 		//List<SimpleGraph<Assem>> controlFlowGraphs = generateControlFlowGraphs(assemFragments);

@@ -19,12 +19,12 @@ import java.util.List;
 import static org.junit.Assert.fail;
 import minijava.MiniJavaLexer;
 import minijava.MiniJavaParser;
-import minijava.ast.rules.Program;
 import minijava.backend.dummymachine.DummyMachineSpecifics;
 import minijava.backend.dummymachine.IntermediateToCmm;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.canon.Canon;
 import minijava.intermediate.tree.TreeStm;
+import minijava.parse.rules.Program;
 import minijava.parse.visitors.ASTVisitor;
 
 import org.antlr.v4.runtime.ANTLRFileStream;

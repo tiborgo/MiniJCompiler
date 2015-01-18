@@ -12,7 +12,7 @@ public class Logger {
 		System.out.println("-------------------------");
 	}
 	
-	public static void logVerbose(String... messages) {
+	public static void logVerbosely(String... messages) {
 		if (verbose) {
 			printDelimiter();
 			for (int i = 0; i < messages.length; i++) {
