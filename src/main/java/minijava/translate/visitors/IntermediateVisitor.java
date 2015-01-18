@@ -391,18 +391,33 @@ public class IntermediateVisitor implements
 		public TreeExp visit(ArrayGet e) throws RuntimeException {
 			TreeExp array = e.array.accept(this);
 			TreeExp index = e.index.accept(this);
-					
-			// TODO: check array bounds
 			
-			return new TreeExpMEM(
-				new TreeExpOP(
-					Op.PLUS,
+			Label getLabel = new Label();
+			
+			TreeStm boundsCheckStm = new TreeStmCJUMP(
+				Rel.GE,
+				index,
+				new TreeExpMEM(array),
+				raiseLabel,
+				getLabel);
+			
+			raises = true;
+			
+			return new TreeExpESEQ(
+				TreeStmSEQ.fromArray(
+					boundsCheckStm,
+					new TreeStmLABEL(getLabel)
+				),
+				new TreeExpMEM(
 					new TreeExpOP(
-						Op.MUL,
-						new TreeExpOP(Op.PLUS, index, new TreeExpCONST(1)),
-						new TreeExpCONST(machineSpecifics.getWordSize())
-					),
-					array
+						Op.PLUS,
+						new TreeExpOP(
+							Op.MUL,
+							new TreeExpOP(Op.PLUS, index, new TreeExpCONST(1)),
+							new TreeExpCONST(machineSpecifics.getWordSize())
+						),
+						array
+					)
 				)
 			);
 		}

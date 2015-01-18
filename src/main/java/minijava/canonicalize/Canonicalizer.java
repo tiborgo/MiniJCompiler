@@ -19,7 +19,7 @@ public class Canonicalizer {
 	public static List<FragmentProc<List<TreeStm>>> canonicalize(Configuration config, List<FragmentProc<TreeStm>> intermediate) throws CanonicalizerException {
 
 		try {
-			String output = null;
+			StringBuilder outputBuilder = new StringBuilder();
 			
 			List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = new ArrayList<>(intermediate.size());
 			
@@ -29,7 +29,6 @@ public class Canonicalizer {
 				FragmentProc<List<TreeStm>> canonFrag = (FragmentProc<List<TreeStm>>) fragment.accept(new CanonVisitor());
 
 				if (config.printCanonicalizedIntermediate) {
-					StringBuilder outputBuilder = new StringBuilder();
 					outputBuilder
 						.append("*******")
 						.append(System.lineSeparator());
@@ -40,7 +39,6 @@ public class Canonicalizer {
 							.append("-----")
 							.append(System.lineSeparator());
 					}
-					output = outputBuilder.toString();
 				}
 
 				Generator.BaseBlockContainer baseBlocks = Generator.generate(canonFrag.body);
@@ -53,7 +51,7 @@ public class Canonicalizer {
 			Logger.logVerbosely("Successfully canonicalized intermediate language");
 			
 			if (config.printCanonicalizedIntermediate) {
-				Logger.log(output);
+				Logger.log(outputBuilder.toString());
 			}
 
 			return intermediateCanonicalized;

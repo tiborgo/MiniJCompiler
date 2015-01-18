@@ -10,38 +10,13 @@ class ArrSum {
 }
 
 class Arr {
-	int[] theArr;
-	int mx;
 
-	// theArr[i-1]=i, for all 1<=i<m
-	public int init(int m) {
-		int i;
-		mx = m;
-		i = 1;
-		while (i < mx + 1) {
-			theArr[i - 1] = i;
-			i = i + 1;
-		}
-		return 0;
-	}
-
-	// Sum_{0<=i<m} i
-	public int sum() {
-		int i;
-		int s;
-		i = 1;
-		s = 0;
-		while (i < mx + 1) { // for i=1..mx
-			s = s + theArr[i - 1];
-			i = i + 1;
-		}
-		return s;
-	}
-
+	int[] x;
+	
 	public int do_it(int m) {
-		int q;
-		theArr = new int[m];
-		q = this.init(m);
-		return this.sum();
+		int a;
+		x = new int[m];
+		x[9] = 12;
+		return x[9];
 	}
 }
