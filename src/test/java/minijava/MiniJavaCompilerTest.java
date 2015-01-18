@@ -4,9 +4,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import minijava.backend.i386.I386MachineSpecifics;
 
@@ -20,20 +18,16 @@ public class MiniJavaCompilerTest {
 
 	@Parameterized.Parameters
 	public static Collection<Object[]> files() throws IOException {
-		
-		List<Object[]> files = new ArrayList<>();
-		files.addAll(TestFiles.getWorkingFiles(TestFiles.EXAMPLE_PROGRAM_PATH_WORKING, TestFiles.EXAMPLE_PROGRAM_PATH_RUNTIME_FAILING));
-		files.addAll(TestFiles.getFailingFiles(TestFiles.EXAMPLE_PROGRAM_PATH_PARSE_FAILING, TestFiles.EXAMPLE_PROGRAM_PATH_TYPE_FAILING));
-		return files;
+		return TestFiles.getFiles();
 	}
 
 	private File file;
-	private boolean works;
-	protected MiniJavaCompiler compiler;
+	private Class<? extends Exception> exceptionClass;
+	private MiniJavaCompiler compiler;
 	
-	public MiniJavaCompilerTest(File file, boolean works) {
+	public MiniJavaCompilerTest(File file, Class<? extends Exception> exceptionClass) {
 		this.file = file;
-		this.works = works;
+		this.exceptionClass = exceptionClass;
 	}
 	
 	@Before
@@ -50,13 +44,19 @@ public class MiniJavaCompilerTest {
 
 		try {
 			compiler.compile(config);
-			if (!works) {
-				fail("The example " + file.toString() + " should have failed, but was accepted by the compiler.");
+			compiler.runExecutable(config, 10);
+			if (exceptionClass != null) {
+				fail("The example " + file.toString() + " should have failed with exception " + exceptionClass + ", but was accepted by the compiler.");
 			}
 		}
 		catch (Exception e) {
-			if (works) {
+			
+			if (exceptionClass == null) {
 				fail("The example " + file.toString() + " should have been accepted by the compiler but failed: " + e.getMessage());
+			}
+			
+			if (!exceptionClass.isInstance(e)) {
+				fail("The example " + file.toString() + " should have failed with exception " + exceptionClass + " but with failed with exception " + e.getClass() + ", " + e.getMessage());
 			}
 		}
 	}

@@ -26,11 +26,17 @@ public class SemanticAnalyser {
 		Logger.logVerbosely("Successfully built symbol table");
 		
 		// check types
-		if (program.accept(new TypeCheckVisitor())) {
-
+		try {
+			if (program.accept(new TypeCheckVisitor())) {
+	
+			}
+			else {
+				// TODO: proper exception for type checks
+				throw new Exception("Type check failed");
+			}
 		}
-		else {
-			throw new SemanticAnalyserException("Type check failed");
+		catch (Exception e) {
+			throw new SemanticAnalyserException("Type check failed", e);
 		}
 		
 		Logger.logVerbosely("Successfully checked types");
