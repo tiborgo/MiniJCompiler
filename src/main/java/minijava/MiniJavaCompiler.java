@@ -51,25 +51,35 @@ public class MiniJavaCompiler {
 		}
 	}
 	
+	private void pipeline(Configuration config) throws CompilerException {
+		Program program = Parser.parse(config);
+		if (config.parse) return;
+		Program typedProgram = SemanticAnalyser.analyseSemantics(config, program);
+		if (config.semanticAnalysis) return;
+		List<FragmentProc<TreeStm>> intermediate = Translator.translate(config, typedProgram, machineSpecifics);
+		if (config.translate) return;
+		List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = Canonicalizer.canonicalize(config, intermediate);
+		if (config.canonicalize) return;
+		List<Fragment<List<Assem>>> assemFragments =  InstructionSelector.selectInstructions(config, intermediateCanonicalized, machineSpecifics);
+		if (config.instructionSelection) return;
+		List<Fragment<List<Assem>>> allocatedFragments = RegisterAllocator.allocateRegisters(assemFragments, machineSpecifics);
+		if (config.registerAllocation) return;
+		String assembly = CodeEmitter.emitCode(config, allocatedFragments, machineSpecifics);
+		if (config.codeEmission) return;
+		Assembler.assemble(config, assembly);
+	}
+	
 	public float compile(Configuration config) throws CompilerException {
 		
 		try {
 			Date startTime = new Date();
-			
-			Program program = Parser.parse(config);
-			Program typedProgram = SemanticAnalyser.analyseSemantics(config, program);
-			List<FragmentProc<TreeStm>> intermediate = Translator.translate(config, typedProgram, machineSpecifics);
-			List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = Canonicalizer.canonicalize(config, intermediate);
-			List<Fragment<List<Assem>>> assemFragments =  InstructionSelector.selectInstructions(config, intermediateCanonicalized, machineSpecifics);
-			List<Fragment<List<Assem>>> allocatedFragments = RegisterAllocator.allocateRegisters(assemFragments, machineSpecifics);
-			String assembly = CodeEmitter.emitCode(config, allocatedFragments, machineSpecifics);
-			Assembler.assemble(config, assembly);
-			
+			pipeline(config);
 			Date endTime = new Date();
+			
 			float interval = (endTime.getTime()-startTime.getTime())/1000f;
 			
 			if (!config.silent) {
-				System.out.printf("Successfully compiled input file in %.1f seconds%n", interval);
+				System.out.printf("Successfully generated " + config.outputFile + " in %.1f seconds%n", interval);
 			}
 			
 			return interval;
