@@ -11,6 +11,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import minijava.ast.rules.Program;
 import minijava.ast.visitors.PrettyPrintVisitor;
@@ -40,10 +47,6 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.kohsuke.args4j.Argument;
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-import org.kohsuke.args4j.Option;
 
 //import java.nio.file.Files;
 
@@ -452,23 +455,61 @@ public class MiniJavaCompiler {
 
 	}
 
-	public void runExecutable() throws RunException {
+	public int runExecutable(int timeOut_s) throws RunException {
 
 		try {
-			ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "./" + Configuration.getInstance().outputFile);
+			final ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "./" + Configuration.getInstance().outputFile);
 			processBuilder.directory(RUNTIME_DIRECTORY.toFile());
-			Process outCall = processBuilder.start();
+			
+			final Process outProcess = processBuilder.start();
+			
+			Runnable outCall = new Runnable() {
 
-			outCall.waitFor();
+				@Override
+				public void run() {
+					try {
+						outProcess.waitFor();
+					}
+					catch (InterruptedException e) {
+						throw new RuntimeException(e);
+					}
+				}
+			};
+			
+			
+			ExecutorService service = Executors.newSingleThreadExecutor();
+			try {
+			    Future<?> ft = service.submit(outCall);
+			    try {
+			    	if (timeOut_s != 0) {
+			    		ft.get(timeOut_s, TimeUnit.SECONDS);
+			    	}
+			    	else {
+			    		ft.get();
+			    	}
+			    }
+			    catch (TimeoutException e) {
+			    	outProcess.destroy();
+			    	throw new RunException("Process did not return after " + timeOut_s + " seconds", e);
+			    }
+			    catch (ExecutionException | CancellationException | InterruptedException e) {
+			    	throw new RunException("Process execution failed.", e);
+			    }
+			}
+			finally {
+			    service.shutdown();
+			}
+
+			
 
 			String line;
 
 			StringBuilder output = new StringBuilder();
 			StringBuilder errOutput = new StringBuilder();
 
-			switch (outCall.exitValue()) {
+			switch (outProcess.exitValue()) {
 			case 0:
-				InputStream stdout = outCall.getInputStream();
+				InputStream stdout = outProcess.getInputStream();
 				BufferedReader bufferedStdout = new BufferedReader(new InputStreamReader(stdout));
 				while ((line = bufferedStdout.readLine()) != null) {
 					output.append(line + System.lineSeparator());
@@ -487,8 +528,8 @@ public class MiniJavaCompiler {
 					.append(System.lineSeparator());
 				break;
 			default:
-				System.err.println("Exit Code: " + outCall.exitValue());
-				InputStream stderr = outCall.getErrorStream();
+				System.err.println("Exit Code: " + outProcess.exitValue());
+				InputStream stderr = outProcess.getErrorStream();
 				BufferedReader bufferedStderr = new BufferedReader(new InputStreamReader(stderr));
 				while ((line = bufferedStderr.readLine()) != null) {
 					errOutput.append(line + System.lineSeparator());
@@ -497,19 +538,18 @@ public class MiniJavaCompiler {
 				stderr.close();
 			}
 
-			if (outCall.exitValue() != 0) {
-				throw new RunException("Failed to run executable:" + System.lineSeparator() + errOutput.toString());
+			if (outProcess.exitValue() != 0) {
+				System.err.println("Failed to run executable: " + errOutput.toString());
 			}
 			else {
 				System.out.println(output.toString());
 			}
+			
+			return outProcess.exitValue();
 
 		}
 		catch (IOException e) {
 			throw new RunException("Failed to read output of compiled executable", e);
-		}
-		catch (InterruptedException e) {
-			throw new RunException("Failed to invoke compiled executable", e);
 		}
 	}
 	
@@ -561,7 +601,7 @@ public class MiniJavaCompiler {
 			
 			if (Configuration.getInstance().runExecutable) {
 				try {
-					compiler.runExecutable();
+					compiler.runExecutable(0);
 				} catch (RunException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
