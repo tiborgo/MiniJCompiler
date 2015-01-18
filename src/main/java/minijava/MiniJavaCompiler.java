@@ -60,7 +60,7 @@ public class MiniJavaCompiler {
 
 	// Compiler pipeline
 
-	private Program inferTypes(Program program) throws CompilerException {
+	private Program inferTypes(Configuration config, Program program) throws CompilerException {
 
 		try {
 			TypeInferenceVisitor typeInferenceVisitor = new TypeInferenceVisitor();
@@ -76,7 +76,7 @@ public class MiniJavaCompiler {
 		}
 	}
 
-	private void checkTypes(Program program) throws CompilerException {
+	private void checkTypes(Configuration config, Program program) throws CompilerException {
 
 		TypeCheckVisitor typeCheckVisitor = new TypeCheckVisitor();
 		if (program.accept(typeCheckVisitor)) {
@@ -89,13 +89,13 @@ public class MiniJavaCompiler {
 		}
 	}
 
-	private List<FragmentProc<TreeStm>> generateIntermediate(Program program) throws CompilerException {
+	private List<FragmentProc<TreeStm>> generateIntermediate(Configuration config, Program program) throws CompilerException {
 
 		try {
 			IntermediateVisitor intermediateVisitor = new IntermediateVisitor(machineSpecifics, program);
 			List<FragmentProc<TreeStm>> procFragements = program.accept(intermediateVisitor);
 
-			if (Configuration.getInstance().verbose) {
+			if (config.verbose) {
 				String output = "";
 				for (FragmentProc<TreeStm> frag : procFragements) {
 					output += frag.body.accept(new IntermediatePrettyPrintVisitor()) + System.lineSeparator() + "-----" + System.lineSeparator();
@@ -113,14 +113,14 @@ public class MiniJavaCompiler {
 		}
 	}
 
-	private List<FragmentProc<List<TreeStm>>> canonicalize(List<FragmentProc<TreeStm>> intermediate) throws CompilerException {
+	private List<FragmentProc<List<TreeStm>>> canonicalize(Configuration config, List<FragmentProc<TreeStm>> intermediate) throws CompilerException {
 
 		try {
 			List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = new ArrayList<>(intermediate.size());
 			for (FragmentProc<TreeStm> fragment : intermediate) {
 				FragmentProc<List<TreeStm>> canonFrag = (FragmentProc<List<TreeStm>>) fragment.accept(new Canon());
 
-				if (Configuration.getInstance().verbose) {
+				if (config.verbose) {
 					String output = "*******" + System.lineSeparator();
 					for (TreeStm stm : canonFrag.body) {
 						output += stm.accept(new IntermediatePrettyPrintVisitor()) + System.lineSeparator() + "-----" + System.lineSeparator();
@@ -145,7 +145,7 @@ public class MiniJavaCompiler {
 		}
 	}
 
-	private List<Fragment<List<Assem>>> generatePreAssembly (List<FragmentProc<List<TreeStm>>> intermediateCanonicalized) throws CompilerException {
+	private List<Fragment<List<Assem>>> generatePreAssembly (Configuration config, List<FragmentProc<List<TreeStm>>> intermediateCanonicalized) throws CompilerException {
 
 		try {
 			List<Fragment<List<Assem>>> assemFragments = new LinkedList<>();
@@ -154,7 +154,7 @@ public class MiniJavaCompiler {
 			}
 
 			String assembly = null;
-			if (Configuration.getInstance().printPreAssembly) {
+			if (config.printPreAssembly) {
 				assembly = machineSpecifics.printAssembly(assemFragments);
 			}
 
@@ -168,7 +168,7 @@ public class MiniJavaCompiler {
 		}
 	}
 
-	private List<SimpleGraph<Assem>> generateControlFlowGraphs (List<Fragment<List<Assem>>> assemFragments) throws CompilerException {
+	private List<SimpleGraph<Assem>> generateControlFlowGraphs (Configuration config, List<Fragment<List<Assem>>> assemFragments) throws CompilerException {
 
 		try {
 			List<SimpleGraph<Assem>> controlFlowGraphs = new ArrayList<>(assemFragments.size());
@@ -177,7 +177,7 @@ public class MiniJavaCompiler {
 			}
 
 			String graphOutput = null;
-			if (Configuration.getInstance().printControlFlowGraphs) {
+			if (config.printControlFlowGraphs) {
 				graphOutput = simpleGraphsToString(controlFlowGraphs);
 			}
 
@@ -239,7 +239,7 @@ public class MiniJavaCompiler {
 		}
 	}*/
 
-	private List<Fragment<List<Assem>>> allocateRegisters(List<Fragment<List<Assem>>> frags) throws CompilerException {
+	private List<Fragment<List<Assem>>> allocateRegisters(Configuration config, List<Fragment<List<Assem>>> frags) throws CompilerException {
 
 		try {
 			List<Fragment<List<Assem>>> allocatedFrags = new LinkedList<>();
@@ -329,12 +329,12 @@ public class MiniJavaCompiler {
 		return graphOutput.toString();
 	}
 
-	private String generateAssembly (List<Fragment<List<Assem>>> assemFragments) throws CompilerException {
+	private String generateAssembly (Configuration config, List<Fragment<List<Assem>>> assemFragments) throws CompilerException {
 		try {
 
 			String assembly = machineSpecifics.printAssembly(assemFragments);;
 			
-			printVerbose("Successfully generated assembly", (Configuration.getInstance().printAssembly) ? assembly : null);
+			printVerbose("Successfully generated assembly", (config.printAssembly) ? assembly : null);
 			
 			return assembly;
 		}
@@ -344,11 +344,11 @@ public class MiniJavaCompiler {
 		}
 	}
 	
-	private void compileAssembly (String assembly) throws CompilerException {
+	private void compileAssembly (Configuration config, String assembly) throws CompilerException {
 		
 		try {
 			// -xc specifies the input language as C and is required for GCC to read from stdin
-			ProcessBuilder processBuilder = new ProcessBuilder("gcc", "-o", Configuration.getInstance().outputFile, "-m32", "-xc", "runtime_32.c", "-m32", "-xassembler", "-");
+			ProcessBuilder processBuilder = new ProcessBuilder("gcc", "-o", config.outputFile, "-m32", "-xc", "runtime_32.c", "-m32", "-xassembler", "-");
 			processBuilder.directory(RUNTIME_DIRECTORY.toFile());
 			Process gccCall = processBuilder.start();
 			// Write C code to stdin of C Compiler
@@ -385,10 +385,10 @@ public class MiniJavaCompiler {
 
 	}
 
-	public int runExecutable(int timeOut_s) throws RunException {
+	public int runExecutable(Configuration config, int timeOut_s) throws RunException {
 
 		try {
-			final ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "./" + Configuration.getInstance().outputFile);
+			final ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "./" + config.outputFile);
 			processBuilder.directory(RUNTIME_DIRECTORY.toFile());
 			
 			final Process outProcess = processBuilder.start();
@@ -485,64 +485,71 @@ public class MiniJavaCompiler {
 	
 	public void compile(Configuration config) throws CompilerException {
 		Program program = Parser.parse(config);
-		Program symbolTable = inferTypes(program);
-		checkTypes(program);
-		List<FragmentProc<TreeStm>> intermediate = generateIntermediate(program);
-		List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = canonicalize(intermediate);
-		List<Fragment<List<Assem>>> assemFragments = generatePreAssembly(intermediateCanonicalized);
+		Program symbolTable = inferTypes(config, program);
+		checkTypes(config, program);
+		List<FragmentProc<TreeStm>> intermediate = generateIntermediate(config, program);
+		List<FragmentProc<List<TreeStm>>> intermediateCanonicalized = canonicalize(config, intermediate);
+		List<Fragment<List<Assem>>> assemFragments = generatePreAssembly(config, intermediateCanonicalized);
 		//List<SimpleGraph<Assem>> controlFlowGraphs = generateControlFlowGraphs(assemFragments);
 		//List<SimpleGraph<Temp>> inferenceGraphs = generateInterferenceGraphs(controlFlowGraphs);
 
-		List<Fragment<List<Assem>>> allocatedFrags = allocateRegisters(assemFragments);
+		List<Fragment<List<Assem>>> allocatedFrags = allocateRegisters(config, assemFragments);
 
-		String assembly = generateAssembly(allocatedFrags);
+		String assembly = generateAssembly(config, allocatedFrags);
 		
-		compileAssembly(assembly);
+		compileAssembly(config, assembly);
 	}
 
 
 
 	public static void main (String[] args) {
 		
-		if (Configuration.initialize(args)) {
+		Configuration config;
+		try{
+			config = new Configuration(args);
+		}
+		catch (IllegalArgumentException e) {
+			System.exit(-1);
+			return;
+		}
 
-			String osName = System.getProperty("os.name").toLowerCase();
-			// TODO: better solution?
-			if (osName.contains("mac")) {
-				Label.leadingUnderscore = true;
+
+		String osName = System.getProperty("os.name").toLowerCase();
+		// TODO: better solution?
+		if (osName.contains("mac")) {
+			Label.leadingUnderscore = true;
+		}
+		else {
+			Label.leadingUnderscore = false;
+		}
+		
+		MiniJavaCompiler compiler = new MiniJavaCompiler(new I386MachineSpecifics());
+		
+		
+		try {
+			Date startTime = new Date();
+			compiler.compile(config);
+			Date endTime = new Date();
+			System.out.printf("Successfully compiled input file in %.1f seconds%n", (endTime.getTime()-startTime.getTime())/1000f);
+		}
+		catch(CompilerException e) {
+			if (config.debug) {
+				e.printStackTrace();
 			}
 			else {
-				Label.leadingUnderscore = false;
+				System.err.println("Failed to compile input file: " + e.getMessage());
 			}
-			
-			MiniJavaCompiler compiler = new MiniJavaCompiler(new I386MachineSpecifics());
-			
-			
+			System.exit(-1);
+		}
+		
+		if (config.runExecutable) {
 			try {
-				Date startTime = new Date();
-				compiler.compile(Configuration.getInstance());
-				Date endTime = new Date();
-				System.out.printf("Successfully compiled input file in %.1f seconds%n", (endTime.getTime()-startTime.getTime())/1000f);
-			}
-			catch(CompilerException e) {
-				if (Configuration.getInstance().debug) {
-					e.printStackTrace();
-				}
-				else {
-					System.err.println("Failed to compile input file: " + e.getMessage());
-				}
+				compiler.runExecutable(config, 0);
+			} catch (RunException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 				System.exit(-1);
 			}
-			
-			if (Configuration.getInstance().runExecutable) {
-				try {
-					compiler.runExecutable(0);
-				} catch (RunException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-					System.exit(-1);
-				}
-			}
-	    }
+		}
 	}
 }

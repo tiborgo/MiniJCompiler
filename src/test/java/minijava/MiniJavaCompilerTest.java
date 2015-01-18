@@ -58,10 +58,10 @@ public class MiniJavaCompilerTest {
 
 		System.out.println("Testing compiler input from file \"" + file.toString() + "\"");
 		
-		Configuration.initialize(new String[]{file.toString()});
+		Configuration config =  new Configuration(new String[]{file.toString()});
 
 		try {
-			compiler.compile(Configuration.getInstance());
+			compiler.compile(config);
 			if (!works) {
 				fail("The example " + file.toString() + " should have failed, but was accepted by the compiler.");
 			}

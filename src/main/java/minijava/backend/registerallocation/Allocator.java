@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import minijava.Configuration;
+import minijava.Logger;
 import minijava.backend.Assem;
 import minijava.backend.MachineSpecifics;
 import minijava.intermediate.FragmentProc;
@@ -29,10 +30,8 @@ public class Allocator {
 		SimpleGraph<ColoredTemp> graph;
 
 		do {
-			if (Configuration.getInstance().verbose) {
-				System.out.println("#################");
-				System.out.println(frag.frame.getName());
-			}
+			//Logger.logVerbose("#################");
+			//Logger.logVerbose(frag.frame.getName().toString());
 
 			// BUILD
 			graph = Builder.build(colors, allocatedFrag);
@@ -69,10 +68,8 @@ public class Allocator {
 			// rewrite program
 			allocatedFrag = new FragmentProc<>(allocatedFrag.frame, machineSpecifics.spill(allocatedFrag.frame, allocatedFrag.body, spillNodes));
 
-			if (Configuration.getInstance().verbose) {
-				System.out.println("Register allocator round " + counter + ", " + spillNodes.size() + " spill nodes " + spillNodes);
-				//System.out.println(machineSpecifics.printAssembly(Arrays.<Fragment<List<Assem>>>asList(allocatedFrag)));
-			}
+			//Logger.logVerbose("Register allocator round " + counter + ", " + spillNodes.size() + " spill nodes " + spillNodes);
+			//System.out.println(machineSpecifics.printAssembly(Arrays.<Fragment<List<Assem>>>asList(allocatedFrag)));+
 
 			// START OVER
 
