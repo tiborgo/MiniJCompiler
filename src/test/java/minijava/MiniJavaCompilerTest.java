@@ -61,7 +61,7 @@ public class MiniJavaCompilerTest {
 		Configuration.initialize(new String[]{file.toString()});
 
 		try {
-			compiler.compile();
+			compiler.compile(Configuration.getInstance());
 			if (!works) {
 				fail("The example " + file.toString() + " should have failed, but was accepted by the compiler.");
 			}

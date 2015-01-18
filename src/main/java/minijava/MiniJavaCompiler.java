@@ -20,7 +20,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import minijava.ast.rules.Program;
-import minijava.ast.visitors.PrettyPrintVisitor;
 import minijava.ast.visitors.TypeCheckVisitor;
 import minijava.ast.visitors.TypeInferenceVisitor;
 import minijava.ast.visitors.baseblocks.BaseBlock;
@@ -39,14 +38,8 @@ import minijava.intermediate.canon.Canon;
 import minijava.intermediate.tree.TreeStm;
 import minijava.intermediate.visitors.IntermediatePrettyPrintVisitor;
 import minijava.intermediate.visitors.IntermediateVisitor;
-import minijava.parsing_actions.ASTVisitor;
+import minijava.parse.Parser;
 import minijava.util.SimpleGraph;
-
-import org.antlr.v4.runtime.ANTLRFileStream;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.TokenStream;
-import org.antlr.v4.runtime.tree.ParseTree;
 
 //import java.nio.file.Files;
 
@@ -54,81 +47,18 @@ public class MiniJavaCompiler {
 	private static final Path RUNTIME_DIRECTORY = Paths.get("src/main/resources/minijava/runtime");
 	private final MachineSpecifics machineSpecifics;
 
-	public static class RunException extends Exception {
-		/**
-		 *
-		 */
-		private static final long serialVersionUID = -7579391088215934802L;
-
-		public RunException(String message) {
-			super(message);
-		}
-
-		public RunException(String message, Throwable cause) {
-			super(message, cause);
-		}
-	}
-
-	public static class CompilerException extends Exception {
-
-		/**
-		 *
-		 */
-		private static final long serialVersionUID = 1L;
-
-		public CompilerException(String message) {
-			super(message);
-		}
-
-		public CompilerException(String message, Throwable cause) {
-			super(message, cause);
-		}
-	}
-
 	public MiniJavaCompiler(MachineSpecifics machineSpecifics) {
 		this.machineSpecifics = machineSpecifics;
 	}
-	
-	private void printDelimiter() {
-		System.out.println("-------------------------");
-	}
 
-	private void printVerbose(String... infos) {
-		if (Configuration.getInstance().verbose) {
-			printDelimiter();
-			for (int i = 0; i < infos.length; i++) {
-				if (infos[i] != null) {
-					if (i != 0) {
-						printDelimiter();
-					}
-					System.out.println(infos[i]);
-				}
-			}
-			printDelimiter();
-		}
+	/**
+	 * @deprecated
+	 */
+	private void printVerbose(String... infos) {	
+		Logger.logVerbose(infos);
 	}
 
 	// Compiler pipeline
-
-	private Program parse() throws CompilerException {
-		try {
-			ANTLRFileStream reader = new ANTLRFileStream(Configuration.getInstance().inputFile);
-			MiniJavaLexer lexer = new MiniJavaLexer((CharStream) reader);
-			TokenStream tokens = new CommonTokenStream(lexer);
-			MiniJavaParser parser = new MiniJavaParser(tokens);
-			ParseTree parseTree = parser.prog();
-			ASTVisitor astVisitor = new ASTVisitor();
-			Program program = (Program) astVisitor.visit(parseTree);
-
-			printVerbose("Successfully parsed input file",
-					(Configuration.getInstance().printSourceCode) ? program.accept(new PrettyPrintVisitor("")) : null);
-			
-			return program;
-		}
-		catch (IOException e) {
-			throw new CompilerException("Lexer/parser failed", e);
-		}
-	}
 
 	private Program inferTypes(Program program) throws CompilerException {
 
@@ -553,8 +483,8 @@ public class MiniJavaCompiler {
 		}
 	}
 	
-	public void compile() throws CompilerException {
-		Program program = parse();
+	public void compile(Configuration config) throws CompilerException {
+		Program program = Parser.parse(config);
 		Program symbolTable = inferTypes(program);
 		checkTypes(program);
 		List<FragmentProc<TreeStm>> intermediate = generateIntermediate(program);
@@ -590,7 +520,7 @@ public class MiniJavaCompiler {
 			
 			try {
 				Date startTime = new Date();
-				compiler.compile();
+				compiler.compile(Configuration.getInstance());
 				Date endTime = new Date();
 				System.out.printf("Successfully compiled input file in %.1f seconds%n", (endTime.getTime()-startTime.getTime())/1000f);
 			}

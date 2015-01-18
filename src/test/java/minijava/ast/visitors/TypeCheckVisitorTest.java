@@ -14,7 +14,7 @@ import static org.junit.Assert.assertTrue;
 import minijava.MiniJavaLexer;
 import minijava.MiniJavaParser;
 import minijava.ast.rules.Program;
-import minijava.parsing_actions.ASTVisitor;
+import minijava.parse.visitors.ASTVisitor;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CharStream;

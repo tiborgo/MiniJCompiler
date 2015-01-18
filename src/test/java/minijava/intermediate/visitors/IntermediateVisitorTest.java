@@ -25,7 +25,7 @@ import minijava.backend.dummymachine.IntermediateToCmm;
 import minijava.intermediate.FragmentProc;
 import minijava.intermediate.canon.Canon;
 import minijava.intermediate.tree.TreeStm;
-import minijava.parsing_actions.ASTVisitor;
+import minijava.parse.visitors.ASTVisitor;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CharStream;
