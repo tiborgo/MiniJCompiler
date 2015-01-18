@@ -2,8 +2,8 @@ package minijava.backend.dummymachine;
 
 import java.util.List;
 
-import minijava.backend.MachineSpecifics;
-import minijava.backend.Assem;
+import minijava.instructionselection.MachineSpecifics;
+import minijava.instructionselection.assems.Assem;
 import minijava.translate.layout.Fragment;
 import minijava.translate.layout.Frame;
 import minijava.translate.layout.Label;

@@ -6,11 +6,11 @@ import java.util.Map;
 
 import minijava.Configuration;
 import minijava.Logger;
-import minijava.backend.Assem;
-import minijava.backend.i386.I386PrintAssemblyVisitor;
+import minijava.backend.i386.visitors.I386PrintAssemblyVisitor;
 import minijava.backend.livenessanalysis.ControlFlowGraphBuilder;
 import minijava.backend.livenessanalysis.InterferenceGraphBuilder;
 import minijava.backend.livenessanalysis.LivenessSetsBuilder;
+import minijava.instructionselection.assems.Assem;
 import minijava.translate.layout.FragmentProc;
 import minijava.translate.layout.Temp;
 import minijava.util.SimpleGraph;

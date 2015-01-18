@@ -1,11 +1,11 @@
-package minijava.backend;
+package minijava.instructionselection.assems;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import minijava.backend.i386.Operand;
-import minijava.backend.i386.visitors.AssemVisitor;
+import minijava.backend.i386.assems.AssemVisitor;
+import minijava.backend.i386.assems.Operand;
 import minijava.translate.layout.Temp;
 
 /**

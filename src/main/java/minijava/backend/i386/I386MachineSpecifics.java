@@ -5,9 +5,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import minijava.backend.Assem;
-import minijava.backend.MachineSpecifics;
-import minijava.backend.i386.AssemBinaryOp.Kind;
+import minijava.backend.i386.assems.AssemBinaryOp;
+import minijava.backend.i386.assems.AssemLabel;
+import minijava.backend.i386.assems.Operand;
+import minijava.backend.i386.assems.StackAllocation;
+import minijava.backend.i386.assems.AssemBinaryOp.Kind;
+import minijava.backend.i386.visitors.AssemblerVisitor;
+import minijava.backend.i386.visitors.I386PrintAssemblyVisitor;
+import minijava.instructionselection.MachineSpecifics;
+import minijava.instructionselection.assems.Assem;
 import minijava.translate.layout.Fragment;
 import minijava.translate.layout.FragmentProc;
 import minijava.translate.layout.Frame;

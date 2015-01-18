@@ -1,8 +1,8 @@
-package minijava.backend;
+package minijava.instructionselection;
 
 import java.util.List;
 
-import minijava.translate.*;
+import minijava.instructionselection.assems.Assem;
 import minijava.translate.layout.Fragment;
 import minijava.translate.layout.Frame;
 import minijava.translate.layout.Label;

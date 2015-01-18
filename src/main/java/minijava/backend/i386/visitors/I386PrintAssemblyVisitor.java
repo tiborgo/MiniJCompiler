@@ -1,11 +1,17 @@
-package minijava.backend.i386;
+package minijava.backend.i386.visitors;
 
 import java.util.Iterator;
 
-import minijava.backend.Directive;
-import minijava.backend.Instruction;
-import minijava.backend.i386.visitors.AssemVisitor;
-import minijava.backend.i386.visitors.OperandVisitor;
+import minijava.backend.i386.assems.AssemBinaryOp;
+import minijava.backend.i386.assems.AssemInstr;
+import minijava.backend.i386.assems.AssemJump;
+import minijava.backend.i386.assems.AssemLabel;
+import minijava.backend.i386.assems.AssemUnaryOp;
+import minijava.backend.i386.assems.AssemVisitor;
+import minijava.backend.i386.assems.Operand;
+import minijava.backend.i386.assems.OperandVisitor;
+import minijava.instructionselection.assems.Directive;
+import minijava.instructionselection.assems.Instruction;
 
 public class I386PrintAssemblyVisitor implements
 		AssemVisitor<String, RuntimeException>,

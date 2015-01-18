@@ -8,7 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import minijava.backend.MachineSpecifics;
+import minijava.instructionselection.MachineSpecifics;
 import minijava.parse.rules.Program;
 import minijava.parse.rules.ProgramVisitor;
 import minijava.parse.rules.declarations.DeclarationVisitor;

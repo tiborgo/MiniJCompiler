@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import minijava.backend.Assem;
+import minijava.instructionselection.assems.Assem;
 import minijava.translate.layout.FragmentProc;
 import minijava.translate.layout.Label;
 import minijava.util.SimpleGraph;

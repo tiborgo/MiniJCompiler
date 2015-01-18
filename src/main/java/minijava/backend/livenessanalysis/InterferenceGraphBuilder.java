@@ -3,7 +3,7 @@ package minijava.backend.livenessanalysis;
 import java.util.HashMap;
 import java.util.Map;
 
-import minijava.backend.Assem;
+import minijava.instructionselection.assems.Assem;
 import minijava.translate.layout.Temp;
 import minijava.util.Pair;
 import minijava.util.SimpleGraph;

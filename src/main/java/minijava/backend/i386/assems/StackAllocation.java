@@ -1,4 +1,6 @@
-package minijava.backend.i386;
+package minijava.backend.i386.assems;
+
+import minijava.backend.i386.I386MachineSpecifics;
 
 public class StackAllocation extends AssemBinaryOp {
 	public StackAllocation(Operand.Imm byteCount) {
