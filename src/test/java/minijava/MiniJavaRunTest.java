@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import minijava.MiniJavaCompiler.CompilerException;
-import minijava.MiniJavaCompiler.RunException;
 import minijava.backend.i386.I386MachineSpecifics;
 import minijava.intermediate.Label;
 
@@ -62,7 +60,7 @@ public class MiniJavaRunTest {
 		
 		Configuration.initialize(new String[]{file.toString()});
 		
-		compiler.compile();
+		compiler.compile(Configuration.getInstance());
 		
 		try {
 			if(compiler.runExecutable(10) == 0) {

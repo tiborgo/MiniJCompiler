@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import minijava.Configuration;
 import minijava.backend.Assem;
 import minijava.backend.i386.I386PrintAssemblyVisitor;
 import minijava.backend.livenessanalysis.ControlFlowGraphBuilder;
@@ -59,7 +60,10 @@ public class Builder {
 		inOutStringBuilder
 			.append("Max interference: ")
 			.append(maxInterference);
-		System.out.println(inOutStringBuilder);
+		
+		if (Configuration.getInstance().verbose) {
+			System.out.println(inOutStringBuilder);
+		}
 
 
 		SimpleGraph<ColoredTemp> preColoredGraph = new SimpleGraph<>(interferenceGraph.getName());

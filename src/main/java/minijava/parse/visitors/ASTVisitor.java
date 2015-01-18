@@ -1,4 +1,4 @@
-package minijava.parsing_actions;
+package minijava.parse.visitors;
 
 import java.util.ArrayList;
 import java.util.List;
