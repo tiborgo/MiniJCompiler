@@ -1,4 +1,4 @@
-package minijava.backend.livenessanalysis;
+package minijava.flowanalysis;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,8 +8,8 @@ import minijava.translate.layout.Temp;
 import minijava.util.Pair;
 import minijava.util.SimpleGraph;
 
-public class InterferenceGraphBuilder {
-	public static SimpleGraph<Temp> build(SimpleGraph<Assem> controlFlowGraph,
+class InterferenceGraphBuilder {
+	static SimpleGraph<Temp> build(SimpleGraph<Assem> controlFlowGraph,
 			Map<Assem, LivenessSetsBuilder.InOut> inOut) {
 
 		SimpleGraph<Temp> interferenceGraph = new SimpleGraph<>(controlFlowGraph.getName());

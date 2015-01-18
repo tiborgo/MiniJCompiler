@@ -1,12 +1,12 @@
-package minijava.backend.registerallocation;
+package minijava.registerallocation;
 
 import java.util.List;
 
 import minijava.util.SimpleGraph;
 
-public class Spiller {
+class Spiller {
 
-	public static void spill(SimpleGraph<ColoredTemp> graph, List<ColoredTemp> stack) {
+	static void spill(SimpleGraph<ColoredTemp> graph, List<ColoredTemp> stack) {
 
 		int maxDegree = 0;
 		SimpleGraph.Node<ColoredTemp> maxDegreeNode = null;

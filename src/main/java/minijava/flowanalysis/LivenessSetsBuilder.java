@@ -1,4 +1,4 @@
-package minijava.backend.livenessanalysis;
+package minijava.flowanalysis;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,9 +12,9 @@ import minijava.instructionselection.assems.Assem;
 import minijava.translate.layout.Temp;
 import minijava.util.SimpleGraph;
 
-public class LivenessSetsBuilder {
+class LivenessSetsBuilder {
 
-	static public class InOut {
+	static class InOut {
 		public final Set<Temp> in = new HashSet<>();
 		public final Set<Temp> out = new HashSet<>();
 
@@ -29,7 +29,7 @@ public class LivenessSetsBuilder {
 		}
 	}
 
-	public static Map<Assem, InOut> build(SimpleGraph<Assem> controlFlowGraph, List<Assem> assems) {
+	static Map<Assem, InOut> build(SimpleGraph<Assem> controlFlowGraph, List<Assem> assems) {
 
 		//final List<SimpleGraph<Assem>.Node> nodes = ReverseOrderBuilder.build(controlFlowGraph);
 		List<Assem> reverseAssems = new ArrayList<>(assems);

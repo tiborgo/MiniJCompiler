@@ -1,4 +1,4 @@
-package minijava.backend.registerallocation;
+package minijava.registerallocation;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -9,9 +9,9 @@ import java.util.Set;
 import minijava.translate.layout.Temp;
 import minijava.util.SimpleGraph;
 
-public class Selector {
+class Selector {
 
-	public static List<Temp> select(
+	static List<Temp> select(
 			SimpleGraph<ColoredTemp> graph,
 			List<ColoredTemp> stack,
 			List<Temp> colors,

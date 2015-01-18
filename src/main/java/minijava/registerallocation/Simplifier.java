@@ -1,4 +1,4 @@
-package minijava.backend.registerallocation;
+package minijava.registerallocation;
 
 import java.util.HashSet;
 import java.util.List;
@@ -6,9 +6,9 @@ import java.util.Set;
 
 import minijava.util.SimpleGraph;
 
-public class Simplifier {
+class Simplifier {
 
-	public static void simplify(SimpleGraph<ColoredTemp> graph, List<ColoredTemp> stack, int k) {
+	static void simplify(SimpleGraph<ColoredTemp> graph, List<ColoredTemp> stack, int k) {
 
 		Set<SimpleGraph.Node<ColoredTemp>> nodes = new HashSet<>(graph.nodeSet());
 
