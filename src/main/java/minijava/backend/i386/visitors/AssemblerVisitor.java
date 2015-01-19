@@ -256,8 +256,12 @@ public class AssemblerVisitor implements
 					new AssemBinaryOp(Kind.MOV, o2Temp, o2),
 					// make backup of edx
 					new AssemBinaryOp(Kind.MOV, savedEDX, I386MachineSpecifics.EDX),
-					// set edx to zero, otherwise floatiing point exception is thrown in case of overflow
-					new AssemBinaryOp(Kind.MOV, I386MachineSpecifics.EDX, new Operand.Imm(0)),
+					// idiv is actually a division of edx:eax by the operand.
+					// So, when eax is negative (first bit is 1) all bits in edx must be 1
+					// (so that first bit of quad edx:eax is 1 and value stays the same)
+					// CDQ makes sure that edx is either all 1 when eax is negative
+					// or 0 when eax is non-negative
+					new AssemInstr(AssemInstr.Kind.CDQ),
 					// actual operation
 					new AssemUnaryOp(operatorUnary, o2Temp),
 					// save the result

@@ -17,7 +17,7 @@ public final class AssemInstr extends DefaultInstruction {
 
 	public static enum Kind {
 
-		RET, LEAVE, NOP
+		RET, LEAVE, NOP, CDQ
 	}
 
 	public final Kind kind;
@@ -40,6 +40,9 @@ public final class AssemInstr extends DefaultInstruction {
 			return Arrays.asList(I386MachineSpecifics.EAX.reg);
 		case NOP:
 			return Collections.emptyList();
+		case CDQ:
+			// uses eax to determine sign extend
+			return Arrays.asList(I386MachineSpecifics.EAX.reg);
 		default:
 			throw new UnsupportedOperationException("Unknown operand " + kind);
 			
@@ -67,10 +70,14 @@ public final class AssemInstr extends DefaultInstruction {
 		switch(kind) {
 		case LEAVE:
 			return Arrays.asList(I386MachineSpecifics.EBP.reg, I386MachineSpecifics.ESP.reg);
+		case CDQ:
+			// extends sign of eax to edx
+			return Arrays.asList(I386MachineSpecifics.EDX.reg);
 		case RET:
 		case NOP:
-		default:
 			return Collections.emptyList();
+		default:
+			throw new UnsupportedOperationException("Unknown operand " + kind);
 		}
 	}
 
