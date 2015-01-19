@@ -19,7 +19,7 @@ class BBS {
 		//aux01 = this.Init(sz);
 		//aux01 = this.Print();
 		//System.out.println(99999);
-		//number = new int[10];
+		number = new int[10];
 		aux01 = this.Sort();
 		//System.out.println(99999);
 		//aux01 = this.Print();
@@ -67,9 +67,9 @@ class BBS {
 					number[j] = t;
 				} else
 					nt = 0;*/
-				//j = j + 1;
+				j = j + 1;
 			}
-			//i = i - 1;
+			i = i - 1;
 		}
 		return 0;
 	}
