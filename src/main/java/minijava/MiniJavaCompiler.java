@@ -169,6 +169,8 @@ public class MiniJavaCompiler {
 			bufferedStderr.close();
 			stderr.close();
 			
+			outProcess.waitFor();
+			
 			if (timeoutSeconds > 0) {
 				timeoutFuture.cancel(true);
 			}
@@ -214,6 +216,9 @@ public class MiniJavaCompiler {
 			}
 			
 			throw new RunException("Failed to read output of compiled executable", e);
+		}
+		catch (InterruptedException e) {
+			throw new RunException("Could not wait until exe returns", e);
 		}
 		finally {
 			timeoutScheduler.shutdown();
