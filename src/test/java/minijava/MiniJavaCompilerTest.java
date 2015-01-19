@@ -56,6 +56,7 @@ public class MiniJavaCompilerTest {
 		outputs.put("ShortCutAnd", "0\n");
 		outputs.put("Stck", "55\n");
 		outputs.put("Sum", "15\n");
+		outputs.put("SwitchArrayElements", "88\n");
 		outputs.put("TestEq", "1\n0\n");
 		outputs.put("TrivialClass", "555\n");
 		outputs.put("While", "1\n3\n6\n10\n15\n21\n28\n36\n45\n55\n0\n");
