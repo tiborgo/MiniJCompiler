@@ -282,36 +282,25 @@ public class IntermediateVisitor implements
 			return negateExpression(negatedExpression);
 		}
 
-		private TreeStm negateStatement(TreeStm statement) {
-			if (statement instanceof TreeStmEXP) {
-				TreeExp expression = ((TreeStmEXP) statement).exp;
-				return new TreeStmEXP(negateExpression(expression));
-			} else if (statement instanceof TreeStmSEQ) {
-				TreeStmSEQ sequentialStatement = (TreeStmSEQ) statement;
-				return new TreeStmSEQ(negateStatement(sequentialStatement.first), negateStatement(sequentialStatement.second));
-			} else if (statement instanceof TreeStmCJUMP) {
-				TreeStmCJUMP conditionalJump = (TreeStmCJUMP) statement;
-				return new TreeStmCJUMP(conditionalJump.rel.neg(), conditionalJump.left, conditionalJump.right,
-						conditionalJump.ltrue, conditionalJump.lfalse);
-			}
-			return statement;
-		}
-
 		private TreeExp negateExpression(TreeExp expression) {
 			if (expression instanceof TreeExpCONST) {
 				TreeExpCONST negatedBoolean = (TreeExpCONST) expression;
 				assert (negatedBoolean.value == 0 || negatedBoolean.value == 1);
 				return new TreeExpCONST(1 - negatedBoolean.value);
-			} else if (expression instanceof TreeExpESEQ) {
+			}
+			else if (expression instanceof TreeExpESEQ) {
 				TreeExpESEQ negatedESEQ = (TreeExpESEQ) expression;
-				return new TreeExpESEQ(negateStatement(negatedESEQ.stm), negatedESEQ.res);
-			} else if (expression instanceof TreeExpCALL) {
+				return new TreeExpESEQ(negatedESEQ.stm, negateExpression(negatedESEQ.res));
+			}
+			else if (expression instanceof TreeExpCALL) {
 				TreeExpCALL call = (TreeExpCALL) expression;
-				return new TreeExpOP(Op.MINUS, call, new TreeExpCONST(1));
-			} else if (expression instanceof TreeExpTEMP) {
+				return new TreeExpOP(Op.MINUS, new TreeExpCONST(1), call);
+			}
+			else if (expression instanceof TreeExpTEMP) {
 				TreeExpTEMP temp = (TreeExpTEMP) expression;
-				return new TreeExpOP(Op.MINUS, temp, new TreeExpCONST(1));
-			} else if (expression instanceof TreeExpOP) {
+				return new TreeExpOP(Op.MINUS, new TreeExpCONST(1), temp);
+			}
+			else if (expression instanceof TreeExpOP) {
 				return negateOperator((TreeExpOP) expression);
 			}
 			throw new IllegalArgumentException("Unable to negate expression \"" + expression.toString() + "\"");
@@ -348,38 +337,62 @@ public class IntermediateVisitor implements
 				case DIV:
 					operator = Op.DIV;
 					break;
-				case AND:
-					// FIXME: Op.AND does not equal &&
-					operator = Op.AND;
-					break;
-				case LT:
-					/*TreeExp subtractionResult = new TreeExpOP(Op.MINUS, e.left.accept(this), e.right.accept(this));
-					TreeExp smallerThan = new TreeExpOP(
-							Op.LSHIFT,
-							new TreeExpOP(Op.AND, new TreeExpCONST(0x10000000), subtractionResult),
-							new TreeExpCONST(7)
+					
+				case AND: {
+					Temp result = new Temp();
+					
+					Label jumpPointSecondTest = new Label();
+					Label jumpPointTrue = new Label();
+					Label jumpPointFalse = new Label();
+					
+					return new TreeExpESEQ(
+						TreeStm.fromArray(
+							new TreeStmMOVE(new TreeExpTEMP(result), new TreeExpCONST(0)),
+							new TreeStmCJUMP(
+								Rel.EQ,
+								e.left.accept(this),
+								new TreeExpCONST(1),
+								jumpPointSecondTest,
+								jumpPointFalse
+							),
+							new TreeStmLABEL(jumpPointSecondTest),
+							new TreeStmCJUMP(
+								Rel.EQ,
+								e.right.accept(this),
+								new TreeExpCONST(1),
+								jumpPointTrue,
+								jumpPointFalse
+							),
+							new TreeStmLABEL(jumpPointTrue),
+							new TreeStmMOVE(new TreeExpTEMP(result), new TreeExpCONST(1)),
+							new TreeStmLABEL(jumpPointFalse)
+						),
+						new TreeExpTEMP(result)
 					);
-					return smallerThan;*/
+				}
+				case LT: {
 					// TODO: optimise (slide 148)
+					
 					Temp result = new Temp();
 					Label jumpPointTrue = new Label();
 					Label jumpPointFalse = new Label();
 					return new TreeExpESEQ(
-							TreeStm.fromArray(
-									new TreeStmMOVE(new TreeExpTEMP(result), new TreeExpCONST(0)),
-									new TreeStmCJUMP(
-											TreeStmCJUMP.Rel.LT,
-											e.left.accept(this),
-											e.right.accept(this),
-											jumpPointTrue,
-											jumpPointFalse
-									),
-									new TreeStmLABEL(jumpPointTrue),
-									new TreeStmMOVE(new TreeExpTEMP(result), new TreeExpCONST(1)),
-									new TreeStmLABEL(jumpPointFalse)
+						TreeStm.fromArray(
+							new TreeStmMOVE(new TreeExpTEMP(result), new TreeExpCONST(0)),
+							new TreeStmCJUMP(
+								Rel.LT,
+								e.left.accept(this),
+								e.right.accept(this),
+								jumpPointTrue,
+								jumpPointFalse
 							),
-							new TreeExpTEMP(result)
+							new TreeStmLABEL(jumpPointTrue),
+							new TreeStmMOVE(new TreeExpTEMP(result), new TreeExpCONST(1)),
+							new TreeStmLABEL(jumpPointFalse)
+						),
+						new TreeExpTEMP(result)
 					);
+				}
 				default:
 					throw new IllegalArgumentException("Unknown operator: " + e.op);
 			}
