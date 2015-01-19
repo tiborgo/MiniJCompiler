@@ -356,7 +356,10 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 
 		@Override
 		public java.lang.Boolean visit(If s) throws RuntimeException {
-			if (!(s.cond.type instanceof Boolean)) {
+			
+			Type condType = s.cond.accept(this);
+			
+			if (!(condType instanceof Boolean)) {
 				errors.add("Condition in if-statement \"" + s.cond.accept(expressionPrettyPrinter)
 						+ "\" is no boolean expression.");
 				return java.lang.Boolean.FALSE;

@@ -183,7 +183,10 @@ public class MiniJavaCompiler {
 
 			switch (outProcess.exitValue()) {
 			case 0:
-				return stdOutput.toString(); 
+				return stdOutput.toString();
+			case 136:
+				errText = "Floating point exception: 8";
+				break;
 			case 138:
 				errText = "Bus error: 10";
 				break;
