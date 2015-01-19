@@ -8,13 +8,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import minijava.assembler.Assembler;
 import minijava.backend.i386.I386MachineSpecifics;
@@ -111,49 +111,39 @@ public class MiniJavaCompiler {
 		}
 	}
 
-	public String runExecutable(Configuration config, int timeOut_s) throws RunException, RunOutputException {
+	public String runExecutable(Configuration config, int timeoutSeconds) throws RunException, RunOutputException {
 
+		ScheduledFuture<Boolean> timeoutFuture = null;
+		ScheduledExecutorService timeoutScheduler = Executors.newScheduledThreadPool(1);
+		
 		try {
 			final ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "./" + config.outputFile);
 			processBuilder.directory(RUNTIME_DIRECTORY.toFile());
 			
 			final Process outProcess = processBuilder.start();
 			
-			Runnable outCall = new Runnable() {
-
-				@Override
-				public void run() {
-					try {
-						outProcess.waitFor();
-					}
-					catch (InterruptedException e) {
-						throw new RuntimeException(e);
-					}
-				}
-			};
-			
-			
-			ExecutorService service = Executors.newSingleThreadExecutor();
-			try {
-			    Future<?> ft = service.submit(outCall);
-			    try {
-			    	if (timeOut_s != 0) {
-			    		ft.get(timeOut_s, TimeUnit.SECONDS);
-			    	}
-			    	else {
-			    		ft.get();
-			    	}
+			if (timeoutSeconds > 0) {
+				
+				try {
+					timeoutFuture = timeoutScheduler.schedule(new Callable<Boolean>() {
+	
+						@Override
+						public Boolean call() throws Exception {
+							try {
+								outProcess.exitValue();
+								return false;
+							}
+							catch (IllegalThreadStateException e) {
+								outProcess.destroy();
+								return true;
+							}
+						}
+						
+					}, timeoutSeconds, TimeUnit.SECONDS);
 			    }
-			    catch (TimeoutException e) {
-			    	outProcess.destroy();
-			    	throw new RunException("Process did not return after " + timeOut_s + " seconds", e);
-			    }
-			    catch (ExecutionException | CancellationException | InterruptedException e) {
+			    catch (CancellationException e) {
 			    	throw new RunException("Process execution failed.", e);
 			    }
-			}
-			finally {
-			    service.shutdown();
 			}
 
 			String line;
@@ -178,6 +168,10 @@ public class MiniJavaCompiler {
 			}
 			bufferedStderr.close();
 			stderr.close();
+			
+			if (timeoutSeconds > 0) {
+				timeoutFuture.cancel(true);
+			}
 			
 			String errText;
 
@@ -207,7 +201,22 @@ public class MiniJavaCompiler {
 			);
 		}
 		catch (IOException e) {
+			
+			if (timeoutSeconds > 0) {
+				try {
+					if (timeoutFuture.get()) {
+						throw new RunException("Process did not return after " + timeoutSeconds + " seconds");
+					}
+				}
+				catch (InterruptedException | ExecutionException e2) {
+					throw new RunException("Timeout failed.", e2);
+				}
+			}
+			
 			throw new RunException("Failed to read output of compiled executable", e);
+		}
+		finally {
+			timeoutScheduler.shutdown();
 		}
 	}
 
