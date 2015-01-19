@@ -16,6 +16,6 @@ class Switcher {
 		tmp = numbers[0];
 		numbers[0] = numbers[1];
 		numbers[1] = tmp;
-		return 0;
+		return numbers[1];
 	}
 }

@@ -269,6 +269,7 @@ public class AssemblerVisitor implements
 				
 				AssemBinaryOp binaryOperation = new AssemBinaryOp(operatorBinary, o1_, o2);
 				emit(binaryOperation);
+				
 				return o1_;
 			}
 		}
@@ -284,22 +285,37 @@ public class AssemblerVisitor implements
 			Operand dst = stmMOVE.dest.accept(this);
 			Operand src = stmMOVE.src.accept(this);
 			
+			Operand tDst;
+			
 			// 1. dst must not be an immediate
 			// TODO: maybe revert jump?
 			// 2. either dst or src must not be an mem
 			if (dst instanceof Operand.Imm ||
 					(dst instanceof Operand.Mem && src instanceof Operand.Mem)) {
-				Operand.Reg tDst = new Operand.Reg(new Temp());
+				tDst = new Operand.Reg(new Temp());
 				emit(new AssemBinaryOp(Kind.MOV, tDst, dst));
-				dst = tDst;
+			}
+			else {
+				tDst = dst;
 			}
 
 			AssemBinaryOp assemBinaryOp = new AssemBinaryOp(
 				Kind.MOV,
-				dst,
+				tDst,
 				src
 			);
 			emit(assemBinaryOp);
+			
+			// when both operands are mem locations we have to load the src into a temporary first
+			// and then move into the dest as second step
+			if (dst instanceof Operand.Mem && src instanceof Operand.Mem) {
+				emit(new AssemBinaryOp(
+					Kind.MOV,
+					dst,
+				    tDst
+				));
+			}
+			
 			return null;
 		}
 
