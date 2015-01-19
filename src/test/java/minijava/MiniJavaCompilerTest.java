@@ -45,7 +45,7 @@ public class MiniJavaCompilerTest {
 		outputs.put("GameOfLife", "...");
 		outputs.put("Graph", "...");
 		outputs.put("LinearSearch", "10\n11\n12\n13\n14\n15\n16\n17\n18\n9999\n0\n1\n1\n0\n55\n");
-		outputs.put("LinkedList", "..."); // "10000000\n10000000\n0\n0\n10000000\n2220000\n33300000\n44440000\n0\n");
+		outputs.put("LinkedList", "25\n10000000\n39\n25\n10000000\n22\n39\n25\n1\n0\n10000000\n28\n22\n39\n25\n2220000\n-555\n-555\n28\n22\n25\n33300000\n22\n25\n44440000\n0\n");
 		outputs.put("ManyArgs", "1\n0\n2\n1\n3\n1\n4\n0\n5\n1\n10\n0\n89\n1\n999\n");
 		outputs.put("Newton", "2\n999\n577\n408\n0\n");
 		outputs.put("Precedence", "5\n");
@@ -59,6 +59,86 @@ public class MiniJavaCompilerTest {
 		outputs.put("TestEq", "1\n0\n");
 		outputs.put("TrivialClass", "555\n");
 		outputs.put("While", "1\n3\n6\n10\n15\n21\n28\n36\n45\n55\n0\n");
+
+		// BubbleSort probably wrong
+		/*"20
+		7
+		12
+		18
+		2
+		11
+		6
+		9
+		19
+		5
+		99999
+		20
+		20
+		20
+		20
+		20
+		20
+		20
+		20
+		20
+		20
+		0
+		"*/
+		
+		/* Graph:
+		'1
+		4
+		999
+		4
+		1
+		-999
+		3
+		2
+		999
+		4
+		1
+		-999
+		3
+		2
+		999
+		4
+		3
+		-999
+		5
+		3
+		-999
+		5
+		4        // should be 5
+		-999     // should be 999
+		0
+		'
+		*/
+		
+		/* Quicksort, probably wrong
+		'20
+		7
+		12
+		18
+		2
+		11
+		6
+		9
+		19
+		5
+		9999
+		20
+		7
+		12
+		18
+		20
+		11
+		6
+		9
+		19
+		7
+		0
+		'
+		*/
 	}
 	
 	public MiniJavaCompilerTest(File file, Class<? extends Exception> exceptionClass) {
