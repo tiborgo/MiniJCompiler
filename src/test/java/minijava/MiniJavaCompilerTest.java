@@ -4,6 +4,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +29,7 @@ public class MiniJavaCompilerTest {
 	private File file;
 	private Class<? extends Exception> exceptionClass;
 	private MiniJavaCompiler compiler;
-	private static Map<String, String> outputs;
+	private static Map<String, Object> outputs;
 	
 	@BeforeClass
 	public static void setUpOutputs() {
@@ -47,6 +48,7 @@ public class MiniJavaCompilerTest {
 		outputs.put("Graph", "1\n4\n999\n4\n1\n-999\n3\n2\n999\n4\n1\n-999\n3\n2\n999\n4\n3\n-999\n5\n5\n999\n5\n4\n-999\n0\n");
 		outputs.put("LinearSearch", "10\n11\n12\n13\n14\n15\n16\n17\n18\n9999\n0\n1\n1\n0\n55\n");
 		outputs.put("LinkedList", "25\n10000000\n39\n25\n10000000\n22\n39\n25\n1\n0\n10000000\n28\n22\n39\n25\n2220000\n-555\n-555\n28\n22\n25\n33300000\n22\n25\n44440000\n0\n");
+		outputs.put("Mandelbrot", new File("src/test/resources/minijava-examples-outputs/working/Mandelbrot.txt"));
 		outputs.put("ManyArgs", "1\n0\n2\n1\n3\n1\n4\n0\n5\n1\n10\n0\n89\n1\n999\n");
 		outputs.put("Newton", "2\n999\n577\n408\n0\n");
 		outputs.put("Precedence", "5\n");
@@ -85,15 +87,29 @@ public class MiniJavaCompilerTest {
 			String output = compiler.runExecutable(config, 15);
 			if (exceptionClass != null) {
 				fail("The example " + file.toString() + " should have failed with exception " + exceptionClass + ", but was accepted by the compiler.");
+			} 
+			Object expectedOutput = outputs.get(FilenameUtils.getBaseName(file.toString()));
+			String expectedOutputText;
+			
+			if (expectedOutput instanceof String) {
+				expectedOutputText = (String) expectedOutput;
 			}
-			String expectedOutput = outputs.get(FilenameUtils.getBaseName(file.toString()));
-			if (!output.equals(expectedOutput)) {
+			else if (expectedOutput instanceof File) {
+				byte[] content = Files.readAllBytes(((File)expectedOutput).toPath());
+				expectedOutputText = new String(content);
+			}
+			else {
+				throw new IllegalArgumentException("Only accept expected output as string or file");
+			}
+			
+			if (!output.equals(expectedOutputText)) {
 				fail("The example " + file.toString() + " should have printed '" + expectedOutput + "' but printed '" + output + "'");
 			}
 		}
 		catch (Exception e) {
 			
 			if (exceptionClass == null) {
+				e.printStackTrace();
 				fail("The example " + file.toString() + " should have been accepted by the compiler but failed: " + e.getMessage());
 			}
 			

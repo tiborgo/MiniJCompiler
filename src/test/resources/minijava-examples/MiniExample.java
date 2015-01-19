@@ -1,107 +1,157 @@
-class BubbleSort {
-	public static void main(String[] a) {
-		System.out.println(new BBS().Start(10));
-	}
+
+class Mandelbrot {
+  public static void main(String[] args) {
+	 System.out.println(new Mandel().m());
+  }
 }
 
-// This class contains the array of integers and
-// methods to initialize, print and sort the array
-// using Bublesort
-class BBS {
+class Mandel {
 
-	int[] number;
-	int size;
+  int z0r;
+  int z0i;
+  int d;
+  int[] powers;
 
-	// Invoke the Initialization, Sort and Printing
-	// Methods
-	public int Start(int sz) {
-		int aux01;
-		//aux01 = this.Init(sz);
-		//aux01 = this.Print();
-		//System.out.println(99999);
-		number = new int[10];
-		aux01 = this.Sort();
-		//System.out.println(99999);
-		//aux01 = this.Print();
-		return 0;
-	}
+  public int init() {
+	 z0r = 0-600;
+	 z0i = 0;
+	 d = 7;
+	 powers = new int[64];
+	 return 0;
+  }
 
-	// Sort array of integers using Bublesort method
-	public int Sort() {
-		//int nt;
-		int i;
-		int aux02;
-		int aux04;
-		int aux05;
-		//int aux06;
-		//int aux07;
-		int j;
-		//int t;
-		i = 5;//size - 1;
-		aux02 = 0;// - 1 ;
-		System.out.println(aux02);
-		System.out.println(i);
-		if (aux02 < i) {
-			System.out.println(1);
-		}
-		else {
-			System.out.println(0);
-		}
-		while (aux02 < i) {
-			System.out.println(12121212);
-			j = 1;
-			// aux03 = i+1 ;
-			while (j < (i + 1)) {
-				//aux07 = j - 1;
-				//aux04 = number[aux07];
-				System.out.println(444444444);
-				aux05 = number[j];
-				//System.out.println(aux05);
-				System.out.println(aux04);
-				/*if (aux05 < aux04) {
-					System.out.println(555);
-					aux06 = j - 1;
-					t = number[aux06];
-					System.out.println(t);
-					number[aux06] = number[j];
-					number[j] = t;
-				} else
-					nt = 0;*/
-				j = j + 1;
+  public int m() {
+
+	 int cr;
+	 int ci;
+	 int zr;
+	 int zi;
+	 int n;
+	 int x;
+	 int y;
+	 int t;
+	 int absz;
+
+	 x = this.init();
+    System.out.print((char)80);
+	 System.out.println(3);
+	 System.out.println(400);
+	 System.out.println(400);
+	 System.out.println(60);
+
+	 y = 0;
+	 while (y < 400) {
+		 ci  = z0i + (y - 200) * d;
+		 x = 0;
+		 while (x < 400) {
+			cr  = z0r + (x - 200) * d;
+			zr = 0;
+			zi = 0;
+			absz = 0;
+			n = 0;
+			while (absz < 4194304 && n < 60) {
+			  t = zr;
+			  zr = this.shr10(zr * zr) - this.shr10(zi * zi) + cr;
+			  zi = 2*this.shr10(t * zi) + ci;
+			  absz = zr * zr + zi * zi;
+			  n = n+1;
 			}
-			i = i - 1;
-		}
-		return 0;
-	}
+			n = this.printdot(n);
+			x = x + 1;
+		 }
+		 y = y + 1;
+	 }
+	 return 0;
+  }
 
-	// Printing method
-	/*public int Print() {
-		int j;
-		j = 0;
-		while (j < (size)) {
-			System.out.println(number[j]);
-			j = j + 1;
-		}
-		return 0;
-	}*/
+  public int printdot(int v) {
+	 int h;
+	 int p;
+	 int q;
+	 int t;
+	 int i;
+    h = this.div(6*v*1024, 60);
+    i = this.div(6*v, 60);
+	 t = h - i*1024;
+	 q = 1024 - t;
+	 if (59 < v) {
+		System.out.println(0);
+		System.out.println(0);
+		System.out.println(0);
+	 } else if (i < 1) {
+		System.out.println(255);
+		System.out.println(this.shr10(255*t));
+		System.out.println(0);
+	 } else if (i < 2) {
+		System.out.println(this.shr10(255*q));
+		System.out.println(255);
+		System.out.println(0);
+	 } else if (i < 3) {
+		System.out.println(0);
+		System.out.println(255);
+		System.out.println(this.shr10(255*t));
+	 } else if (i < 4) {
+		System.out.println(0);
+		System.out.println(this.shr10(255*q));
+		System.out.println(255);
+	 } else if (i < 5) {
+		System.out.println(this.shr10(255*t));
+		System.out.println(0);
+		System.out.println(255);
+	 } else {
+		System.out.println(255);
+		System.out.println(0);
+		System.out.println(this.shr10(255*q));
+	 }
+	 return 0;
+  }
 
-	// Initialize array of integers
-	/*public int Init(int sz) {
-		size = sz;
-		number = new int[sz];
+  // binaere Division
+  public int div(int dividend, int dividor) {
+	 boolean pos;
+    int j;
+    int k;
+    int b;
+    int res;
 
-		number[0] = 20;
-		number[1] = 7;
-		number[2] = 12;
-		number[3] = 18;
-		number[4] = 2;
-		number[5] = 11;
-		number[6] = 6;
-		number[7] = 9;
-		number[8] = 19;
-		number[9] = 5;
+	 // Wir rechnen mit negativen Zahlen, da es mehr negative int-Werte gibt
+	 // als positive.
+	 pos = (0 < dividend);
+	 if (pos) {
+		dividend = 0 - dividend;
+	 } else {}
 
-		return 0;
-	}*/
+	 if (0 < dividor) {
+		dividor = 0 - dividor;
+	 } else {
+		pos = !pos;
+	 }
 
+	 powers[0] = 1;
+    k = 0;
+	 b = 1;
+	 while (dividend < dividor * powers[k]) { 
+		k = k + 1;
+		b = 2 * b;
+		powers[k] = b;
+	 }
+
+    res = 0;
+	 while (0-1 < k && dividend < 0) {
+		if (dividend < powers[k] * dividor + 1) {
+		  dividend = dividend - powers[k] * dividor;
+		  res = res + powers[k];
+		} else {}
+		k = k - 1;
+	 }
+
+	 if (!pos) {
+		res = 0 - res;
+	 } else {}
+    return res;
+  }
+
+  public int shr10(int v) {
+	 return this.div(v, 1024);
+  }
 }
