@@ -17,6 +17,7 @@ int32_t halloc(int32_t size) {
 int32_t println_int(int32_t n)
 {
   printf("%" PRId32 "\n",n);
+  fflush(stdout);
   return 0;
 }
 
@@ -24,6 +25,7 @@ int32_t println_int(int32_t n)
 int32_t print_char(int32_t n)
 {
   printf("%c", n);
+  fflush(stdout);
   return 0;
 }
 
