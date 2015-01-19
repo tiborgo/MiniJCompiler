@@ -414,12 +414,12 @@ public class IntermediateVisitor implements
 				raiseLabel,
 				getLabel);
 			
-			raises = true;
+			//raises = true;
 			
 			return new TreeExpESEQ(
 				TreeStmSEQ.fromArray(
-					boundsCheckStm,
-					new TreeStmLABEL(getLabel)
+					/*boundsCheckStm,
+					new TreeStmLABEL(getLabel)*/
 				),
 				new TreeExpMEM(
 					new TreeExpOP(
@@ -575,7 +575,7 @@ public class IntermediateVisitor implements
 					raiseLabel,
 					assignLabel);
 			
-			raises = true;
+			//raises = true;
 
 			
 			TreeStm assignStm =  new TreeStmMOVE(
@@ -596,7 +596,7 @@ public class IntermediateVisitor implements
 				assignValue);
 
 			return TreeStmSEQ.fromArray(
-				boundsCheckStm,
+				//boundsCheckStm,
 				new TreeStmLABEL(assignLabel),
 				assignStm
 			);

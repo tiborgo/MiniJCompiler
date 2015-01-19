@@ -1,113 +1,107 @@
-// test selected numbers whether they are prime
-// variant using long (>4) arg list
-// prints sequence of test value and int-encoded isprime?
-// expected output:
-// 1
-// 0
-// 2
-// 1
-// 3
-// 1
-// 4
-// 0
-// 5
-// 1
-// 10
-// 0
-// 89
-// 1
-// 999
-
-class TestPrime {
-    public static void main(String[] a){
-      System.out.println((new Prime()).test_it(1,2,3,4,5,10,89));
-    }
+class BubbleSort {
+	public static void main(String[] a) {
+		System.out.println(new BBS().Start(10));
+	}
 }
 
-class Prime {
-    public boolean or (boolean a, boolean b) {
-      return !(!a && !b);
-    }
-    public boolean divides (int m, int n) {
-      int i;
-      boolean found;
-      i=1; 
-      found=false;
-      while (!found && i<n) {
-	if ((i*m)<n) {
-	  i=i+1;
-	} else if (n<(i*m)) {
-	  i=n;
-	} else {
-	  found=true;
+// This class contains the array of integers and
+// methods to initialize, print and sort the array
+// using Bublesort
+class BBS {
+
+	int[] number;
+	int size;
+
+	// Invoke the Initialization, Sort and Printing
+	// Methods
+	public int Start(int sz) {
+		int aux01;
+		//aux01 = this.Init(sz);
+		//aux01 = this.Print();
+		//System.out.println(99999);
+		//number = new int[10];
+		aux01 = this.Sort();
+		//System.out.println(99999);
+		//aux01 = this.Print();
+		return 0;
 	}
-      }
-      return found;
-    }
 
-    // naive prime-test, without array of primes or sqrt-bound
-    public boolean isprime (int n) {
-      int i;
-      boolean ok;
-      ok = this.or((1<n) && (n<3), ((2<n) && !this.divides(2,n)));
-      i=3;
-      while (ok && (i<n)) {
-	ok = ok && !(this.divides(i,n));
-	i=i+2;
-      }
-      return ok;
-    }
-	
-  // boolean to int conversion
-  public int b2i (boolean b) {
-    int res;
-    if (b) {
-      res = 1;
-    } else {
-      res = 0;
-    }
-    return res;
-  }
+	// Sort array of integers using Bublesort method
+	public int Sort() {
+		//int nt;
+		int i;
+		int aux02;
+		int aux04;
+		int aux05;
+		//int aux06;
+		//int aux07;
+		int j;
+		//int t;
+		i = 5;//size - 1;
+		aux02 = 0;// - 1 ;
+		System.out.println(aux02);
+		System.out.println(i);
+		if (aux02 < i) {
+			System.out.println(1);
+		}
+		else {
+			System.out.println(0);
+		}
+		while (aux02 < i) {
+			System.out.println(12121212);
+			j = 1;
+			// aux03 = i+1 ;
+			while (j < (i + 1)) {
+				//aux07 = j - 1;
+				//aux04 = number[aux07];
+				System.out.println(444444444);
+				aux05 = number[j];
+				//System.out.println(aux05);
+				System.out.println(aux04);
+				/*if (aux05 < aux04) {
+					System.out.println(555);
+					aux06 = j - 1;
+					t = number[aux06];
+					System.out.println(t);
+					number[aux06] = number[j];
+					number[j] = t;
+				} else
+					nt = 0;*/
+				//j = j + 1;
+			}
+			//i = i - 1;
+		}
+		return 0;
+	}
 
-  public int test_it (int x1, int x2, int x3, int x4, int x5, int x6, int x7) {
-      int n;
-      boolean b;
-      n = x1;
-      System.out.println(n);
-      b = this.isprime(n);
-      System.out.println(this.b2i(b));
-      // ---
-      n = x2;
-      System.out.println(n);
-      b = this.isprime(n);
-      System.out.println(this.b2i(b));
-      // ---
-      n = x3;
-      System.out.println(n);
-      b = this.isprime(n);
-      System.out.println(this.b2i(b));
-      // ---
-      n = x4;
-      System.out.println(n);
-      b = this.isprime(n);
-      System.out.println(this.b2i(b));
-      // ---
-      n = x5;
-      System.out.println(n);
-      b = this.isprime(n);
-      System.out.println(this.b2i(b));
-      // ---
-      n = x6;
-      System.out.println(n);
-      b = this.isprime(n);
-      System.out.println(this.b2i(b));
-      // ---
-      n = x7;
-      System.out.println(n);
-      b = this.isprime(n);
-      System.out.println(this.b2i(b));
-      // ---
-      // System.out.println(999);
-      return 999;
-  }
+	// Printing method
+	/*public int Print() {
+		int j;
+		j = 0;
+		while (j < (size)) {
+			System.out.println(number[j]);
+			j = j + 1;
+		}
+		return 0;
+	}*/
+
+	// Initialize array of integers
+	/*public int Init(int sz) {
+		size = sz;
+		number = new int[sz];
+
+		number[0] = 20;
+		number[1] = 7;
+		number[2] = 12;
+		number[3] = 18;
+		number[4] = 2;
+		number[5] = 11;
+		number[6] = 6;
+		number[7] = 9;
+		number[8] = 19;
+		number[9] = 5;
+
+		return 0;
+	}*/
+
 }

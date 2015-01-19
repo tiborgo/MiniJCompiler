@@ -111,7 +111,7 @@ public class MiniJavaCompiler {
 		}
 	}
 
-	public ExecutableOutput runExecutable(Configuration config, int timeOut_s) throws RunException {
+	public String runExecutable(Configuration config, int timeOut_s) throws RunException, RunOutputException {
 
 		try {
 			final ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "./" + config.outputFile);
@@ -158,49 +158,50 @@ public class MiniJavaCompiler {
 
 			String line;
 
-			StringBuilder output = new StringBuilder();
+			StringBuilder stdOutput = new StringBuilder();
 			StringBuilder errOutput = new StringBuilder();
+			
+			// read standard output
+			InputStream stdout = outProcess.getInputStream();
+			BufferedReader bufferedStdout = new BufferedReader(new InputStreamReader(stdout));
+			while ((line = bufferedStdout.readLine()) != null) {
+				stdOutput.append(line + System.lineSeparator());
+			}
+			bufferedStdout.close();
+			stdout.close();
+			
+			// read error output
+			InputStream stderr = outProcess.getErrorStream();
+			BufferedReader bufferedStderr = new BufferedReader(new InputStreamReader(stderr));
+			while ((line = bufferedStderr.readLine()) != null) {
+				errOutput.append(line + System.lineSeparator());
+			}
+			bufferedStderr.close();
+			stderr.close();
+			
+			String errText;
 
 			switch (outProcess.exitValue()) {
 			case 0:
-				InputStream stdout = outProcess.getInputStream();
-				BufferedReader bufferedStdout = new BufferedReader(new InputStreamReader(stdout));
-				while ((line = bufferedStdout.readLine()) != null) {
-					output.append(line + System.lineSeparator());
-				}
-				bufferedStdout.close();
-				stdout.close();
-				break;
+				return stdOutput.toString(); 
 			case 138:
-				errOutput
-					.append("Bus error: 10")
-					.append(System.lineSeparator());
+				errText = "Bus error: 10";
 				break;
 			case 139:
-				errOutput
-					.append("Segmentation Fault")
-					.append(System.lineSeparator());
+				errText = "Segmentation Fault";
 				break;
 			default:
-				errOutput
-					.append("Exit value: ")
-					.append(outProcess.exitValue());
-
-				InputStream stderr = outProcess.getErrorStream();
-				BufferedReader bufferedStderr = new BufferedReader(new InputStreamReader(stderr));
-				while ((line = bufferedStderr.readLine()) != null) {
-					errOutput.append(line + System.lineSeparator());
-				}
-				bufferedStderr.close();
-				stderr.close();
-			}
-
-			if (outProcess.exitValue() != 0) {
-				throw new RunException("Failed to run executable: " + errOutput);
+				errText = "Unknown error: " + outProcess.exitValue();
+				break;
+				
 			}
 			
-			return new ExecutableOutput(outProcess.exitValue(), output.toString());
-
+			throw new RunOutputException(
+				errText,
+				outProcess.exitValue(),
+				stdOutput.toString(),
+				errOutput.toString()
+			);
 		}
 		catch (IOException e) {
 			throw new RunException("Failed to read output of compiled executable", e);
@@ -224,12 +225,28 @@ public class MiniJavaCompiler {
 			
 			if (config.runExecutable) {
 				try {
-					ExecutableOutput out = compiler.runExecutable(config, 0);
+					String out = compiler.runExecutable(config, 0);
 					if (!config.silent) {
-						System.out.println(out.output);
+						System.out.println(out);
 					}
 				}
 				catch (RunException e) {
+					
+					if (config.debug) {
+						e.printStackTrace();
+					}
+					else {
+						System.err.println(e.getMessage());
+					}
+					System.exit(-1);
+				}
+				catch (RunOutputException e) {
+					
+					if (!config.silent) {
+						System.out.println(e.getStdOutput());
+						System.err.println(e.getErrOutput());
+					}
+					
 					if (config.debug) {
 						e.printStackTrace();
 					}

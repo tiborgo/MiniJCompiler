@@ -160,13 +160,13 @@ public class MiniJavaCompilerTest {
 
 		try {
 			compiler.compile(config);
-			ExecutableOutput out = compiler.runExecutable(config, 15);
+			String output = compiler.runExecutable(config, 15);
 			if (exceptionClass != null) {
 				fail("The example " + file.toString() + " should have failed with exception " + exceptionClass + ", but was accepted by the compiler.");
 			}
 			String expectedOutput = outputs.get(FilenameUtils.getBaseName(file.toString()));
-			if (!out.output.equals(expectedOutput)) {
-				fail("The example " + file.toString() + " should have printed '" + expectedOutput + "' but printed '" + out.output + "'");
+			if (!output.equals(expectedOutput)) {
+				fail("The example " + file.toString() + " should have printed '" + expectedOutput + "' but printed '" + output + "'");
 			}
 		}
 		catch (Exception e) {

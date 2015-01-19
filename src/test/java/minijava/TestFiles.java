@@ -36,7 +36,7 @@ public class TestFiles {
 		files.addAll(getFiles(null, EXAMPLE_PROGRAM_PATH_WORKING));
 		files.addAll(getFiles(ParserException.class, EXAMPLE_PROGRAM_PATH_PARSE_FAILING));
 		files.addAll(getFiles(SemanticAnalyserException.class, EXAMPLE_PROGRAM_PATH_TYPE_FAILING));
-		files.addAll(getFiles(RunException.class, EXAMPLE_PROGRAM_PATH_RUNTIME_FAILING));
+		files.addAll(getFiles(RunOutputException.class, EXAMPLE_PROGRAM_PATH_RUNTIME_FAILING));
 		return files;
 	}
 }
