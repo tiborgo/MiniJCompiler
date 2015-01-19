@@ -72,6 +72,10 @@ public class I386MachineSpecifics implements MachineSpecifics {
 		for (Assem instr : instrs) {
 			
 			boolean spilled = false;
+			
+			Assem renamedInstr = instr;
+			List<Assem> useInstrs = new LinkedList<>();
+			List<Assem> defInstrs = new LinkedList<>();
 		
 			for (int i = 0; i < toSpill.size(); i++) {
 
@@ -92,25 +96,30 @@ public class I386MachineSpecifics implements MachineSpecifics {
 					spilledInstrs.addAll(expVisitor.getInstructions());
 
 					if (use.contains(t)) {
-						spilledInstrs.add(new AssemBinaryOp(Kind.MOV, new Operand.Reg(t_), m));
+						useInstrs.add(new AssemBinaryOp(Kind.MOV, new Operand.Reg(t_), m));
 					}
 
-					spilledInstrs.add(instr.rename(new Function<Temp, Temp>() {
+					renamedInstr = renamedInstr.rename(new Function<Temp, Temp>() {
 
 						@Override
 						public Temp apply(Temp a) {
 							return a.equals(t) ? t_ : a;
 						}
 
-					}));
+					});
 
 					if (def.contains(t)) {
-						spilledInstrs.add(new AssemBinaryOp(Kind.MOV, m, new Operand.Reg(t_)));
+						defInstrs.add(new AssemBinaryOp(Kind.MOV, m, new Operand.Reg(t_)));
 					}
 				}
 			}
 			
-			if (!spilled) {
+			if (spilled) {
+				spilledInstrs.addAll(useInstrs);
+				spilledInstrs.add(renamedInstr);
+				spilledInstrs.addAll(defInstrs);
+			}
+			else {
 				/*
 				 * Set amount of memory reserved on the stack according to
 				 * the number of local variables. The local variable count
