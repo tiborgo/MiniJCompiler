@@ -24,62 +24,69 @@ import minijava.translate.tree.TreeStmVisitor;
 public class IntermediatePrettyPrintVisitor implements
 	TreeExpVisitor<String, RuntimeException>,
 	TreeStmVisitor<String, RuntimeException> {
-
+	
 	private String indent = "";
 	private int level = 0;
-
+	
 	private void increaseIndent() {
 		indent += "  ";
 		level++;
 	}
-
+	
 	private void decreaseIndent() {
 		indent = indent.substring(0, indent.length()-2);
 		level--;
 	}
-
+	
 	private String enclose(String name, Object... args) {
-
+		
 		StringBuilder encloseBuilder = new StringBuilder();
-
+		
 		encloseBuilder
 			.append(indent).append(name).append("(").append(System.lineSeparator());
-
+		
 		increaseIndent();
+		
+		if (level < 10) {
+			for (int i = 0; i < args.length; i++) {
 
-		for (int i = 0; i < args.length; i++) {
-
-			if (args[i] instanceof String) {
-				encloseBuilder
-					.append(indent)
-					.append(args[i]);
-			}
-			else if (args[i] instanceof TreeExp) {
-				encloseBuilder.append(((TreeExp)args[i]).accept(this));
-			}
-			else if (args[i] instanceof TreeStm) {
-				encloseBuilder.append(((TreeStm)args[i]).accept(this));
-			}
-			else {
-				throw new IllegalArgumentException("'args' item must be of type String, TreeExp or TreeStm");
-			}
-
-			if (i < args.length-1) {
-				encloseBuilder
-					.append(", ")
-					.append(System.lineSeparator());
+				if (args[i] instanceof String) {
+					encloseBuilder
+						.append(indent)
+						.append(args[i]);
+				}
+				else if (args[i] instanceof TreeExp) {
+					encloseBuilder.append(((TreeExp)args[i]).accept(this));
+				}
+				else if (args[i] instanceof TreeStm) {
+					encloseBuilder.append(((TreeStm)args[i]).accept(this));
+				}
+				else {
+					throw new IllegalArgumentException("'args' item must be of type String, TreeExp or TreeStm");
+				}
+			
+				if (i < args.length-1) {
+					encloseBuilder
+						.append(", ")
+						.append(System.lineSeparator());
+				}
 			}
 		}
-
+		else {
+			encloseBuilder
+				.append(indent)
+				.append("...");
+		}
+		
 		decreaseIndent();
-
+		
 		encloseBuilder
 			.append(System.lineSeparator())
 			.append(indent).append(")");
-
+		
 		return encloseBuilder.toString();
 	}
-
+	
 	@Override
 	public String visit(TreeStmMOVE s) {
 		return enclose("MOVE", s.dest, s.src);
@@ -92,11 +99,11 @@ public class IntermediatePrettyPrintVisitor implements
 
 	@Override
 	public String visit(TreeStmJUMP s) {
-
+		
 		if (s.poss.size() > 1) {
 			throw new UnsupportedOperationException("Cannot print jump to multiple possibilities");
 		}
-
+		
 		return enclose("JUMP", s.dest);
 	}
 
@@ -121,7 +128,7 @@ public class IntermediatePrettyPrintVisitor implements
 		List<TreeExp> args = new ArrayList<>(e.args.size()+1);
 		args.add(e.func);
 		args.addAll(e.args);
-
+		
 		return enclose("CALL", args.toArray());
 	}
 
