@@ -242,22 +242,31 @@ public class AssemblerVisitor implements
 			// Unary instructions
 			if (operatorUnary != null) {
 
-				// TODO: should we save %edx?
-
 				Operand.Reg savedEAX = new Operand.Reg(new Temp());
-				//Operand.Reg savedEDX = new Operand.Reg(new Temp());
-				Operand.Reg o2Temp = new Operand.Reg(new Temp());
+				Operand.Reg savedEDX = new Operand.Reg(new Temp());
 				Operand.Reg result = new Operand.Reg(new Temp());
-
-				AssemBinaryOp saveEAX = new AssemBinaryOp(Kind.MOV, savedEAX, I386MachineSpecifics.EAX);
-				//AssemBinaryOp saveEDX = new AssemBinaryOp(Kind.MOV, savedEDX, I386MachineSpecifics.EDX);
-				AssemBinaryOp moveToEAX = new AssemBinaryOp(Kind.MOV, I386MachineSpecifics.EAX, o1);
-				AssemBinaryOp moveToO2Temp = new AssemBinaryOp(Kind.MOV, o2Temp, o2);
-				AssemUnaryOp division = new AssemUnaryOp(operatorUnary, o2Temp);
-				AssemBinaryOp saveResult = new AssemBinaryOp(Kind.MOV, result, I386MachineSpecifics.EAX);
-				AssemBinaryOp restoreEAX = new AssemBinaryOp(Kind.MOV, I386MachineSpecifics.EAX, savedEAX);
-				//AssemBinaryOp restoreEDX = new AssemBinaryOp(Kind.MOV, I386MachineSpecifics.EDX, savedEDX);
-				emit(saveEAX/*, saveEDX*/, moveToEAX, moveToO2Temp, division, saveResult, restoreEAX/*, restoreEDX*/);
+				Operand.Reg o2Temp = new Operand.Reg(new Temp());
+				
+				emit(
+					// save eax
+					new AssemBinaryOp(Kind.MOV, savedEAX, I386MachineSpecifics.EAX),
+					// move left operand to eax
+					new AssemBinaryOp(Kind.MOV, I386MachineSpecifics.EAX, o1),
+					// store left operand in temp in case it is a mem or immediate
+					new AssemBinaryOp(Kind.MOV, o2Temp, o2),
+					// make backup of edx
+					new AssemBinaryOp(Kind.MOV, savedEDX, I386MachineSpecifics.EDX),
+					// set edx to zero, otherwise floatiing point exception is thrown in case of overflow
+					new AssemBinaryOp(Kind.MOV, I386MachineSpecifics.EDX, new Operand.Imm(0)),
+					// actual operation
+					new AssemUnaryOp(operatorUnary, o2Temp),
+					// save the result
+					new AssemBinaryOp(Kind.MOV, result, I386MachineSpecifics.EAX),
+					// restore eax
+					new AssemBinaryOp(Kind.MOV, I386MachineSpecifics.EAX, savedEAX),
+					// restore edx
+					new AssemBinaryOp(Kind.MOV, I386MachineSpecifics.EDX, savedEDX)
+				);
 				return result;
 			}
 			else {
