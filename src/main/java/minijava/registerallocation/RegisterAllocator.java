@@ -47,7 +47,7 @@ public class RegisterAllocator {
 					SimpleGraph<Temp> interferenceGraph = FlowAnalyser.analyseFlow(config, allocatedFrag);
 					
 					// BUILD
-					graph = Builder.build(interferenceGraph, colors, allocatedFrag);
+					graph = Builder.build(interferenceGraph, colors);
 		
 					if (counter > 2) {
 						//break;

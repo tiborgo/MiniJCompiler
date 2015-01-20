@@ -49,10 +49,10 @@ public class AssemBinaryOp extends DefaultInstruction {
 		case AND:
 		case OR:
 		case XOR:
+		case LEA:
 			return dst.getTemps();
 
 		case CMP:
-		case LEA:
 		case TEST:
 			return Collections.emptyList();
 		}

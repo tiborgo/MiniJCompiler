@@ -12,7 +12,7 @@ import minijava.util.Pair;
 /**
  * Represents an assembly instruction with an arbitrary number of operands.
  */
-public class DefaultInstruction extends Instruction {
+public abstract class DefaultInstruction extends Instruction {
 
 	public DefaultInstruction(Operand... operands) {
 		super(operands);
