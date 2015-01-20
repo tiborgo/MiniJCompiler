@@ -1,21 +1,23 @@
-package minijava.registerallocation;
+package minijava.flowanalysis;
 
 import minijava.translate.layout.Temp;
 
-class ColoredTemp {
+public class CoalesceableTemp {
 	public Temp color;
 	public final Temp temp;
+	public boolean moveRelated;
 	
-	ColoredTemp(Temp temp) {
-		this(temp, null);
+	public CoalesceableTemp(Temp temp) {
+		this(temp, null, false);
 	}
 	
-	ColoredTemp(Temp temp, Temp color) {
+	public CoalesceableTemp(Temp temp, Temp color, boolean moveRelated) {
 		this.color = color;
 		this.temp = temp;
+		this.moveRelated = moveRelated;
 	}
 	
-	boolean isColored() {
+	public boolean isColored() {
 		return color != null;
 	}
  	
@@ -26,7 +28,7 @@ class ColoredTemp {
 	
 	@Override
 	public boolean equals(Object obj) {
-		return (obj instanceof ColoredTemp && ((ColoredTemp)obj).temp.equals(temp)); 
+		return (obj instanceof CoalesceableTemp && ((CoalesceableTemp)obj).temp.equals(temp)); 
 	}
 	
 	@Override

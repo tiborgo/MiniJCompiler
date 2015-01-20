@@ -9,18 +9,25 @@ import minijava.util.Pair;
 import minijava.util.SimpleGraph;
 
 class InterferenceGraphBuilder {
-	static SimpleGraph<Temp> build(SimpleGraph<Assem> controlFlowGraph,
+	static SimpleGraph<CoalesceableTemp> build(SimpleGraph<Assem> controlFlowGraph,
 			Map<Assem, LivenessSetsBuilder.InOut> inOut) {
 
-		SimpleGraph<Temp> interferenceGraph = new SimpleGraph<>(controlFlowGraph.getName());
+		SimpleGraph<CoalesceableTemp> interferenceGraph = new SimpleGraph<>(controlFlowGraph.getName());
 
-		Map<Temp, SimpleGraph.Node<Temp>> nodes = new HashMap<>();
-		for (LivenessSetsBuilder.InOut inOutN : inOut.values()) {
-			for (Temp t : inOutN.in) {
-				if (nodes.get(t) == null) {
-					SimpleGraph.Node<Temp> node = interferenceGraph.addNode(t);
+		Map<Temp, SimpleGraph.Node<CoalesceableTemp>> nodes = new HashMap<>();
+		
+		for (SimpleGraph.Node<Assem> n : controlFlowGraph.nodeSet()) {
+		
+			for (Temp t : inOut.get(n.info).in) {
+				
+				SimpleGraph.Node<CoalesceableTemp> node = nodes.get(t);
+				
+				if (node == null) {
+					node = interferenceGraph.addNode(new CoalesceableTemp(t, null, false));
 					nodes.put(t, node);
 				}
+				
+				node.info.moveRelated = node.info.moveRelated && (n.info.isMoveBetweenTemps() != null); 
 			}
 		}
 
@@ -33,10 +40,10 @@ class InterferenceGraphBuilder {
 
 					for (Temp u : inOut.get(n.info).out) {
 						if (!u.equals(t)) {
-							SimpleGraph.Node<Temp> tNode = nodes.get(t);
-							SimpleGraph.Node<Temp> uNode = nodes.get(u);
+							SimpleGraph.Node<CoalesceableTemp> tNode = nodes.get(t);
+							SimpleGraph.Node<CoalesceableTemp> uNode = nodes.get(u);
 							if (tNode == null) {
-								tNode = interferenceGraph.addNode(t);
+								tNode = interferenceGraph.addNode(new CoalesceableTemp(t, null, false));
 								nodes.put(t, tNode);
 							}
 							if (uNode == null) {
@@ -54,10 +61,10 @@ class InterferenceGraphBuilder {
 				for (Temp u : inOut.get(n.info).out) {
 
 					if (!u.equals(moveInstruction.snd) && !u.equals(moveInstruction.fst)) {
-						SimpleGraph.Node<Temp> tNode = nodes.get(moveInstruction.fst);
-						SimpleGraph.Node<Temp> uNode = nodes.get(u);
+						SimpleGraph.Node<CoalesceableTemp> tNode = nodes.get(moveInstruction.fst);
+						SimpleGraph.Node<CoalesceableTemp> uNode = nodes.get(u);
 						if (tNode == null) {
-							tNode = interferenceGraph.addNode(moveInstruction.fst);
+							tNode = interferenceGraph.addNode(new CoalesceableTemp(moveInstruction.fst, null, false));
 							nodes.put(moveInstruction.fst, tNode);
 						}
 						if (uNode == null) {
