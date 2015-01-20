@@ -37,7 +37,12 @@ public final class AssemInstr extends DefaultInstruction {
 			return Arrays.asList(I386MachineSpecifics.EBP.reg);
 		case RET:
 			// eax is the returned value
-			return Arrays.asList(I386MachineSpecifics.EAX.reg);
+			// and calle save registers
+			return Arrays.asList(I386MachineSpecifics.EAX.reg,
+					I386MachineSpecifics.EBX.reg,
+					I386MachineSpecifics.ESI.reg,
+					I386MachineSpecifics.EDI.reg,
+					I386MachineSpecifics.EBP.reg);
 		case NOP:
 			return Collections.emptyList();
 		case CDQ:

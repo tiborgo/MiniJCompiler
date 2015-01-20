@@ -58,6 +58,7 @@ public final class AssemUnaryOp extends Instruction {
 		case IDIV: {
 			List<Temp> temps = new ArrayList<>(op.getTemps());
 			temps.add(I386MachineSpecifics.EAX.reg);
+			temps.add(I386MachineSpecifics.EDX.reg);
 			return temps;
 		}
 			

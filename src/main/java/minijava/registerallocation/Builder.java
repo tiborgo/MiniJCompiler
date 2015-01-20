@@ -3,14 +3,12 @@ package minijava.registerallocation;
 import java.util.List;
 
 import minijava.flowanalysis.FlowAnalyserException;
-import minijava.instructionselection.assems.Assem;
-import minijava.translate.layout.FragmentProc;
 import minijava.translate.layout.Temp;
 import minijava.util.SimpleGraph;
 
 class Builder {
 
-	static SimpleGraph<ColoredTemp> build(SimpleGraph<Temp> interferenceGraph, List<Temp> colors, FragmentProc<List<Assem>> assemFragment) throws FlowAnalyserException {
+	static SimpleGraph<ColoredTemp> build(SimpleGraph<Temp> interferenceGraph, List<Temp> colors) throws FlowAnalyserException {
 
 		SimpleGraph<ColoredTemp> preColoredGraph = new SimpleGraph<>(interferenceGraph.getName());
 
