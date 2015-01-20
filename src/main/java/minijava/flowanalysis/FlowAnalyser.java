@@ -9,20 +9,19 @@ import minijava.Logger;
 import minijava.backend.i386.visitors.I386PrintAssemblyVisitor;
 import minijava.instructionselection.assems.Assem;
 import minijava.translate.layout.FragmentProc;
-import minijava.translate.layout.Temp;
 import minijava.util.SimpleGraph;
 
 import org.apache.commons.lang3.StringUtils;
 
 public class FlowAnalyser {
 
-	public static SimpleGraph<Temp> analyseFlow(Configuration config, FragmentProc<List<Assem>> assemFragment) throws FlowAnalyserException {
+	public static SimpleGraph<CoalesceableTemp> analyseFlow(Configuration config, FragmentProc<List<Assem>> assemFragment) throws FlowAnalyserException {
 		
 		try {
 		
 			SimpleGraph<Assem> controlFlowGraph = ControlFlowGraphBuilder.build(assemFragment);
 			Map<Assem, LivenessSetsBuilder.InOut> inOut = LivenessSetsBuilder.build(controlFlowGraph, assemFragment.body);
-			SimpleGraph<Temp> interferenceGraph = InterferenceGraphBuilder.build(controlFlowGraph, inOut);
+			SimpleGraph<CoalesceableTemp> interferenceGraph = InterferenceGraphBuilder.build(controlFlowGraph, inOut);
 			
 			
 			int maxInterference = 0;

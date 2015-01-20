@@ -8,6 +8,7 @@ import java.util.Map;
 
 import minijava.Configuration;
 import minijava.Logger;
+import minijava.flowanalysis.CoalesceableTemp;
 import minijava.flowanalysis.FlowAnalyser;
 import minijava.instructionselection.MachineSpecifics;
 import minijava.instructionselection.assems.Assem;
@@ -36,35 +37,33 @@ public class RegisterAllocator {
 				FragmentProc<List<Assem>> allocatedFrag = new FragmentProc<>(fragProc.frame, fragProc.body);
 		
 				int counter = 0;
-				SimpleGraph<ColoredTemp> graph;
+				SimpleGraph<CoalesceableTemp> graph;
 		
 				do {
+					counter++;
+					
 					if (config.printRegisterAllocationDetails) {
 						Logger.log("#################");
 						Logger.log(fragProc.frame.getName().toString());
 					}
 		
-					SimpleGraph<Temp> interferenceGraph = FlowAnalyser.analyseFlow(config, allocatedFrag);
+					graph = FlowAnalyser.analyseFlow(config, allocatedFrag);
 					
 					// BUILD
-					graph = Builder.build(interferenceGraph, colors);
+					Builder.build(graph, colors);
 		
-					if (counter > 2) {
-						//break;
-					}
+					
 		
-					counter++;
-		
-					Map<ColoredTemp, SimpleGraph.BackupNode<ColoredTemp>> graphBackup = graph.backup();
+					Map<CoalesceableTemp, SimpleGraph.BackupNode<CoalesceableTemp>> graphBackup = graph.backup();
 		
 					int coloredNodesCount = 0;
-					for (SimpleGraph.Node<ColoredTemp> n : graph.nodeSet()) {
+					for (SimpleGraph.Node<CoalesceableTemp> n : graph.nodeSet()) {
 						if (n.info.isColored()) {
 							coloredNodesCount++;
 						}
 					}
 		
-					List<ColoredTemp> stack = new LinkedList<>();
+					List<CoalesceableTemp> stack = new LinkedList<>();
 		
 					do {
 						// SIMPLIFY
@@ -91,7 +90,7 @@ public class RegisterAllocator {
 				}
 				while(spillNodes.size() > 0);
 		
-				final SimpleGraph<ColoredTemp> finalGraph = graph;
+				final SimpleGraph<CoalesceableTemp> finalGraph = graph;
 		
 				// Replace colored temps
 				for (int i = 0; i < allocatedFrag.body.size(); i++) {
@@ -100,7 +99,7 @@ public class RegisterAllocator {
 		
 						@Override
 						public Temp apply(Temp a) {
-							SimpleGraph.Node<ColoredTemp> n = finalGraph.get(new ColoredTemp(a));
+							SimpleGraph.Node<CoalesceableTemp> n = finalGraph.get(new CoalesceableTemp(a));
 							return (n.info.color == null) ? a : n.info.color;
 						}
 					}));
