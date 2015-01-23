@@ -15,8 +15,8 @@ class Selector {
 	static List<Temp> select(
 			SimpleGraph<CoalesceableTemp> graph,
 			List<CoalesceableTemp> stack,
-			List<Temp> colors,
-			Map<CoalesceableTemp, SimpleGraph.BackupNode<CoalesceableTemp>> graphBackup) {
+			List<Temp> colors/*,
+			Map<CoalesceableTemp, SimpleGraph.BackupNode<CoalesceableTemp>> graphBackup*/) {
 
 		List<Temp> spilledNodes = new LinkedList<>();
 		Collections.reverse(stack);
@@ -26,9 +26,10 @@ class Selector {
 			// Add node to simplified graph
 
 
-			SimpleGraph.BackupNode<CoalesceableTemp> b = graphBackup.get(t);
-			graph.restore(b);
+			//SimpleGraph.BackupNode<CoalesceableTemp> b = graphBackup.get(t);
+			//graph.restore(b);
 			SimpleGraph.Node<CoalesceableTemp> n = graph.get(t);
+			graph.activateNode(n);
 
 			// Find color for node
 			Set<SimpleGraph.Node<CoalesceableTemp>> neighbours = n.neighbours();
