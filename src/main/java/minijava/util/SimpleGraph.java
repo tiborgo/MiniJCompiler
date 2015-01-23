@@ -6,12 +6,17 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import minijava.flowanalysis.CoalesceableTemp;
+import minijava.util.SimpleGraph.Node;
+
 public class SimpleGraph<NodeInfo> {
 
 	private final Map<NodeInfo, Node<NodeInfo>> nodes = new HashMap<>();
+	private final Map<NodeInfo, Node<NodeInfo>> deactivatedNodes = new HashMap<>();
 
 	private final String name;
 	private final boolean directed;
+	private final boolean secondaryDirected;
 
 	public static class BackupNode<T> {
 		private final T info;
@@ -32,13 +37,24 @@ public class SimpleGraph<NodeInfo> {
 	public static class Node<T> {
 
 		public T info;
+		
 		private Set<Node<T>> successors;
 		private Set<Node<T>> predecessors;
+		
+		private Set<Node<T>> deactivatedSuccessors;
+		private Set<Node<T>> deactivatedPredecessors;
+		
+		private Set<Node<T>> secondarySuccessors;
+		private Set<Node<T>> secondaryPredecessors;
 
 		private Node(T info) {
 			this.info = info;
 			this.successors = new HashSet<>();
 			this.predecessors = new HashSet<>();
+			this.deactivatedSuccessors = new HashSet<>();
+			this.deactivatedPredecessors = new HashSet<>();
+			this.secondarySuccessors = new HashSet<>();
+			this.secondaryPredecessors = new HashSet<>();
 		}
 
 		/**
@@ -56,11 +72,26 @@ public class SimpleGraph<NodeInfo> {
 		public Set<Node<T>> predecessors() {
 			return Collections.unmodifiableSet(predecessors);
 		}
+		
+		public Set<Node<T>> secondarySuccessors() {
+			return Collections.unmodifiableSet(secondarySuccessors);
+		}
+		
+		public Set<Node<T>> secondaryPredecessors() {
+			return Collections.unmodifiableSet(secondaryPredecessors);
+		}
 
 		public Set<Node<T>> neighbours() {
 			Set<Node<T>> neigbours = new HashSet<>();
 			neigbours.addAll(successors);
 			neigbours.addAll(predecessors);
+			return neigbours;
+		}
+		
+		public Set<Node<T>> secondaryNeighbours() {
+			Set<Node<T>> neigbours = new HashSet<>();
+			neigbours.addAll(secondarySuccessors);
+			neigbours.addAll(secondaryPredecessors);
 			return neigbours;
 		}
 
@@ -123,9 +154,10 @@ public class SimpleGraph<NodeInfo> {
 		}
 	}
 
-	public SimpleGraph(String name, boolean directed) {
+	public SimpleGraph(String name, boolean directed, boolean secondaryDirected) {
 		this.name = name;
 		this.directed = directed;
+		this.secondaryDirected = secondaryDirected;
 	}
 
 	public String getName() {
@@ -135,15 +167,19 @@ public class SimpleGraph<NodeInfo> {
 	public Set<Node<NodeInfo>> nodeSet() {
 		return new HashSet<>(nodes.values());
 	}
-
-	public void removeNode(Node<NodeInfo> n) {
+	
+	public void deactivateNode(Node<NodeInfo> n) {
 		nodes.remove(n.info);
-		for (Node<NodeInfo> successor : n.successors()) {
-			successor.removePredecessor(n);
+		deactivatedNodes.put(n.info, n);
+		
+		Set<Node<NodeInfo>> successors = new HashSet<>(n.successors());
+		for (Node<NodeInfo> successor : successors) {
+			deactivateEdge(n, successor);
 		}
 
-		for (Node<NodeInfo> predecessor : n.predecessors()) {
-			predecessor.removeSuccessor(n);
+		Set<Node<NodeInfo>> predecessors = new HashSet<>(n.predecessors());
+		for (Node<NodeInfo> predecessor : predecessors) {
+			deactivateEdge(predecessor, n);
 		}
 	}
 
@@ -182,15 +218,139 @@ public class SimpleGraph<NodeInfo> {
 	}
 
 	public void addEdge(Node<NodeInfo> src, Node<NodeInfo> dst) {
-		src.addSuccessor(dst);
-		dst.addPredecessor(src);
+		if (deactivatedNodes.get(dst) != null) {
+			src.deactivatedSuccessors.add(dst);
+		}
+		else {
+			src.addSuccessor(dst);
+		}
+		if (deactivatedNodes.get(src) != null) {
+			dst.deactivatedPredecessors.add(src);
+		}
+		else {
+			dst.addPredecessor(src);
+		}
+	}
+	
+	public void addSecondaryEdge(Node<NodeInfo> src, Node<NodeInfo> dst) {
+		src.secondarySuccessors.add(dst);
+		dst.secondaryPredecessors.add(src);
+	}
+	
+	public boolean hasEdge(Node<NodeInfo> src, Node<NodeInfo> dst) {
+		if (directed) {
+			return src.successors.contains(dst);
+		}
+		else {
+			return src.successors.contains(dst) || src.predecessors.contains(dst);
+		}
+	}
+	
+	public boolean hasSecondaryEdge(Node<NodeInfo> src, Node<NodeInfo> dst) {
+		if (secondaryDirected) {
+			return src.secondarySuccessors.contains(dst);
+		}
+		else {
+			return src.secondarySuccessors.contains(dst) || src.secondaryPredecessors.contains(dst);
+		}
 	}
 
 	public void removeEdge(Node<NodeInfo> src, Node<NodeInfo> dst) {
 		src.removeSuccessor(dst);
 		dst.removePredecessor(src);
 	}
+	
+	public void removeSecondaryEdge(Node<NodeInfo> src, Node<NodeInfo> dst) {
+		src.secondarySuccessors.remove(dst);
+		dst.secondaryPredecessors.remove(src);
+	}
+	
+	private void deactivateEdge(Node<NodeInfo> src, Node<NodeInfo> dst) {
+		src.successors.remove(dst);
+		src.deactivatedSuccessors.add(dst);
+		dst.predecessors.remove(src);
+		dst.deactivatedPredecessors.add(src);
+	}
 
+	public void merge(Node<NodeInfo> a, Node<NodeInfo> b, NodeInfo info) {
+
+		Node<NodeInfo> ab = new Node<>(info);
+		
+		Set<Node<NodeInfo>> allPrimaryPredecessors = new HashSet<>();
+		allPrimaryPredecessors.addAll(a.predecessors);
+		allPrimaryPredecessors.addAll(b.predecessors);
+		allPrimaryPredecessors.addAll(a.deactivatedPredecessors);
+		allPrimaryPredecessors.addAll(b.deactivatedPredecessors);
+		allPrimaryPredecessors.remove(a);
+		allPrimaryPredecessors.remove(b);
+		
+		Set<Node<NodeInfo>> allPrimarySuccessors = new HashSet<>();
+		allPrimarySuccessors.addAll(a.successors);
+		allPrimarySuccessors.addAll(b.successors);
+		allPrimarySuccessors.addAll(a.deactivatedSuccessors);
+		allPrimarySuccessors.addAll(b.deactivatedSuccessors);
+		if (!directed) {
+			allPrimarySuccessors.removeAll(allPrimaryPredecessors);
+		}
+		allPrimarySuccessors.remove(a);
+		allPrimarySuccessors.remove(b);
+		
+		Set<Node<NodeInfo>> allSecondaryPredecessors = new HashSet<>();
+		allSecondaryPredecessors.addAll(a.secondaryPredecessors);
+		allSecondaryPredecessors.addAll(b.secondaryPredecessors);
+		allSecondaryPredecessors.remove(a);
+		allSecondaryPredecessors.remove(b);
+		
+		Set<Node<NodeInfo>> allSecondarySuccessors = new HashSet<>();
+		allSecondarySuccessors.addAll(a.secondarySuccessors);
+		allSecondarySuccessors.addAll(b.secondarySuccessors);
+		if (!secondaryDirected) {
+			allSecondarySuccessors.removeAll(allSecondaryPredecessors);
+		}
+		allSecondarySuccessors.remove(a);
+		allSecondarySuccessors.remove(b);
+		
+		removeNode(a);
+		removeNode(b);
+		
+		for (Node<NodeInfo> predecessor : allPrimaryPredecessors) {
+			addEdge(predecessor, ab);
+		}
+		for (Node<NodeInfo> successor : allPrimarySuccessors) {
+			addEdge(ab, successor);
+		}
+		for (Node<NodeInfo> predecessor : allSecondaryPredecessors) {
+			addSecondaryEdge(predecessor, ab);
+		}
+		for (Node<NodeInfo> successor : allSecondarySuccessors) {
+			addSecondaryEdge(ab, successor);
+		}
+		
+		nodes.put(info, ab);
+	}
+	
+	private void removeNode(Node<NodeInfo> n) {
+		nodes.remove(n.info);
+		for (Node<NodeInfo> successor : n.successors()) {
+			successor.predecessors.remove(n);
+		}
+		for (Node<NodeInfo> predecessor : n.predecessors()) {
+			predecessor.successors.remove(n);
+		}
+		for (Node<NodeInfo> successor : n.deactivatedSuccessors) {
+			successor.deactivatedPredecessors.remove(n);
+		}
+		for (Node<NodeInfo> predecessor : n.deactivatedPredecessors) {
+			predecessor.deactivatedSuccessors.remove(n);
+		}
+		for (Node<NodeInfo> successor : n.secondarySuccessors()) {
+			successor.secondaryPredecessors.remove(n);
+		}
+		for (Node<NodeInfo> predecessor : n.secondaryPredecessors()) {
+			predecessor.secondarySuccessors.remove(n);
+		}
+	}
+	
 	public void reverse() {
 		for (Node<NodeInfo> node : nodes.values()) {
 			node.reverse();
@@ -205,23 +365,34 @@ public class SimpleGraph<NodeInfo> {
 	 */
 	public String getDot() {
 		
-		String graphType = (directed) ? "digraph" : "graph";
-		String lineType = (directed) ? "->" : "--";
+		String primaryLineType = (directed) ? "" : "dir=none";
+		String secondaryLineType = (secondaryDirected) ? "" :  "dir=none";
 		
 		StringBuilder out = new StringBuilder();
 		
 		out
-			.append(graphType)
-			.append(" G {" + System.lineSeparator());
+			.append("digraph G {" + System.lineSeparator());
 
 		for (Node<NodeInfo> n : nodes.values()) {
 			out.append("\"" + n.hashCode() + "\" [label=\"" + n.info.toString()
 					+ "\"];" + System.lineSeparator());
 		}
+		for (Node<NodeInfo> n : deactivatedNodes.values()) {
+			out.append("\"" + n.hashCode() + "\" [label=\"" + n.info.toString()
+					+ "\", color=gray];" + System.lineSeparator());
+		}
+		
 		for (Node<NodeInfo> n : nodes.values()) {
 			for (Node<NodeInfo> m : n.successors()) {
-				out.append("\"" + n.hashCode() + "\" " + lineType + " \"" + m.hashCode()
-						+ "\";" + System.lineSeparator());
+				out.append("\"" + n.hashCode() + "\" -> \"" + m.hashCode()
+						+ "\" [" + primaryLineType + "];" + System.lineSeparator());
+			}
+		}
+		
+		for (Node<NodeInfo> n : nodes.values()) {
+			for (Node<NodeInfo> m : n.secondarySuccessors()) {
+				out.append("\"" + n.hashCode() + "\" -> \"" + m.hashCode()
+						+ "\" [style=dotted, " + secondaryLineType + "];" + System.lineSeparator());
 			}
 		}
 		

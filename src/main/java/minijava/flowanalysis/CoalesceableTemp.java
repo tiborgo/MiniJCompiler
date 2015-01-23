@@ -15,7 +15,7 @@ public class CoalesceableTemp {
 	public Temp color;
 	public final Temp temp;
 	private Map<Temp, Set<Assem>> moves = new HashMap<>();
-	private Set<Temp> partners = new HashSet<>();
+	//private Set<Temp> partners = new HashSet<>();
 	
 	public CoalesceableTemp(Temp temp) {
 		this(temp, null);
@@ -30,9 +30,9 @@ public class CoalesceableTemp {
 		return color != null;
 	}
 	
-	public boolean isMoveRelated() {
+	/*public boolean isMoveRelated() {
 		return (moves.size() > 0);
-	}
+	}*/
 	
 	public void addMove(Assem move) {
 		Pair<Temp, Temp> moveTemps = move.isMoveBetweenTemps();
@@ -41,7 +41,7 @@ public class CoalesceableTemp {
 		assert(moveTemps.fst.equals(temp) || moveTemps.snd.equals(temp));
 		
 		Temp partner = (moveTemps.fst.equals(temp)) ? moveTemps.snd : moveTemps.fst;
-		partners.add(partner);
+		//partners.add(partner);
 		if (moves.get(partner) == null) {
 			moves.put(partner, new HashSet<Assem>());
 		}
@@ -56,7 +56,7 @@ public class CoalesceableTemp {
 	}*/
 	
 	public void removePartner(Temp partner) {
-		partners.remove(partner);
+		//partners.remove(partner);
 		moves.remove(partner);
 		/*for (Assem move : moves) {
 			Pair<Temp, Temp> temps = move.isMoveBetweenTemps();
@@ -78,7 +78,7 @@ public class CoalesceableTemp {
  	
 	@Override
 	public String toString() {
-		return temp.toString() + " -> " + ((color != null) ? color.toString() : "<uncolored>") + ((partners.size() > 0) ? " ---> " + partners : "");
+		return temp.toString() + " -> " + ((color != null) ? color.toString() : "<uncolored>");
 	}
 	
 	@Override
@@ -92,11 +92,11 @@ public class CoalesceableTemp {
 	}
 
 	public Set<Temp> getPartners() {
-		return Collections.unmodifiableSet(partners);
+		return moves.keySet();
 	}
 
 	public void free() {
-		partners.clear();
+		//partners.clear();
 		moves.clear();
 	}
 }

@@ -15,9 +15,9 @@ class Simplifier {
 		boolean changed = false;
 
 		for (SimpleGraph.Node<CoalesceableTemp> node : nodes) {
-			if (!node.info.isMoveRelated() && node.degree() < k && !node.info.isColored()) {
+			if (node.secondaryNeighbours().size() == 0 && node.degree() < k && !node.info.isColored()) {
 				stack.add(node.info);
-				graph.removeNode(node);
+				graph.deactivateNode(node);
 				changed = true;
 			}
 		}

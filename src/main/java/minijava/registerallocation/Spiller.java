@@ -7,7 +7,7 @@ import minijava.util.SimpleGraph;
 
 class Spiller {
 
-	static void spill(SimpleGraph<CoalesceableTemp> graph, List<CoalesceableTemp> stack) {
+	static boolean spill(SimpleGraph<CoalesceableTemp> graph, List<CoalesceableTemp> stack) {
 
 		/*int maxDegree = 0;
 		SimpleGraph.Node<CoalesceableTemp> maxDegreeNode = null;
@@ -21,12 +21,14 @@ class Spiller {
 		//if (maxDegreeNode != null) {
 		
 		for (SimpleGraph.Node<CoalesceableTemp> n : graph.nodeSet()) {
-			if (!n.info.isColored() && !n.info.isMoveRelated()) {
+			if (!n.info.isColored()/* && n.secondaryNeighbours().size() > 0 */) {
 				stack.add(n.info);
-				graph.removeNode(n);
-				break;
+				//graph.removeNode(n);
+				graph.deactivateNode(n);
+				return true;
 			}
 		}
+		return false;
 		
 		//SimpleGraph.Node<CoalesceableTemp> n = graph.nodeSet().iterator().next();
 			
