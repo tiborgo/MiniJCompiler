@@ -14,7 +14,7 @@ class InterferenceGraphBuilder {
 	static SimpleGraph<CoalesceableTemp> build(SimpleGraph<Assem> controlFlowGraph,
 			Map<Assem, LivenessSetsBuilder.InOut> inOut) {
 
-		SimpleGraph<CoalesceableTemp> interferenceGraph = new SimpleGraph<>(controlFlowGraph.getName());
+		SimpleGraph<CoalesceableTemp> interferenceGraph = new SimpleGraph<>(controlFlowGraph.getName(), false);
 
 		Map<Temp, SimpleGraph.Node<CoalesceableTemp>> nodes = new HashMap<>();
 		

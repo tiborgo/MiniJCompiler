@@ -11,6 +11,7 @@ public class SimpleGraph<NodeInfo> {
 	private final Map<NodeInfo, Node<NodeInfo>> nodes = new HashMap<>();
 
 	private final String name;
+	private final boolean directed;
 
 	public static class BackupNode<T> {
 		private final T info;
@@ -122,8 +123,9 @@ public class SimpleGraph<NodeInfo> {
 		}
 	}
 
-	public SimpleGraph(String name) {
+	public SimpleGraph(String name, boolean directed) {
 		this.name = name;
+		this.directed = directed;
 	}
 
 	public String getName() {
@@ -202,19 +204,33 @@ public class SimpleGraph<NodeInfo> {
 	 * http://www.graphviz.com
 	 */
 	public String getDot() {
+		
+		String graphType = (directed) ? "digraph" : "graph";
+		String lineType = (directed) ? "->" : "--";
+		
 		StringBuilder out = new StringBuilder();
-		out.append("digraph G {" + System.lineSeparator());
+		
+		out
+			.append(graphType)
+			.append(" G {" + System.lineSeparator());
+
 		for (Node<NodeInfo> n : nodes.values()) {
 			out.append("\"" + n.hashCode() + "\" [label=\"" + n.info.toString()
 					+ "\"];" + System.lineSeparator());
 		}
 		for (Node<NodeInfo> n : nodes.values()) {
 			for (Node<NodeInfo> m : n.successors()) {
-				out.append("\"" + n.hashCode() + "\"  -> \"" + m.hashCode()
-						+ "\"" + System.lineSeparator());
+				out.append("\"" + n.hashCode() + "\" " + lineType + " \"" + m.hashCode()
+						+ "\";" + System.lineSeparator());
 			}
 		}
-		out.append("}" + System.lineSeparator());
+		
+		out
+			.append("labelloc=\"t\";" + System.lineSeparator())
+			.append("label=\"")
+			.append(name)
+			.append("\";" + System.lineSeparator())
+			.append("}" + System.lineSeparator());
 		return out.toString();
 	}
 }
