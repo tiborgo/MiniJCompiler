@@ -18,7 +18,7 @@ public class SimpleGraph<NodeInfo> {
 	private final boolean directed;
 	private final boolean secondaryDirected;
 
-	public static class BackupNode<T> {
+	/*public static class BackupNode<T> {
 		private final T info;
 		private final Set<T> successors = new HashSet<>();
 		private final Set<T> predecessors = new HashSet<>();
@@ -32,7 +32,7 @@ public class SimpleGraph<NodeInfo> {
 				predecessors.add(p.info);
 			}
 		}
-	}
+	}*/
 
 	public static class Node<T> {
 
@@ -123,9 +123,9 @@ public class SimpleGraph<NodeInfo> {
 			return info.hashCode();
 		}
 
-		public BackupNode<T> backup() {
+		/*public BackupNode<T> backup() {
 			return new BackupNode<T>(this);
-		}
+		}*/
 
 		// TODO: Should not be necessary
 		protected void addSuccessor(Node<T> successor) {
@@ -182,6 +182,25 @@ public class SimpleGraph<NodeInfo> {
 			deactivateEdge(predecessor, n);
 		}
 	}
+	
+	public void activateNode(Node<NodeInfo> n) {
+		deactivatedNodes.remove(n.info);
+		nodes.put(n.info, n);
+		
+		Set<Node<NodeInfo>> successors = new HashSet<>(n.deactivatedSuccessors);
+		for (Node<NodeInfo> successor : successors) {
+			if (nodes.get(successor.info) != null) {
+				activateEdge(n, successor);
+			}
+		}
+
+		Set<Node<NodeInfo>> predecessors = new HashSet<>(n.deactivatedPredecessors);
+		for (Node<NodeInfo> predecessor : predecessors) {
+			if (nodes.get(predecessor.info) != null) {
+				activateEdge(predecessor, n);
+			}
+		}
+	}
 
 	public Node<NodeInfo> addNode(NodeInfo info) {
 		Node<NodeInfo> node = new Node<NodeInfo>(info);
@@ -190,10 +209,14 @@ public class SimpleGraph<NodeInfo> {
 	}
 
 	public Node<NodeInfo> get(NodeInfo info) {
-		return nodes.get(info);
+		Node<NodeInfo> node = nodes.get(info);
+		if (node == null) {
+			node = deactivatedNodes.get(info);
+		}
+		return node;
 	}
 
-	public void restore(BackupNode<NodeInfo> node) {
+	/*public void restore(BackupNode<NodeInfo> node) {
 		Node<NodeInfo> n = addNode(node.info);
 		for (NodeInfo st : node.successors) {
 			Node<NodeInfo> s = nodes.get(st);
@@ -215,7 +238,7 @@ public class SimpleGraph<NodeInfo> {
 			backup.put(info, nodes.get(info).backup());
 		}
 		return backup;
-	}
+	}*/
 
 	public void addEdge(Node<NodeInfo> src, Node<NodeInfo> dst) {
 		if (deactivatedNodes.get(dst) != null) {
@@ -270,6 +293,13 @@ public class SimpleGraph<NodeInfo> {
 		src.deactivatedSuccessors.add(dst);
 		dst.predecessors.remove(src);
 		dst.deactivatedPredecessors.add(src);
+	}
+	
+	private void activateEdge(Node<NodeInfo> src, Node<NodeInfo> dst) {
+		src.deactivatedSuccessors.remove(dst);
+		src.successors.add(dst);
+		dst.deactivatedPredecessors.remove(src);
+		dst.predecessors.add(src);
 	}
 
 	public void merge(Node<NodeInfo> a, Node<NodeInfo> b, NodeInfo info) {
@@ -383,14 +413,35 @@ public class SimpleGraph<NodeInfo> {
 		}
 		
 		for (Node<NodeInfo> n : nodes.values()) {
-			for (Node<NodeInfo> m : n.successors()) {
+			for (Node<NodeInfo> m : n.successors) {
 				out.append("\"" + n.hashCode() + "\" -> \"" + m.hashCode()
 						+ "\" [" + primaryLineType + "];" + System.lineSeparator());
 			}
 		}
 		
+		for (Node<NodeInfo> n : deactivatedNodes.values()) {
+			for (Node<NodeInfo> m : n.successors) {
+				out.append("\"" + n.hashCode() + "\" -> \"" + m.hashCode()
+						+ "\" [" + primaryLineType + ", color=gray];" + System.lineSeparator());
+			}
+		}
+		
 		for (Node<NodeInfo> n : nodes.values()) {
-			for (Node<NodeInfo> m : n.secondarySuccessors()) {
+			for (Node<NodeInfo> m : n.deactivatedSuccessors) {
+				out.append("\"" + n.hashCode() + "\" -> \"" + m.hashCode()
+						+ "\" [" + primaryLineType + ", color=gray];" + System.lineSeparator());
+			}
+		}
+		
+		for (Node<NodeInfo> n : deactivatedNodes.values()) {
+			for (Node<NodeInfo> m : n.deactivatedSuccessors) {
+				out.append("\"" + n.hashCode() + "\" -> \"" + m.hashCode()
+						+ "\" [" + primaryLineType + ", color=gray];" + System.lineSeparator());
+			}
+		}
+		
+		for (Node<NodeInfo> n : nodes.values()) {
+			for (Node<NodeInfo> m : n.secondarySuccessors) {
 				out.append("\"" + n.hashCode() + "\" -> \"" + m.hashCode()
 						+ "\" [style=dotted, " + secondaryLineType + "];" + System.lineSeparator());
 			}

@@ -57,7 +57,7 @@ public class RegisterAllocator {
 		
 					System.out.println(graph.getDot());
 		
-					Map<CoalesceableTemp, SimpleGraph.BackupNode<CoalesceableTemp>> graphBackup = graph.backup();
+					//Map<CoalesceableTemp, SimpleGraph.BackupNode<CoalesceableTemp>> graphBackup = graph.backup();
 		
 		
 					List<CoalesceableTemp> stack = new LinkedList<>();
@@ -114,7 +114,7 @@ public class RegisterAllocator {
 					System.out.println(machineSpecifics.printAssembly(Arrays.<Fragment<List<Assem>>>asList(new FragmentProc<List<Assem>>(allocatedFrame, allocatedBody))));
 		
 					// SELECT
-					spillNodes = Selector.select(graph, stack, colors, graphBackup);
+					spillNodes = Selector.select(graph, stack, colors/*, graphBackup*/);
 		
 					// rewrite program
 					allocatedBody = machineSpecifics.spill(allocatedFrame, allocatedBody, spillNodes);
