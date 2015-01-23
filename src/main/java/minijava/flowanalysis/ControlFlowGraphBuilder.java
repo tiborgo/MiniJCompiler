@@ -7,19 +7,18 @@ import java.util.List;
 import java.util.Map;
 
 import minijava.instructionselection.assems.Assem;
-import minijava.translate.layout.FragmentProc;
 import minijava.translate.layout.Label;
 import minijava.util.SimpleGraph;
 
 class ControlFlowGraphBuilder {
-	static SimpleGraph<Assem> build(FragmentProc<List<Assem>> frag) {
+	static SimpleGraph<Assem> build(List<Assem> body, String methodName) {
 
-		SimpleGraph<Assem> graph = new SimpleGraph<>(frag.frame.getName().toString());
+		SimpleGraph<Assem> graph = new SimpleGraph<>(methodName);
 		List<SimpleGraph.Node<Assem>> jumps = new LinkedList<>();
 		Map<Label, SimpleGraph.Node<Assem>> labelNodes = new HashMap<>();
 
 		SimpleGraph.Node<Assem> previousNode = null;
-		Iterator<Assem> iter = frag.body.iterator();
+		Iterator<Assem> iter = body.iterator();
 
 		while (iter.hasNext()) {
 

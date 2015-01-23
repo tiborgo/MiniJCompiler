@@ -1,6 +1,8 @@
 package minijava.flowanalysis;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import minijava.instructionselection.assems.Assem;
@@ -17,17 +19,22 @@ class InterferenceGraphBuilder {
 		Map<Temp, SimpleGraph.Node<CoalesceableTemp>> nodes = new HashMap<>();
 		
 		for (SimpleGraph.Node<Assem> n : controlFlowGraph.nodeSet()) {
+			
+			List<Temp> ts = new ArrayList<>(n.info.use());
+			ts.addAll(n.info.def());
 		
-			for (Temp t : inOut.get(n.info).in) {
+			for (Temp t : ts) {
 				
 				SimpleGraph.Node<CoalesceableTemp> node = nodes.get(t);
 				
 				if (node == null) {
-					node = interferenceGraph.addNode(new CoalesceableTemp(t, null, false));
+					node = interferenceGraph.addNode(new CoalesceableTemp(t, null));
 					nodes.put(t, node);
 				}
 				
-				node.info.moveRelated = node.info.moveRelated && (n.info.isMoveBetweenTemps() != null); 
+				if (n.info.isMoveBetweenTemps() != null) {
+					node.info.addMove(n.info);
+				}
 			}
 		}
 
@@ -43,7 +50,7 @@ class InterferenceGraphBuilder {
 							SimpleGraph.Node<CoalesceableTemp> tNode = nodes.get(t);
 							SimpleGraph.Node<CoalesceableTemp> uNode = nodes.get(u);
 							if (tNode == null) {
-								tNode = interferenceGraph.addNode(new CoalesceableTemp(t, null, false));
+								tNode = interferenceGraph.addNode(new CoalesceableTemp(t, null));
 								nodes.put(t, tNode);
 							}
 							if (uNode == null) {
@@ -64,7 +71,7 @@ class InterferenceGraphBuilder {
 						SimpleGraph.Node<CoalesceableTemp> tNode = nodes.get(moveInstruction.fst);
 						SimpleGraph.Node<CoalesceableTemp> uNode = nodes.get(u);
 						if (tNode == null) {
-							tNode = interferenceGraph.addNode(new CoalesceableTemp(moveInstruction.fst, null, false));
+							tNode = interferenceGraph.addNode(new CoalesceableTemp(moveInstruction.fst, null));
 							nodes.put(moveInstruction.fst, tNode);
 						}
 						if (uNode == null) {
