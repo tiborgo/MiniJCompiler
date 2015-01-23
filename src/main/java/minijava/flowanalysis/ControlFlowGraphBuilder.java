@@ -13,7 +13,7 @@ import minijava.util.SimpleGraph;
 class ControlFlowGraphBuilder {
 	static SimpleGraph<Assem> build(List<Assem> body, String methodName) {
 
-		SimpleGraph<Assem> graph = new SimpleGraph<>(methodName);
+		SimpleGraph<Assem> graph = new SimpleGraph<>(methodName, true);
 		List<SimpleGraph.Node<Assem>> jumps = new LinkedList<>();
 		Map<Label, SimpleGraph.Node<Assem>> labelNodes = new HashMap<>();
 
