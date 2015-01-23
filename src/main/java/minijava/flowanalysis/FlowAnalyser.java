@@ -8,25 +8,27 @@ import minijava.Configuration;
 import minijava.Logger;
 import minijava.backend.i386.visitors.I386PrintAssemblyVisitor;
 import minijava.instructionselection.assems.Assem;
-import minijava.translate.layout.FragmentProc;
 import minijava.util.SimpleGraph;
 
 import org.apache.commons.lang3.StringUtils;
 
 public class FlowAnalyser {
 
-	public static SimpleGraph<CoalesceableTemp> analyseFlow(Configuration config, FragmentProc<List<Assem>> assemFragment) throws FlowAnalyserException {
+	public static SimpleGraph<CoalesceableTemp> analyseFlow(Configuration config, List<Assem> body, String methodName) throws FlowAnalyserException {
 		
 		try {
 		
-			SimpleGraph<Assem> controlFlowGraph = ControlFlowGraphBuilder.build(assemFragment);
-			Map<Assem, LivenessSetsBuilder.InOut> inOut = LivenessSetsBuilder.build(controlFlowGraph, assemFragment.body);
+			SimpleGraph<Assem> controlFlowGraph = ControlFlowGraphBuilder.build(body, methodName);
+			Map<Assem, LivenessSetsBuilder.InOut> inOut = LivenessSetsBuilder.build(controlFlowGraph, body);
 			SimpleGraph<CoalesceableTemp> interferenceGraph = InterferenceGraphBuilder.build(controlFlowGraph, inOut);
 			
+			if (config.printInterferenceGraphs) {
+				Logger.log(interferenceGraph.getDot());
+			}
 			
 			int maxInterference = 0;
 			I386PrintAssemblyVisitor visitor = new I386PrintAssemblyVisitor();
-			Iterator<Assem> iter = assemFragment.body.iterator();
+			Iterator<Assem> iter = body.iterator();
 			StringBuilder inOutStringBuilder = new StringBuilder();
 	
 			if (config.printFlowAnalysisDetails) {

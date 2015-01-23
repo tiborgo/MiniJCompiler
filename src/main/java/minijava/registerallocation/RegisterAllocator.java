@@ -1,5 +1,6 @@
 package minijava.registerallocation;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -14,9 +15,11 @@ import minijava.instructionselection.MachineSpecifics;
 import minijava.instructionselection.assems.Assem;
 import minijava.translate.layout.Fragment;
 import minijava.translate.layout.FragmentProc;
+import minijava.translate.layout.Frame;
 import minijava.translate.layout.Temp;
 import minijava.util.Function;
 import minijava.util.SimpleGraph;
+import minijava.util.SimpleGraph.Node;
 
 public class RegisterAllocator {
 
@@ -34,8 +37,8 @@ public class RegisterAllocator {
 				List<Temp> colors = Arrays.asList(machineSpecifics.getGeneralPurposeRegisters());
 				int k = colors.size();
 				List<Temp> spillNodes = Collections.emptyList();
-				FragmentProc<List<Assem>> allocatedFrag = new FragmentProc<>(fragProc.frame, fragProc.body);
-		
+				Frame allocatedFrame = fragProc.frame;
+				List<Assem> allocatedBody = new ArrayList<>(fragProc.body);
 				int counter = 0;
 				SimpleGraph<CoalesceableTemp> graph;
 		
@@ -47,7 +50,7 @@ public class RegisterAllocator {
 						Logger.log(fragProc.frame.getName().toString());
 					}
 		
-					graph = FlowAnalyser.analyseFlow(config, allocatedFrag);
+					graph = FlowAnalyser.analyseFlow(config, allocatedBody, allocatedFrame.getName().toString());
 					
 					// BUILD
 					Builder.build(graph, colors);
@@ -56,29 +59,57 @@ public class RegisterAllocator {
 		
 					Map<CoalesceableTemp, SimpleGraph.BackupNode<CoalesceableTemp>> graphBackup = graph.backup();
 		
-					int coloredNodesCount = 0;
-					for (SimpleGraph.Node<CoalesceableTemp> n : graph.nodeSet()) {
-						if (n.info.isColored()) {
-							coloredNodesCount++;
-						}
-					}
 		
 					List<CoalesceableTemp> stack = new LinkedList<>();
 		
+					int coloredNodesCount = 0;
 					do {
-						// SIMPLIFY
-						Simplifier.simplify(graph, stack, k);
+						int insignificantNodesCount = 0;
+						//do {
+							boolean changed;
+							do {
+								// SIMPLIFY
+								changed = Simplifier.simplify(graph, stack, k);
+							
+								// COALESCE
+								
+								changed = Coalescer.coalesce(graph, allocatedBody, k, allocatedFrame.getName().toString()) || changed;
+							}
+							while (changed);
+							
+							// FREEZE
+							boolean freezed = Freezer.freeze(graph, stack, k);
+							
+							for (Node<CoalesceableTemp> n : graph.nodeSet()) {
+								if (n.degree() < k) {
+									insignificantNodesCount++;
+								}
+							}
+							
+							if (!freezed && graph.nodeSet().size() > 0) {
+								// SPILL
+								Spiller.spill(graph, stack);
+							}
+						//}
+						//while(insignificantNodesCount > 0);
 		
-						// SPILL
-						Spiller.spill(graph, stack);
+						
+						
+						for (SimpleGraph.Node<CoalesceableTemp> n : graph.nodeSet()) {
+							if (n.info.isColored()) {
+								coloredNodesCount++;
+							}
+						}
 					}
 					while(graph.nodeSet().size() > coloredNodesCount);
+					
+					System.out.println(machineSpecifics.printAssembly(Arrays.<Fragment<List<Assem>>>asList(new FragmentProc<List<Assem>>(allocatedFrame, allocatedBody))));
 		
 					// SELECT
 					spillNodes = Selector.select(graph, stack, colors, graphBackup);
 		
 					// rewrite program
-					allocatedFrag = new FragmentProc<>(allocatedFrag.frame, machineSpecifics.spill(allocatedFrag.frame, allocatedFrag.body, spillNodes));
+					allocatedBody = machineSpecifics.spill(allocatedFrame, allocatedBody, spillNodes);
 		
 					if (config.printRegisterAllocationDetails) {
 						Logger.log("Register allocator round " + counter + ", " + spillNodes.size() + " spill nodes " + spillNodes);
@@ -93,9 +124,9 @@ public class RegisterAllocator {
 				final SimpleGraph<CoalesceableTemp> finalGraph = graph;
 		
 				// Replace colored temps
-				for (int i = 0; i < allocatedFrag.body.size(); i++) {
+				for (int i = 0; i < allocatedBody.size(); i++) {
 		
-					allocatedFrag.body.set(i, allocatedFrag.body.get(i).rename(new Function<Temp, Temp>() {
+					allocatedBody.set(i, allocatedBody.get(i).rename(new Function<Temp, Temp>() {
 		
 						@Override
 						public Temp apply(Temp a) {
@@ -105,7 +136,7 @@ public class RegisterAllocator {
 					}));
 				}
 		
-				allocatedFrags.add(allocatedFrag);
+				allocatedFrags.add(new FragmentProc<>(allocatedFrame, allocatedBody));
 			}
 			
 			Logger.logVerbosely("Successfully allocated registers");

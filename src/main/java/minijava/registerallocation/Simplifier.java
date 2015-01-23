@@ -9,15 +9,19 @@ import minijava.util.SimpleGraph;
 
 class Simplifier {
 
-	static void simplify(SimpleGraph<CoalesceableTemp> graph, List<CoalesceableTemp> stack, int k) {
+	static boolean simplify(SimpleGraph<CoalesceableTemp> graph, List<CoalesceableTemp> stack, int k) {
 
 		Set<SimpleGraph.Node<CoalesceableTemp>> nodes = new HashSet<>(graph.nodeSet());
+		boolean changed = false;
 
 		for (SimpleGraph.Node<CoalesceableTemp> node : nodes) {
-			if (node.info.color == null && node.degree() < k) {
+			if (!node.info.isMoveRelated() && node.degree() < k && !node.info.isColored()) {
 				stack.add(node.info);
 				graph.removeNode(node);
+				changed = true;
 			}
 		}
+		
+		return changed;
 	}
 }
