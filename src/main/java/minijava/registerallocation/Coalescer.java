@@ -20,30 +20,35 @@ public class Coalescer {
 		
 		final Map<Temp, Temp> renames = new HashMap<>();
 		boolean changed = false;
+		boolean loopChanged;
 		
 		// Slide 295
-		
-		for (Node<CoalesceableTemp> a : graph.nodeSet()) {
+		//if (a.info.isMoveRelated()) {
+		do {
 			
-			if (a.info.isMoveRelated()) {
-				for (Temp tB : a.info.getPartners()) {
-					Node<CoalesceableTemp> b = graph.get(new CoalesceableTemp(tB));
-					Set<Pair<Temp, Temp>> moveTempsSet = a.info.getMoveTemps(tB);
+			loopChanged = false;
+			
+			nodeLoop:
+			for (Node<CoalesceableTemp> a : graph.nodeSet()) {
+			
+			
+				for (Node<CoalesceableTemp> b : a.secondarySuccessors()) {
+					//Node<CoalesceableTemp> b = graph.get(new CoalesceableTemp(tB));
+					/*Set<Pair<Temp, Temp>> moveTempsSet = a.info.getMoveTemps(b.info.temp);
 					Temp removeColor = null;
 					Temp coalascedColor = null;
 					Pair<Temp, Temp> moveTemps = null;
 					for (Pair<Temp, Temp> temps : moveTempsSet) {
 						moveTemps = temps;
-						removeColor = (tB.equals(temps.fst)) ? ((b != null) ? b.info.color : null) : a.info.color;
-						coalascedColor = (tB.equals(temps.snd) && b != null) ? b.info.color : a.info.color;
+						removeColor = (b.info.temp.equals(temps.fst)) ? ((b != null) ? b.info.color : null) : a.info.color;
+						coalascedColor = (b.info.temp.equals(temps.snd) && b != null) ? b.info.color : a.info.color;
 						if (removeColor == null) {
 							break;
 						}
-					}
+					}*/
 					
-					// Node can only be coalesced when they don't interfere
 					// Cannot remove colored temp since registers can have a special purpose
-					if (!a.neighbours().contains(b) && removeColor == null) {
+					if (/*!a.neighbours().contains(b) &&*/ b.info.color == null) {
 					
 						boolean coalesceable = false;
 						
@@ -83,7 +88,8 @@ public class Coalescer {
 						// coalesce
 						if (coalesceable) {
 							changed = true;
-							graph.removeNode(a);
+							loopChanged = true;
+							/*graph.removeNode(a);
 							if (b != null) {
 								graph.removeNode(b);
 							}
@@ -91,17 +97,20 @@ public class Coalescer {
 							Node<CoalesceableTemp> coalescedNode = graph.addNode(new CoalesceableTemp(moveTemps.snd, coalascedColor));
 							for (Node<CoalesceableTemp> neighbour : neighbours) {
 								graph.addEdge(coalescedNode, neighbour);
-							}
+							}*/
 							
-							renames.put(moveTemps.fst, moveTemps.snd);
-						}
-						else {
-							break;
+							graph.merge(a, b, a.info);
+							
+							renames.put(b.info.temp, a.info.temp);
+							
+							break nodeLoop;
 						}
 					}
 				}
 			}
 		}
+		while(loopChanged);
+		
 		
 		for (int i = 0; i < allocatedBody.size(); i++) {
 			

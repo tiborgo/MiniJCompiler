@@ -55,7 +55,7 @@ public class RegisterAllocator {
 					// BUILD
 					Builder.build(graph, colors);
 		
-					
+					System.out.println(graph.getDot());
 		
 					Map<CoalesceableTemp, SimpleGraph.BackupNode<CoalesceableTemp>> graphBackup = graph.backup();
 		
@@ -63,6 +63,8 @@ public class RegisterAllocator {
 					List<CoalesceableTemp> stack = new LinkedList<>();
 		
 					int coloredNodesCount = 0;
+					boolean spilled;
+					boolean freezed;
 					do {
 						int insignificantNodesCount = 0;
 						//do {
@@ -74,34 +76,40 @@ public class RegisterAllocator {
 								// COALESCE
 								
 								changed = Coalescer.coalesce(graph, allocatedBody, k, allocatedFrame.getName().toString()) || changed;
+								
+								System.out.println(graph.getDot());
 							}
 							while (changed);
 							
 							// FREEZE
-							boolean freezed = Freezer.freeze(graph, stack, k);
+							freezed = Freezer.freeze(graph, stack, k);
 							
-							for (Node<CoalesceableTemp> n : graph.nodeSet()) {
+							/*for (Node<CoalesceableTemp> n : graph.nodeSet()) {
 								if (n.degree() < k) {
 									insignificantNodesCount++;
 								}
-							}
+							}*/
 							
-							if (!freezed && graph.nodeSet().size() > 0) {
+							
+							if (!freezed/* && graph.nodeSet().size() > 0*/) {
 								// SPILL
-								Spiller.spill(graph, stack);
+								spilled = Spiller.spill(graph, stack);
+							}
+							else {
+								spilled = false;
 							}
 						//}
 						//while(insignificantNodesCount > 0);
 		
 						
 						
-						for (SimpleGraph.Node<CoalesceableTemp> n : graph.nodeSet()) {
+						/*for (SimpleGraph.Node<CoalesceableTemp> n : graph.nodeSet()) {
 							if (n.info.isColored()) {
 								coloredNodesCount++;
 							}
-						}
+						}*/
 					}
-					while(graph.nodeSet().size() > coloredNodesCount);
+					while(freezed || spilled/*graph.nodeSet().size() > coloredNodesCount*/);
 					
 					System.out.println(machineSpecifics.printAssembly(Arrays.<Fragment<List<Assem>>>asList(new FragmentProc<List<Assem>>(allocatedFrame, allocatedBody))));
 		
