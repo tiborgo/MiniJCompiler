@@ -130,7 +130,7 @@ public class I386PrintAssemblyVisitor implements
 
 		if (op.displacement != 0) {
 			operation
-				.append("+")
+				.append(op.displacement < 0 ? "" : "+")
 				.append(op.displacement);
 		}
 		operation.append("]");
