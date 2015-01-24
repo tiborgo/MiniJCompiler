@@ -21,6 +21,8 @@ import minijava.util.Function;
 import minijava.util.SimpleGraph;
 import minijava.util.SimpleGraph.Node;
 
+import minijava.util.GraphSaver;
+
 public class RegisterAllocator {
 
 	public static List<Fragment<List<Assem>>> allocateRegisters(Configuration config, List<Fragment<List<Assem>>> frags, MachineSpecifics machineSpecifics) throws RegisterAllocatorException {
@@ -72,10 +74,16 @@ public class RegisterAllocator {
 							do {
 								// SIMPLIFY
 								changed = Simplifier.simplify(graph, stack, k);
-							
+								
 								// COALESCE
 								
+								//boolean b1 = graph.getDot().contains("t71");
+								
 								changed = Coalescer.coalesce(graph, allocatedBody, k, allocatedFrame.getName().toString()) || changed;
+								
+								//boolean b2 = graph.getDot().contains("t71");
+								
+								//int x = 0;
 								
 								//System.out.println(graph.getDot());
 							}
@@ -138,7 +146,8 @@ public class RegisterAllocator {
 		
 						@Override
 						public Temp apply(Temp a) {
-							SimpleGraph.Node<CoalesceableTemp> n = finalGraph.get(new CoalesceableTemp(a));
+							SimpleGraph<CoalesceableTemp> graph = finalGraph;
+							SimpleGraph.Node<CoalesceableTemp> n = graph.get(new CoalesceableTemp(a));
 							return (n.info.color == null) ? a : n.info.color;
 						}
 					}));
