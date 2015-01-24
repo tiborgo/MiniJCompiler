@@ -1,4 +1,4 @@
-package minijava.intermediate.visitors;
+package minijava.translate.visitors;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.fail;
+
 import minijava.MiniJavaLexer;
 import minijava.MiniJavaParser;
 import minijava.backend.dummymachine.DummyMachineSpecifics;
@@ -24,10 +25,9 @@ import minijava.backend.dummymachine.IntermediateToCmm;
 import minijava.canonicalize.visitors.CanonVisitor;
 import minijava.parse.rules.Program;
 import minijava.parse.visitors.ASTVisitor;
+import minijava.semanticanalysis.visitors.TypeInferenceVisitor;
 import minijava.translate.layout.FragmentProc;
 import minijava.translate.tree.TreeStm;
-import minijava.translate.visitors.IntermediateVisitor;
-
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -61,6 +61,8 @@ public class IntermediateVisitorTest {
 				ParseTree parseTree = parser.prog();
 				ASTVisitor astVisitor = new ASTVisitor();
 				Program ast = (Program) astVisitor.visit(parseTree);
+				TypeInferenceVisitor typeInferenceVisitor = new TypeInferenceVisitor();
+				ast.accept(typeInferenceVisitor);
 
 				visitor = new IntermediateVisitor(new DummyMachineSpecifics(), ast);
 				List<FragmentProc<TreeStm>> fragmentList = ast.accept(visitor);
@@ -98,7 +100,7 @@ public class IntermediateVisitorTest {
 				int retVal = gccCall.exitValue();
 				if (retVal != 0) {
 					System.out.println(cCode);
-					fail("C Compiler returned with value "+retVal);
+					fail("C Compiler returned with value " + retVal);
 				}
 				return super.visitFile(file, attrs);
 			}
