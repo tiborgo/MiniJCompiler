@@ -55,7 +55,7 @@ public class RegisterAllocator {
 					// BUILD
 					Builder.build(graph, colors);
 		
-					System.out.println(graph.getDot());
+					//System.out.println(graph.getDot());
 		
 					//Map<CoalesceableTemp, SimpleGraph.BackupNode<CoalesceableTemp>> graphBackup = graph.backup();
 		
@@ -77,7 +77,7 @@ public class RegisterAllocator {
 								
 								changed = Coalescer.coalesce(graph, allocatedBody, k, allocatedFrame.getName().toString()) || changed;
 								
-								System.out.println(graph.getDot());
+								//System.out.println(graph.getDot());
 							}
 							while (changed);
 							
@@ -111,7 +111,7 @@ public class RegisterAllocator {
 					}
 					while(freezed || spilled/*graph.nodeSet().size() > coloredNodesCount*/);
 					
-					System.out.println(machineSpecifics.printAssembly(Arrays.<Fragment<List<Assem>>>asList(new FragmentProc<List<Assem>>(allocatedFrame, allocatedBody))));
+					//System.out.println(machineSpecifics.printAssembly(Arrays.<Fragment<List<Assem>>>asList(new FragmentProc<List<Assem>>(allocatedFrame, allocatedBody))));
 		
 					// SELECT
 					spillNodes = Selector.select(graph, stack, colors/*, graphBackup*/);

@@ -133,8 +133,8 @@ public class Coalescer {
 			}
 		}
 		
-		System.out.println(methodName);
-		System.out.println(renames);
+		//System.out.println(methodName);
+		//System.out.println(renames);
 		
 		return changed;
 	}
