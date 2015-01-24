@@ -87,16 +87,16 @@ public class Coalescer {
 						}
 						
 						nodes.remove(b);
+						nodes.remove(a);
+						nodes.add(ab);
 
 						break;
 					}
 				}
 			}
-
-			nodes.remove(a);
-
-			if (coalesceable) {
-				nodes.add(graph.get(a.info));
+			
+			if (!coalesceable) {
+				nodes.remove(a);
 			}
 		}
 
