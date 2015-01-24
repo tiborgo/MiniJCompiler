@@ -17,6 +17,8 @@ import minijava.util.Pair;
 import minijava.util.SimpleGraph;
 import minijava.util.SimpleGraph.Node;
 
+import minijava.util.GraphSaver;
+
 public class Coalescer {
 
 	static boolean coalesce(Configuration config, SimpleGraph<CoalesceableTemp> graph, List<Assem> allocatedBody, int k) {
@@ -72,10 +74,18 @@ public class Coalescer {
 					if (coalesceable) {
 						changed = true;
 
-						graph.merge(a, b, a.info);
+						Node<CoalesceableTemp> ab = graph.merge(a, b, a.info);
 
 						renames.put(b.info.temp, a.info.temp);
-
+						
+						// Remove move relations when the new node is interfering with one of its move neighbours
+						for (Node<CoalesceableTemp> n : ab.secondaryNeighbours()) {
+							if (graph.hasEdge(n, ab)) {
+								graph.removeSecondaryEdge(n, ab);
+								graph.removeSecondaryEdge(ab, n);
+							}
+						}
+						
 						nodes.remove(b);
 
 						break;
