@@ -14,6 +14,8 @@ import minijava.util.Pair;
 import minijava.util.SimpleGraph;
 import minijava.util.SimpleGraph.Node;
 
+import minijava.util.GraphSaver;
+
 public class Coalescer {
 
 	static boolean coalesce(SimpleGraph<CoalesceableTemp> graph, List<Assem> allocatedBody, int k, String methodName) {
@@ -114,11 +116,17 @@ public class Coalescer {
 		
 		for (int i = 0; i < allocatedBody.size(); i++) {
 			
+			int x = 0;
+			
 			Assem coalescedAssem = allocatedBody.get(i).rename(new Function<Temp, Temp>() {
 
 				@Override
 				public Temp apply(Temp t) {
-					Temp newT = renames.get(t);
+					Temp newT = t;
+					do {
+						newT = renames.get(newT);
+					}
+					while (renames.get(newT) != null);
 					return (newT != null) ? newT : t;
 				}
 			});
