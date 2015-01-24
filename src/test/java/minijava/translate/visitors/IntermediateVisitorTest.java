@@ -1,4 +1,4 @@
-package minijava.intermediate.visitors;
+package minijava.translate.visitors;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.fail;
+
 import minijava.MiniJavaLexer;
 import minijava.MiniJavaParser;
 import minijava.backend.dummymachine.DummyMachineSpecifics;
@@ -26,8 +27,6 @@ import minijava.parse.rules.Program;
 import minijava.parse.visitors.ASTVisitor;
 import minijava.translate.layout.FragmentProc;
 import minijava.translate.tree.TreeStm;
-import minijava.translate.visitors.IntermediateVisitor;
-
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -98,7 +97,7 @@ public class IntermediateVisitorTest {
 				int retVal = gccCall.exitValue();
 				if (retVal != 0) {
 					System.out.println(cCode);
-					fail("C Compiler returned with value "+retVal);
+					fail("C Compiler returned with value " + retVal);
 				}
 				return super.visitFile(file, attrs);
 			}
