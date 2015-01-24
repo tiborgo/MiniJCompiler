@@ -2,7 +2,7 @@ package minijava.translate.layout;
 
 public class Temp implements Comparable<Temp> {
 
-  private static int nextId = 0;
+  private static int nextId = 500;
 
   private final int id;
 

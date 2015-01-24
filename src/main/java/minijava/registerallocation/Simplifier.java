@@ -11,16 +11,30 @@ class Simplifier {
 
 	static boolean simplify(SimpleGraph<CoalesceableTemp> graph, List<CoalesceableTemp> stack, int k) {
 
-		Set<SimpleGraph.Node<CoalesceableTemp>> nodes = new HashSet<>(graph.nodeSet());
 		boolean changed = false;
-
-		for (SimpleGraph.Node<CoalesceableTemp> node : nodes) {
-			if (node.secondaryNeighbours().size() == 0 && node.degree() < k && !node.info.isColored()) {
-				stack.add(node.info);
-				graph.deactivateNode(node);
-				changed = true;
+		boolean loopChanged ;
+		Set<SimpleGraph.Node<CoalesceableTemp>> simplifiableNodes = new HashSet<>();
+		
+		do {
+			
+			loopChanged = false;
+			
+			Set<SimpleGraph.Node<CoalesceableTemp>> nodes = new HashSet<>(graph.nodeSet());
+	
+			for (SimpleGraph.Node<CoalesceableTemp> node : nodes) {
+	
+				if (node.secondaryNeighbours().size() == 0 && node.degree() < k && !node.info.isColored()) {
+					stack.add(node.info);
+					graph.deactivateNode(node);
+					changed = true;
+					loopChanged = true;
+					simplifiableNodes.add(node);
+				}
 			}
 		}
+		while(loopChanged);
+		
+		System.out.println(simplifiableNodes);
 		
 		return changed;
 	}
