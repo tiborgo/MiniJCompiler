@@ -17,8 +17,8 @@ import minijava.translate.layout.FragmentProc;
 import minijava.translate.layout.Frame;
 import minijava.translate.layout.Temp;
 import minijava.util.Function;
+import minijava.util.Pair;
 import minijava.util.SimpleGraph;
-
 import minijava.util.GraphSaver;
 
 public class RegisterAllocator {
@@ -109,7 +109,7 @@ public class RegisterAllocator {
 				// Replace colored temps
 				for (int i = 0; i < allocatedBody.size(); i++) {
 
-					allocatedBody.set(i, allocatedBody.get(i).rename(new Function<Temp, Temp>() {
+					Assem renamedAssem = allocatedBody.get(i).rename(new Function<Temp, Temp>() {
 
 						@Override
 						public Temp apply(Temp a) {
@@ -117,7 +117,17 @@ public class RegisterAllocator {
 							SimpleGraph.Node<CoalesceableTemp> n = graph.get(new CoalesceableTemp(a));
 							return (n.info.color == null) ? a : n.info.color;
 						}
-					}));
+					});
+					
+					// remove moves where dst and src are equal
+					Pair<Temp, Temp> move = renamedAssem.isMoveBetweenTemps();
+					if (move != null && move.fst.equals(move.snd)) {
+						allocatedBody.remove(i);
+						i--;
+					}
+					else {
+						allocatedBody.set(i, renamedAssem);
+					}
 				}
 
 				allocatedFrags.add(new FragmentProc<>(allocatedFrame, allocatedBody));
