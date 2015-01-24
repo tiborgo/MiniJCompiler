@@ -25,6 +25,7 @@ import minijava.backend.dummymachine.IntermediateToCmm;
 import minijava.canonicalize.visitors.CanonVisitor;
 import minijava.parse.rules.Program;
 import minijava.parse.visitors.ASTVisitor;
+import minijava.semanticanalysis.visitors.TypeInferenceVisitor;
 import minijava.translate.layout.FragmentProc;
 import minijava.translate.tree.TreeStm;
 import org.antlr.v4.runtime.ANTLRFileStream;
@@ -60,6 +61,8 @@ public class IntermediateVisitorTest {
 				ParseTree parseTree = parser.prog();
 				ASTVisitor astVisitor = new ASTVisitor();
 				Program ast = (Program) astVisitor.visit(parseTree);
+				TypeInferenceVisitor typeInferenceVisitor = new TypeInferenceVisitor();
+				ast.accept(typeInferenceVisitor);
 
 				visitor = new IntermediateVisitor(new DummyMachineSpecifics(), ast);
 				List<FragmentProc<TreeStm>> fragmentList = ast.accept(visitor);
