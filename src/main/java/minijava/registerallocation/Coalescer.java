@@ -1,5 +1,6 @@
 package minijava.registerallocation;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,7 +14,6 @@ import minijava.util.Function;
 import minijava.util.Pair;
 import minijava.util.SimpleGraph;
 import minijava.util.SimpleGraph.Node;
-
 import minijava.util.GraphSaver;
 
 public class Coalescer {
@@ -22,17 +22,24 @@ public class Coalescer {
 		
 		final Map<Temp, Temp> renames = new HashMap<>();
 		boolean changed = false;
-		boolean loopChanged;
+		//boolean loopChanged;
 		
 		// Slide 295
 		//if (a.info.isMoveRelated()) {
-		do {
+		//do {
 			
-			loopChanged = false;
+			//loopChanged = false;
 			
-			nodeLoop:
-			for (Node<CoalesceableTemp> a : graph.nodeSet()) {
+			Set<Node<CoalesceableTemp>> nodes = new HashSet<>(graph.nodeSet());
 			
+			//nodeLoop:
+			//for (Node<CoalesceableTemp> a : graph.nodeSet()) {
+			
+			while(nodes.size() > 0) {
+				
+				boolean coalesceable = false;
+				
+				Node<CoalesceableTemp> a = nodes.iterator().next();
 			
 				for (Node<CoalesceableTemp> b : a.secondarySuccessors()) {
 					//Node<CoalesceableTemp> b = graph.get(new CoalesceableTemp(tB));
@@ -52,17 +59,10 @@ public class Coalescer {
 					// Cannot remove colored temp since registers can have a special purpose
 					if (/*!a.neighbours().contains(b) &&*/ b.info.color == null) {
 					
-						boolean coalesceable = false;
+						
 						
 						Set<Node<CoalesceableTemp>> neighbours = new HashSet<>(a.neighbours());
-						
-						// tB is not used at all
-						if (b == null) {
-							coalesceable = true;
-						}
-						else {
-							neighbours.addAll(b.neighbours());
-						}
+						neighbours.addAll(b.neighbours());
 						
 						neighbours.remove(a);
 						neighbours.remove(b);
@@ -90,7 +90,7 @@ public class Coalescer {
 						// coalesce
 						if (coalesceable) {
 							changed = true;
-							loopChanged = true;
+							//loopChanged = true;
 							/*graph.removeNode(a);
 							if (b != null) {
 								graph.removeNode(b);
@@ -105,44 +105,62 @@ public class Coalescer {
 							
 							renames.put(b.info.temp, a.info.temp);
 							
-							break nodeLoop;
+							nodes.remove(b);
+							
+							break;
+							//break nodeLoop;
 						}
 					}
 				}
-			}
-		}
-		while(loopChanged);
-		
-		
-		for (int i = 0; i < allocatedBody.size(); i++) {
-			
-			int x = 0;
-			
-			Assem coalescedAssem = allocatedBody.get(i).rename(new Function<Temp, Temp>() {
-
-				@Override
-				public Temp apply(Temp t) {
-					Temp newT = t;
-					do {
-						newT = renames.get(newT);
-					}
-					while (renames.get(newT) != null);
-					return (newT != null) ? newT : t;
+				
+				nodes.remove(a);
+				
+				if (coalesceable) {
+					nodes.add(graph.get(a.info));
 				}
-			});
-			
-			Pair<Temp, Temp> move = coalescedAssem.isMoveBetweenTemps();
-			if (move != null && move.fst.equals(move.snd)) {
-				allocatedBody.remove(i);
-				i--;
 			}
-			else {
-				allocatedBody.set(i, coalescedAssem);
+		/*}
+		while(loopChanged);*/
+		
+		
+		if (renames.size() > 0) {
+			for (int i = 0; i < allocatedBody.size(); i++) {
+				
+				Assem renameCandidate = allocatedBody.get(i);
+				
+				Set<Temp> temps = new HashSet<>(renameCandidate.use());
+				temps.addAll(renameCandidate.def());
+				
+				if (!Collections.disjoint(temps, renames.keySet())) {
+				
+				
+					Assem coalescedAssem = allocatedBody.get(i).rename(new Function<Temp, Temp>() {
+		
+						@Override
+						public Temp apply(Temp t) {
+							Temp newT = t;
+							do {
+								newT = renames.get(newT);
+							}
+							while (renames.get(newT) != null);
+							return (newT != null) ? newT : t;
+						}
+					});
+					
+					Pair<Temp, Temp> move = coalescedAssem.isMoveBetweenTemps();
+					if (move != null && move.fst.equals(move.snd)) {
+						allocatedBody.remove(i);
+						i--;
+					}
+					else {
+						allocatedBody.set(i, coalescedAssem);
+					}
+				}
 			}
 		}
 		
-		//System.out.println(methodName);
-		//System.out.println(renames);
+		System.out.println(methodName);
+		System.out.println(renames);
 		
 		return changed;
 	}

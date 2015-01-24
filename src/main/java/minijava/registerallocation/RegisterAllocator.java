@@ -28,6 +28,8 @@ public class RegisterAllocator {
 	public static List<Fragment<List<Assem>>> allocateRegisters(Configuration config, List<Fragment<List<Assem>>> frags, MachineSpecifics machineSpecifics) throws RegisterAllocatorException {
 		
 		try {
+			int totalRounds = 0;
+			
 			List<Fragment<List<Assem>>> allocatedFrags = new LinkedList<>();
 			
 			for (Fragment<List<Assem>> frag : frags) {
@@ -67,19 +69,26 @@ public class RegisterAllocator {
 					int coloredNodesCount = 0;
 					boolean spilled;
 					boolean freezed;
+					int counter2 = 0;
 					do {
 						int insignificantNodesCount = 0;
 						//do {
 							boolean changed;
+							
 							do {
+								counter2++;
+								
 								// SIMPLIFY
 								changed = Simplifier.simplify(graph, stack, k);
+								System.out.println("simplify " + changed);
 								
 								// COALESCE
 								
 								//boolean b1 = graph.getDot().contains("t71");
 								
+								
 								changed = Coalescer.coalesce(graph, allocatedBody, k, allocatedFrame.getName().toString()) || changed;
+								System.out.println("coalesce (" + counter + "." + counter2 + ")");
 								
 								//boolean b2 = graph.getDot().contains("t71");
 								
@@ -90,7 +99,9 @@ public class RegisterAllocator {
 							while (changed);
 							
 							// FREEZE
+							
 							freezed = Freezer.freeze(graph, stack, k);
+							System.out.println("freeze " + freezed);
 							
 							/*for (Node<CoalesceableTemp> n : graph.nodeSet()) {
 								if (n.degree() < k) {
@@ -102,6 +113,7 @@ public class RegisterAllocator {
 							if (!freezed/* && graph.nodeSet().size() > 0*/) {
 								// SPILL
 								spilled = Spiller.spill(graph, stack);
+								System.out.println("spill " + spilled);
 							}
 							else {
 								spilled = false;
@@ -122,6 +134,7 @@ public class RegisterAllocator {
 					//System.out.println(machineSpecifics.printAssembly(Arrays.<Fragment<List<Assem>>>asList(new FragmentProc<List<Assem>>(allocatedFrame, allocatedBody))));
 		
 					// SELECT
+					System.out.println("select");
 					spillNodes = Selector.select(graph, stack, colors/*, graphBackup*/);
 		
 					// rewrite program
@@ -133,9 +146,10 @@ public class RegisterAllocator {
 					}
 		
 					// START OVER
-		
 				}
 				while(spillNodes.size() > 0);
+				
+				totalRounds += counter;
 		
 				final SimpleGraph<CoalesceableTemp> finalGraph = graph;
 		
@@ -156,7 +170,7 @@ public class RegisterAllocator {
 				allocatedFrags.add(new FragmentProc<>(allocatedFrame, allocatedBody));
 			}
 			
-			Logger.logVerbosely("Successfully allocated registers");
+			Logger.logVerbosely("Successfully allocated registers (" + totalRounds + " round/s)");
 			
 			return allocatedFrags;
 		}
