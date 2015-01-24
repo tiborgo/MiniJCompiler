@@ -1,14 +1,13 @@
 package minijava.backend.i386;
 
-import static org.junit.Assert.*;
-import minijava.backend.i386.I386Frame;
-import minijava.translate.layout.Label;
-import minijava.translate.layout.Frame.Location;
+import static org.junit.Assert.assertEquals;
 
+import minijava.translate.layout.Frame.Location;
+import minijava.translate.layout.Label;
 import org.junit.Before;
 import org.junit.Test;
 
-class I386FrameTest {
+public class I386FrameTest {
 	private static I386Frame frame;
 
 	@Before
