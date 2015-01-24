@@ -19,6 +19,8 @@ import minijava.translate.layout.Temp;
 import minijava.util.Function;
 import minijava.util.SimpleGraph;
 
+import minijava.util.GraphSaver;
+
 public class RegisterAllocator {
 
 	public static List<Fragment<List<Assem>>> allocateRegisters(Configuration config, List<Fragment<List<Assem>>> frags, MachineSpecifics machineSpecifics) throws RegisterAllocatorException {

@@ -279,7 +279,7 @@ public class SimpleGraph<NodeInfo> {
 		dst.predecessors.add(src);
 	}
 
-	public void merge(Node<NodeInfo> a, Node<NodeInfo> b, NodeInfo info) {
+	public Node<NodeInfo> merge(Node<NodeInfo> a, Node<NodeInfo> b, NodeInfo info) {
 
 		Node<NodeInfo> ab = new Node<>(info);
 		
@@ -334,6 +334,8 @@ public class SimpleGraph<NodeInfo> {
 		}
 		
 		nodes.put(info, ab);
+		
+		return ab;
 	}
 	
 	private void removeNode(Node<NodeInfo> n) {
