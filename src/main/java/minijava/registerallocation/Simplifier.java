@@ -13,7 +13,6 @@ class Simplifier {
 
 		boolean changed = false;
 		boolean loopChanged ;
-		Set<SimpleGraph.Node<CoalesceableTemp>> simplifiableNodes = new HashSet<>();
 		
 		do {
 			
@@ -28,13 +27,10 @@ class Simplifier {
 					graph.deactivateNode(node);
 					changed = true;
 					loopChanged = true;
-					simplifiableNodes.add(node);
 				}
 			}
 		}
 		while(loopChanged);
-		
-		System.out.println(simplifiableNodes);
 		
 		return changed;
 	}

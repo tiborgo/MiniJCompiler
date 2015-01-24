@@ -1,9 +1,7 @@
 package minijava.flowanalysis;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,7 +13,6 @@ public class CoalesceableTemp {
 	public Temp color;
 	public final Temp temp;
 	private Map<Temp, Set<Assem>> moves = new HashMap<>();
-	//private Set<Temp> partners = new HashSet<>();
 	
 	public CoalesceableTemp(Temp temp) {
 		this(temp, null);
@@ -30,10 +27,6 @@ public class CoalesceableTemp {
 		return color != null;
 	}
 	
-	/*public boolean isMoveRelated() {
-		return (moves.size() > 0);
-	}*/
-	
 	public void addMove(Assem move) {
 		Pair<Temp, Temp> moveTemps = move.isMoveBetweenTemps();
 		
@@ -41,28 +34,10 @@ public class CoalesceableTemp {
 		assert(moveTemps.fst.equals(temp) || moveTemps.snd.equals(temp));
 		
 		Temp partner = (moveTemps.fst.equals(temp)) ? moveTemps.snd : moveTemps.fst;
-		//partners.add(partner);
 		if (moves.get(partner) == null) {
 			moves.put(partner, new HashSet<Assem>());
 		}
 		moves.get(partner).add(move);
-	}
-	
-	/*public void removeMove(Assem move) {
-		int i = moves.indexOf(move);
-		assert(i != -1);
-		moves.remove(i);
-		partners.remove(i);
-	}*/
-	
-	public void removePartner(Temp partner) {
-		//partners.remove(partner);
-		moves.remove(partner);
-		/*for (Assem move : moves) {
-			Pair<Temp, Temp> temps = move.isMoveBetweenTemps();
-			Temp t = (temps.fst.equals(temp)) ? temps.snd : temps.fst;
-			moves.remove(move);
-		}*/
 	}
 	
 	public Set<Pair<Temp, Temp>> getMoveTemps(Temp partner) {
@@ -93,10 +68,5 @@ public class CoalesceableTemp {
 
 	public Set<Temp> getPartners() {
 		return moves.keySet();
-	}
-
-	public void free() {
-		//partners.clear();
-		moves.clear();
 	}
 }

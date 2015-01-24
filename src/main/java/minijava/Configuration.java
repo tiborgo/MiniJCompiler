@@ -97,6 +97,9 @@ public class Configuration {
 	@Option(name = "--print-register-allocation-details", aliases = {"-prad"}, usage = "Prints details of the register allocation")
 	public boolean printRegisterAllocationDetails;
 	
+	@Option(name = "--print-coalescing-details", aliases = {"-pcd"}, usage = "Prints details of the coalescing algorithm")
+	public boolean printCoalescingDetails;
+	
 	@Option(name = "--print-flow-analysis-details", aliases = {"-pfad"}, usage = "Prints details of the flow analysis")
 	public boolean printFlowAnalysisDetails;
 	
