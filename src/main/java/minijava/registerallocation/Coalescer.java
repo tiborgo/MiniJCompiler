@@ -3,6 +3,7 @@ package minijava.registerallocation;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,8 +18,6 @@ import minijava.util.Pair;
 import minijava.util.SimpleGraph;
 import minijava.util.SimpleGraph.Node;
 
-import minijava.util.GraphSaver;
-
 public class Coalescer {
 
 	static boolean coalesce(Configuration config, SimpleGraph<CoalesceableTemp> graph, List<Assem> allocatedBody, int k) {
@@ -28,13 +27,18 @@ public class Coalescer {
 
 		// Slide 295
 
-		Set<Node<CoalesceableTemp>> nodes = new HashSet<>(graph.nodeSet());
+		//Set<Node<CoalesceableTemp>> nodes = new HashSet<>(graph.nodeSet());
+		Map<Node<CoalesceableTemp>, Node<CoalesceableTemp>> nodes = new LinkedHashMap<>();
+		
+		for (Node<CoalesceableTemp> n : graph.nodeSet()) {
+			nodes.put(n, n);
+		}
 
 		while(nodes.size() > 0) {
 
 			boolean coalesceable = false;
 
-			Node<CoalesceableTemp> a = nodes.iterator().next();
+			Node<CoalesceableTemp> a = nodes.values().iterator().next();
 
 			for (Node<CoalesceableTemp> b : a.secondarySuccessors()) {
 
@@ -88,7 +92,7 @@ public class Coalescer {
 						
 						nodes.remove(b);
 						nodes.remove(a);
-						nodes.add(ab);
+						nodes.put(ab, ab);
 
 						break;
 					}
