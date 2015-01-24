@@ -69,9 +69,18 @@ public class Coalescer {
 						}
 					}
 
-					// GEORGE
+					
 					if (!coalesceable) {
-						// TODO: implement
+						
+						// GEORGE
+						
+						coalesceable = true;
+						for (Node<CoalesceableTemp> t : b.neighbours()) {
+							if (!(t.degree() < k) && !graph.hasEdge(t, a)) {
+								coalesceable = false;
+								break;
+							}
+						}
 					}
 
 					// coalesce
