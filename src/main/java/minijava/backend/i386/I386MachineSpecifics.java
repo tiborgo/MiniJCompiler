@@ -129,7 +129,7 @@ public class I386MachineSpecifics implements MachineSpecifics {
 					
 					int byteCount = frame.size() - I386MachineSpecifics.WORD_SIZE;
 					// 4 (push ebp) + 4 (ret address) + byteCount
-					int padding = 16 - ((byteCount + 8) % 16);
+					int padding = (16 - ((byteCount + 8) % 16)) % 16;
 					Operand.Imm byteCountOperand = new Operand.Imm(byteCount + padding);
 					((StackAllocation) instr).setByteCount(byteCountOperand);
 				}
