@@ -6,9 +6,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import minijava.flowanalysis.CoalesceableTemp;
-import minijava.util.SimpleGraph.Node;
-
 public class SimpleGraph<NodeInfo> {
 
 	private final Map<NodeInfo, Node<NodeInfo>> nodes = new HashMap<>();
@@ -17,22 +14,6 @@ public class SimpleGraph<NodeInfo> {
 	private final String name;
 	private final boolean directed;
 	private final boolean secondaryDirected;
-
-	/*public static class BackupNode<T> {
-		private final T info;
-		private final Set<T> successors = new HashSet<>();
-		private final Set<T> predecessors = new HashSet<>();
-
-		private BackupNode(Node<T> node) {
-			info = node.info;
-			for (Node<T> s : node.successors()) {
-				successors.add(s.info);
-			}
-			for (Node<T> p : node.predecessors()) {
-				predecessors.add(p.info);
-			}
-		}
-	}*/
 
 	public static class Node<T> {
 
@@ -122,10 +103,6 @@ public class SimpleGraph<NodeInfo> {
 		public int hashCode() {
 			return info.hashCode();
 		}
-
-		/*public BackupNode<T> backup() {
-			return new BackupNode<T>(this);
-		}*/
 
 		// TODO: Should not be necessary
 		protected void addSuccessor(Node<T> successor) {

@@ -3,7 +3,6 @@ package minijava.registerallocation;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import minijava.flowanalysis.CoalesceableTemp;
@@ -15,19 +14,13 @@ class Selector {
 	static List<Temp> select(
 			SimpleGraph<CoalesceableTemp> graph,
 			List<CoalesceableTemp> stack,
-			List<Temp> colors/*,
-			Map<CoalesceableTemp, SimpleGraph.BackupNode<CoalesceableTemp>> graphBackup*/) {
+			List<Temp> colors) {
 
 		List<Temp> spilledNodes = new LinkedList<>();
 		Collections.reverse(stack);
 
 		for (CoalesceableTemp t : stack) {
 
-			// Add node to simplified graph
-
-
-			//SimpleGraph.BackupNode<CoalesceableTemp> b = graphBackup.get(t);
-			//graph.restore(b);
 			SimpleGraph.Node<CoalesceableTemp> n = graph.get(t);
 			graph.activateNode(n);
 
