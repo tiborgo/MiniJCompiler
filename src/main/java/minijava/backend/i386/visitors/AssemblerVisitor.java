@@ -157,6 +157,36 @@ public class AssemblerVisitor implements
 
 		@Override
 		public Operand visit(TreeExpMEM e) throws RuntimeException {
+			// Try to find a tile for the memory access subtree
+			if (e.addr instanceof TreeExpOP) {
+				TreeExpOP addressCalculation = (TreeExpOP) e.addr;
+				if (addressCalculation.op == TreeExpOP.Op.PLUS) {
+					TreeExp baseAddressExp = null;
+					TreeExpCONST constExp = null;
+					if (addressCalculation.left instanceof TreeExpCONST) {
+						constExp = (TreeExpCONST) addressCalculation.left;
+						baseAddressExp = addressCalculation.right;
+					} else if (addressCalculation.right instanceof TreeExpCONST) {
+						constExp = (TreeExpCONST) addressCalculation.right;
+						baseAddressExp = addressCalculation.left;
+					}
+
+					// Tile was found
+					if (baseAddressExp != null && constExp != null) {
+						Operand baseAddress = baseAddressExp.accept(this);
+						if (baseAddress instanceof Operand.Reg) {
+							return new Operand.Mem(((Operand.Reg) baseAddress).reg, null, null, constExp.value);
+						} else if (baseAddress instanceof Operand.Imm) {
+							return new Operand.Mem(null, null, null, ((Operand.Imm) baseAddress).imm + constExp.value);
+						} else if (baseAddress instanceof Operand.Mem) {
+							Operand.Mem memOperand = (Mem) baseAddress;
+							return new Operand.Mem(memOperand.base, memOperand.scale, memOperand.index, memOperand.displacement + constExp.value);
+						}
+					}
+				}
+			}
+
+			// None of the above patterns match
 			Operand address = e.addr.accept(this);
 
 			OperandVisitor<Operand.Mem, RuntimeException> memVisitor = new OperandVisitor<Operand.Mem, RuntimeException>() {
