@@ -34,7 +34,7 @@ import minijava.translate.layout.Label;
 import minijava.translate.tree.TreeStm;
 
 public class MiniJavaCompiler {
-	public static final Path RUNTIME_DIRECTORY = Paths.get("src/main/resources/minijava/runtime");
+	public static final Path RUNTIME_DIRECTORY = Paths.get("runtime");
 	
 	private final MachineSpecifics machineSpecifics;
 
@@ -118,7 +118,6 @@ public class MiniJavaCompiler {
 		
 		try {
 			final ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", "./" + config.outputFile);
-			processBuilder.directory(RUNTIME_DIRECTORY.toFile());
 			
 			final Process outProcess = processBuilder.start();
 			

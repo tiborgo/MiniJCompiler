@@ -81,6 +81,7 @@ public class MiniJavaCompilerTest {
 		System.out.println("Testing compiler input from file \"" + file.toString() + "\"");
 		
 		Configuration config =  new Configuration(new String[]{file.toString()});
+		config.outputFile = "out" + File.separator + config.outputFile;
 
 		try {
 			compiler.compile(config);

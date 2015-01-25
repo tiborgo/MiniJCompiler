@@ -6,10 +6,11 @@ import java.util.List;
 
 import minijava.Configuration;
 import minijava.Logger;
-import minijava.MiniJavaCompiler;
 import minijava.instructionselection.MachineSpecifics;
 import minijava.instructionselection.assems.Assem;
 import minijava.translate.layout.Fragment;
+
+import org.apache.commons.io.FilenameUtils;
 
 public class CodeEmitter {
 
@@ -19,7 +20,8 @@ public class CodeEmitter {
 			String assembly = machineSpecifics.printAssembly(assemFragments);;
 			
 			if (config.codeEmission) {
-				PrintWriter out = new PrintWriter(MiniJavaCompiler.RUNTIME_DIRECTORY.toString() + File.separator + config.outputFile);
+				new File(FilenameUtils.getPath(config.outputFile)).mkdirs();
+				PrintWriter out = new PrintWriter(config.outputFile);
 				out.print(assembly);
 				out.close();
 			}
