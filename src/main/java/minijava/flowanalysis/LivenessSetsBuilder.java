@@ -31,56 +31,18 @@ class LivenessSetsBuilder {
 
 	static Map<Assem, InOut> build(SimpleGraph<Assem> controlFlowGraph, List<Assem> assems) {
 
-		//final List<SimpleGraph<Assem>.Node> nodes = ReverseOrderBuilder.build(controlFlowGraph);
 		List<Assem> reverseAssems = new ArrayList<>(assems);
 		Collections.reverse(reverseAssems);
 
 		boolean changed;
 
-		// With the help of the comparator the Map keys keep the order of the program flow.
-		// Helps a lot when debugging
-		/*Comparator<Assem> comparator = new Comparator<Assem>() {
-
-			@Override
-			public int compare(Assem o1, Assem o2) {
-				int iO1 = 0;
-				int iO2 = 0;
-				int found = 0;
-
-				for (int i = 0; i < nodes.size(); i++) {
-					SimpleGraph<Assem>.Node n = nodes.get(i);
-					if (n.info.equals(o1)) {
-						iO1 = i;
-						found++;
-					}
-					if (n.info.equals(o2)) {
-						iO2 = i;
-						found++;
-					}
-					if (found == 2) {
-						break;
-					}
-				}
-				return iO2 - iO1;
-			}
-		};*/
-
-		Map<Assem, InOut> inOut = new HashMap<>();//TreeMap<>(comparator);
+		Map<Assem, InOut> inOut = new HashMap<>();
 
 		for (Assem assem : reverseAssems) {
-		//for (int i = 0; i < nodes.size(); i++) {
 			inOut.put(assem, new InOut());
 		}
 
-		int printCountEach = 500;
-		int counter = 0;
-
 		do {
-
-			if (counter % printCountEach == printCountEach-1) {
-				System.out.println("Liveness Sets Builder round: " + (counter+1));
-			}
-			counter++;
 
 			changed = false;
 
