@@ -45,8 +45,7 @@ public class I386MachineSpecifics implements MachineSpecifics {
 
 	@Override
 	public Temp[] getAllRegisters() {
-		// TODO Auto-generated method stub
-		return null;
+		return getGeneralPurposeRegisters();
 	}
 
 	@Override

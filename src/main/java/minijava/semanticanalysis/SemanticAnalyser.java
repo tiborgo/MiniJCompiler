@@ -12,7 +12,6 @@ public class SemanticAnalyser {
 
 	public static Program analyseSemantics(Configuration config, Program program) throws SemanticAnalyserException {
 		
-		// FIXME: properly copy program
 		Program typedProgram = new Program(new ArrayList<>(program.getClasses()));
 		
 		// infer types
@@ -31,7 +30,6 @@ public class SemanticAnalyser {
 	
 			}
 			else {
-				// TODO: proper exception for type checks
 				throw new Exception("Type check failed");
 			}
 		}

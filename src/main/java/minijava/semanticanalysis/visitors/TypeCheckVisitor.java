@@ -151,11 +151,11 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 		public Type visit(NewIntArray e) throws RuntimeException {
 			if (e.size.accept(this) instanceof Integer) {
 				e.type = new Array(new Integer());
+				return e.type;
 			}
 			else {
-				// TODO: error
+				return null;
 			}
-			return e.type;
 		}
 
 		@Override
@@ -163,11 +163,11 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 			// Check if class exists
 			if (symbolTable.contains(e.className)) {
 				e.type = new Class(e.className);
+				return e.type;
 			}
 			else {
-				// TODO: error
+				return null;
 			}
-			return e.type;
 		}
 
 		@Override
@@ -194,7 +194,6 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 				}
 				else {
 					System.err.println("Both operands of binary operation '" + e.op + "' must have type int");
-					// TODO: proper exception
 					return null;
 				}
 				break;
@@ -205,7 +204,6 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 				}
 				else {
 					System.err.println("Both operands of binary operation '" + e.op + "' must have type int");
-					// TODO: proper exception
 					return null;
 				}
 				break;
@@ -259,14 +257,12 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 			// Check class
 			minijava.parse.rules.declarations.Class clazz = symbolTable.get(object.c);
 			if (clazz == null) {
-				// TODO: error
 				return null;
 			}
 			
 			// Check method
 			Method method = clazz.getMethod(e.method);
 			if (method == null) {
-				// TODO: error
 				return null;
 			}
 			
@@ -278,7 +274,6 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 					Type argType = e.args.get(i).accept(this);
 					if (!argType.equals(method.parameters.get(i).type)) {
 						ok = false;
-						// TODO: error
 					}
 				}
 				
@@ -290,7 +285,6 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 				}
 			}
 			else {
-				// TODO: error
 				return null;
 			}
 			return e.type;
@@ -304,15 +298,14 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 
 		@Override
 		public Type visit(Id e) throws RuntimeException {
-			// TODO: Should be replaced with a lookup in an appropriate data structure that honours variable visibility
 			Variable object = methodContext.get(e.id);
 			if (object == null) {
 				object = classContext.getField(e.id);
 			}
 
 			if (object == null) {
-				// TODO: error
 				System.err.println("Unknown variable \""+e.id+"\"");
+				return null;
 			} else {
 				e.type = object.type;
 			}
@@ -394,7 +387,6 @@ public class TypeCheckVisitor implements ProgramVisitor<java.lang.Boolean, Runti
 
 		@Override
 		public java.lang.Boolean visit(PrintChar s) throws RuntimeException {
-			// TODO: No type class for type char?
 			if (s.arg.type instanceof Integer) {
 				return java.lang.Boolean.TRUE;
 			}

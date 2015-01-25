@@ -30,7 +30,6 @@ public class Method extends Declaration {
 	public Variable get(String variableName) {
 		for (Parameter parameter : parameters) {
 			if (parameter.id.equals(variableName)) {
-				// FIXME: Do not create a new instance
 				return new Variable(parameter.type, parameter.id);
 			}
 		}

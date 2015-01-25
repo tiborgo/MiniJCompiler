@@ -9,7 +9,6 @@ public class Main extends Class {
 
 	public final MainMethod mainMethod;
 
-	// TODO: Main method should be passed in constructor
 	public Main(String className, String mainArg, Statement mainBody) {
 		
 		super(className,

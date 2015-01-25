@@ -104,26 +104,6 @@ public class SimpleGraph<NodeInfo> {
 			return info.hashCode();
 		}
 
-		// TODO: Should not be necessary
-		protected void addSuccessor(Node<T> successor) {
-			successors.add(successor);
-		}
-
-		// TODO: Should not be necessary
-		protected void addPredecessor(Node<T> predecessor) {
-			predecessors.add(predecessor);
-		}
-
-		// TODO: Should not be necessary
-		protected void removeSuccessor(Node<T> successor) {
-			successors.remove(successor);
-		}
-
-		// TODO: Should not be necessary
-		protected void removePredecessor(Node<T> predecessor) {
-			predecessors.remove(predecessor);
-		}
-
 		protected void reverse() {
 			Set<Node<T>> temp = successors;
 			successors = predecessors;
@@ -222,13 +202,13 @@ public class SimpleGraph<NodeInfo> {
 			src.deactivatedSuccessors.add(dst);
 		}
 		else {
-			src.addSuccessor(dst);
+			src.successors.add(dst);
 		}
 		if (deactivatedNodes.get(src) != null) {
 			dst.deactivatedPredecessors.add(src);
 		}
 		else {
-			dst.addPredecessor(src);
+			dst.predecessors.add(src);
 		}
 	}
 	
@@ -256,8 +236,8 @@ public class SimpleGraph<NodeInfo> {
 	}
 
 	public void removeEdge(Node<NodeInfo> src, Node<NodeInfo> dst) {
-		src.removeSuccessor(dst);
-		dst.removePredecessor(src);
+		src.successors.remove(dst);
+		dst.predecessors.remove(src);
 	}
 	
 	public void removeSecondaryEdge(Node<NodeInfo> src, Node<NodeInfo> dst) {

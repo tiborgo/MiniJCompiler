@@ -183,7 +183,6 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 	@Override
 	public Object visitAssignStatement(@NotNull MiniJavaParser.AssignStatementContext ctx) {
 
-		// FIXME: Change grammar so it yields an Id expression
 		Id id = new Id((String) visit(ctx.identifier()));
 		Expression rhs = (Expression) visit(ctx.expression());
 
@@ -201,7 +200,6 @@ public class ASTVisitor extends MiniJavaBaseVisitor<Object> {
 	@Override
 	public Object visitArrayAssignStatement(@NotNull MiniJavaParser.ArrayAssignStatementContext ctx) {
 
-		// FIXME: Change grammar so it yields an Id expression
 		Id id = new Id((String) visit(ctx.identifier()));
 		Expression index = (Expression) visit(ctx.index);
 		Expression rhs = (Expression) visit(ctx.rhs);

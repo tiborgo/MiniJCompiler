@@ -91,7 +91,6 @@ public class AssemblerVisitor implements
 		Assem ret = new AssemInstr(AssemInstr.Kind.RET);
 		instructions.add(ret);
 
-		// FIXME: Set correct frame?
 		return new FragmentProc<List<Assem>>(fragProc.frame, instructions);
 	}
 
@@ -106,7 +105,6 @@ public class AssemblerVisitor implements
 
 		@Override
 		public Operand visit(TreeExpCALL e) throws RuntimeException {
-			// TODO: Save Caller-Save registers?
 
 			// Push arguments on stack
 			int parameterCount = e.args.size();
@@ -336,7 +334,6 @@ public class AssemblerVisitor implements
 			Operand tDst;
 			
 			// 1. dst must not be an immediate
-			// TODO: maybe revert jump?
 			// 2. either dst or src must not be an mem
 			if (dst instanceof Operand.Imm ||
 					(dst instanceof Operand.Mem && src instanceof Operand.Mem)) {
@@ -418,7 +415,6 @@ public class AssemblerVisitor implements
 			Operand right = stmCJUMP.right.accept(this);
 
 			// 1. dst must not be an immediate
-			// TODO: maybe revert jump?
 			// 2. either dst or src must not be an mem
 			if (left instanceof Operand.Imm ||
 					(left instanceof Operand.Mem && right instanceof Operand.Mem)) {
