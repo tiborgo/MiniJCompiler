@@ -64,15 +64,25 @@ public class RegisterAllocator {
 					int innerCounter = 0;
 					do {
 						boolean innerChanged;
-
+						boolean first = true;
+						
 						do {
 							innerCounter++;
 
 							// SIMPLIFY
 							innerChanged = Simplifier.simplify(graph, stack, k);
 
-							// COALESCE						
-							innerChanged = Coalescer.coalesce(config, graph, allocatedBody, k) || innerChanged;
+							if (!config.noCoalesce) {
+								// COALESCE
+								if (first || innerChanged) {
+									innerChanged = Coalescer.coalesce(config, graph, allocatedBody, k);
+								}
+							}
+							else {
+								innerChanged = false;
+							}
+							
+							first = false;
 						}
 						while (innerChanged);
 
