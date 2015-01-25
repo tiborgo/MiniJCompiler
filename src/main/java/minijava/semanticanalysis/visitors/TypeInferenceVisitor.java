@@ -205,14 +205,12 @@ public class TypeInferenceVisitor implements ProgramVisitor<Void, RuntimeExcepti
 
 		@Override
 		public Void visit(Id e) throws RuntimeException {
-			// TODO: Should be replaced with a lookup in an appropriate data structure that honours variable visibility
 			Variable object = methodContext.get(e.id);
 			if (object == null) {
 				object = classContext.getField(e.id);
 			}
 
 			if (object == null) {
-				// TODO: error
 				System.err.println("Unknown variable \""+e.id+"\"");
 			} else {
 				e.type = object.type;

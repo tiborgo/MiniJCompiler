@@ -19,7 +19,6 @@ import minijava.translate.layout.Temp;
 import minijava.util.Function;
 import minijava.util.Pair;
 import minijava.util.SimpleGraph;
-import minijava.util.GraphSaver;
 
 public class RegisterAllocator {
 

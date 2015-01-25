@@ -146,7 +146,6 @@ public class IntermediateVisitor implements
 			}
 			
 			// Fields
-			// TODO: better in DeclClass visit ?
 			for (int i = 0; i < classContext.fields.size(); i++) {
 				int offset = (i+1) * machineSpecifics.getWordSize();
 				classTemps.put(classContext.fields.get(i).name, new TreeExpMEM(new TreeExpOP(Op.PLUS, thisExp, new TreeExpCONST(offset))));
@@ -371,7 +370,6 @@ public class IntermediateVisitor implements
 					);
 				}
 				case LT: {
-					// TODO: optimise (slide 148)
 					
 					Temp result = new Temp();
 					Label jumpPointTrue = new Label();

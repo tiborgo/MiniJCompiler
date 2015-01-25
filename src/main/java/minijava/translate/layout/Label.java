@@ -2,7 +2,6 @@ package minijava.translate.layout;
 
 public final class Label {
 
-  // TODO: Labels should be created by a factory
   public static boolean leadingUnderscore;
   private static int nextId = 0;
   private final String name;  // invariant: is always non-null

@@ -39,14 +39,12 @@ public interface Assem {
    * Returns the operands that are involved in an assignment of one temporary to another.
    * @return Temporaries that are part of the assignment or {@code null}, if no assignment occurs
    */
-  // TODO: Change method signature
   public Pair<Temp, Temp> isMoveBetweenTemps();
 
   /**
    * Returns the label of this element.
    * @return Element label or {@code null}, if this element has no label.
    */
-  // TODO: Change method signature
   public Label isLabel();
 
   public Assem rename(Function<Temp, Temp> sigma);

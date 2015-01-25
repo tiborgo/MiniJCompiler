@@ -29,7 +29,6 @@ public class Generator {
 		}
 	}
 
-	// TODO: Make Generator a singleton instead of using static methods
 	/**
 	 * Creates {@code BaseBlock}s from the specified list of statements and returns them as a {@code BaseBlockContainer}
 	 * with the specified exit point.
