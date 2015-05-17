@@ -1,0 +1,53 @@
+package minij.instructionselection.assems;
+
+import java.util.Collections;
+import java.util.List;
+
+import minij.backend.i386.assems.Operand;
+import minij.translate.layout.Label;
+import minij.translate.layout.Temp;
+import minij.util.Function;
+import minij.util.Pair;
+
+/**
+ * Represents an assembly instruction with an arbitrary number of operands.
+ */
+public abstract class DefaultInstruction extends Instruction {
+
+	public DefaultInstruction(Operand... operands) {
+		super(operands);
+	}
+
+	@Override
+	public List<Label> jumps() {
+		// All instructions except calls/jumps have no jumps
+		return Collections.emptyList();
+	}
+
+	@Override
+	public boolean isFallThrough() {
+		// All instructions except calls/jumps are fall-through instructions
+		return true;
+	}
+
+	@Override
+	public final Label isLabel() {
+		// Labels are directives, not instructions
+		return null;
+	}
+
+	@Override
+	public List<Temp> def() {
+		return Collections.emptyList();
+	}
+
+	@Override
+	public Pair<Temp, Temp> isMoveBetweenTemps() {
+		return null;
+	}
+
+	@Override
+	public Assem rename(Function<Temp, Temp> sigma) {
+		return null;
+	}
+}

@@ -1,5 +1,5 @@
 /*
-    Runtime library, for use in compiled MiniJava programs
+    Runtime library, for use in compiled MiniJ programs
  */
 
 #include <stdio.h>
@@ -36,7 +36,7 @@ int64_t L_raise(int64_t rc)
 }
 
 // Actual entry point: wrapper around the compiled main method
-// of the main class of the MiniJava program
+// of the main class of the MiniJ program
 int main()
 {
   Lmain(0);   // call main method with dummy argument for (unused) string array

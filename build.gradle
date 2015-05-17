@@ -11,11 +11,11 @@ apply plugin: "eclipse"
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
-mainClassName = "minijava.MiniJavaCompiler"
+mainClassName = "minij.MiniJCompiler"
 sourceSets.main.java.srcDir "src/generated-sources/java"
 
 ext.antlr = [
-	grammarpackage: "minijava",
+	grammarpackage: "minij",
 	antlrSource: 'src/main/antlr',
 	destinationDir: "src/generated-sources/java"
 ]

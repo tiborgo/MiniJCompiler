@@ -6,4 +6,4 @@ bin/
 .settings/
 src/generated-sources
 *.out
-src/main/resources/minijava/runtime/CC.out
+src/main/resources/minij/runtime/CC.out
