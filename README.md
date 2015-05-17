@@ -1,6 +1,6 @@
 # MiniJCompiler
 
-Created by [Tibor Goldschwendt](https://github.com/tiborgo) <goldschwendt@cip.ifi.lmu.de> and [Michael Seifert](https://github.com/seifertm) <mseifert@error-reports.org>. This project was realised in the course of the *Praktikum Compilerbau* at LMU Munich under the supervision of Dr. Ulrich Schöpp.
+Created by [Tibor Goldschwendt](https://github.com/tiborgo) <goldschwendt@cip.ifi.lmu.de> and [Michael Seifert](https://github.com/seifertm) <mseifert@error-reports.org>. This project was realised in the course of the *[Praktikum Compilerbau](http://www.tcs.ifi.lmu.de/lehre/ws-2014-15/compilerbau)* at LMU Munich under the supervision of Dr. Ulrich Schöpp.
 
 The MiniJCompiler is a compiler system developed to translate MiniJ source code (simplified Java) to Intel assembler. For that matter, the MiniJCompiler chain comprises the following steps:
 
@@ -93,4 +93,6 @@ See `src/test/resources/working/` for MiniJ examples.
 
 ## License
 
-GPLv3 License.
+The compiler itself is distributed under the terms of the GPLv3 license.
+The .minij example/test files are taken from the [course website](http://www.tcs.ifi.lmu.de/lehre/ws-2014-15/compilerbau)
+with friendly permission from Ulrich Schöpp.
