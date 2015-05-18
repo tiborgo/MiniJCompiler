@@ -95,4 +95,4 @@ See `src/test/resources/working/` for MiniJ examples.
 
 The compiler itself is distributed under the terms of the GPLv3 license.
 The .minij example/test files are taken from the [course website](http://www.tcs.ifi.lmu.de/lehre/ws-2014-15/compilerbau)
-with friendly permission from Ulrich Schöpp.
+by courtesy of Ulrich Schöpp.
