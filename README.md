@@ -60,7 +60,8 @@ $ java -jar MiniJCompiler.jar <MiniJ file>
 ```
 
 See `src/test/resources/working/` for MiniJ examples.
-Further examples are available at [the MiniJava project page](http://www.cambridge.org/us/features/052182060X/). 
+Further examples are available at the [MiniJava project page](http://www.cambridge.org/us/features/052182060X/) or 
+the [course website](http://www.tcs.ifi.lmu.de/lehre/ws-2014-15/compilerbau).
 
 ### Command Line Options
 
@@ -95,5 +96,4 @@ Further examples are available at [the MiniJava project page](http://www.cambrid
 ## License
 
 The compiler itself is distributed under the terms of the GPLv3 license.
-The .minij example/test files are taken from the [course website](http://www.tcs.ifi.lmu.de/lehre/ws-2014-15/compilerbau)
-by courtesy of Ulrich Schöpp.
+The .minij example/test files are taken by courtesy of Ulrich Schöpp.
