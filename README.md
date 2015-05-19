@@ -60,6 +60,7 @@ $ java -jar MiniJCompiler.jar <MiniJ file>
 ```
 
 See `src/test/resources/working/` for MiniJ examples.
+Further examples are available at [the MiniJava project page](http://www.cambridge.org/us/features/052182060X/). 
 
 ### Command Line Options
 
