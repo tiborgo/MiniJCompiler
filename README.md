@@ -1,6 +1,6 @@
 # MiniJCompiler
 
-Created by [Tibor Goldschwendt](https://github.com/tiborgo) <goldschwendt@cip.ifi.lmu.de> and [Michael Seifert](https://github.com/seifertm) <mseifert@error-reports.org>. This project was realised in the course of the *[Praktikum Compilerbau](http://www.tcs.ifi.lmu.de/lehre/ws-2014-15/compilerbau)* at LMU Munich under the supervision of Dr. Ulrich Schöpp.
+Created by [Tibor Goldschwendt](https://github.com/tiborgo) (<goldschwendt@cip.ifi.lmu.de>) and [Michael Seifert](https://github.com/seifertm) (<mseifert@error-reports.org>). This project was realised in the course of the *[Praktikum Compilerbau](http://www.tcs.ifi.lmu.de/lehre/ws-2014-15/compilerbau)* at LMU Munich under the supervision of Dr. Ulrich Schöpp.
 
 The MiniJCompiler is a compiler system developed to translate MiniJ source code (simplified Java) to Intel assembler. For that matter, the MiniJCompiler chain comprises the following steps:
 
@@ -66,7 +66,7 @@ the [course website](http://www.tcs.ifi.lmu.de/lehre/ws-2014-15/compilerbau).
 ### Command Line Options
 
 | Command | Effect |
-|-|-|
+|---|---|
 | `--assembler`, `-a` | compile until assembler and linker step (default: false) |
 | `--canonicalize`, `-c`| compile until canonicalize step (default: false) |
 | `--code-emission`, `-ce`| compile until code emission step (default: false) |
